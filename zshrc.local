@@ -33,6 +33,8 @@ source ${HOME}/.local/zsh-functions/z/z.sh
 # Add cargo binaries to path (e.g. watchexec)
 export path=(${HOME}/.cargo/bin ${path})
 
+export XDG_CONFIG_HOME="${HOME}/.config"
+
 #
 # Prompt
 #
