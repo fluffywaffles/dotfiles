@@ -51,15 +51,15 @@ function batpower-visual-battery {
   local bat_status=$(batpower-status)
   local color=""
   if   [[ $bat_charge -ge 85 ]]; then
-    color="$FG[118]" # green
+    color="${fg[118]}" # green
   elif [[ $bat_charge -ge 50 ]]; then
-    color="$FG[154]" # yellow-green
+    color="${fg[154]}" # yellow-green
   elif [[ $bat_charge -ge 35 ]]; then
-    color="$FG[011]" # yellow
+    color="${fg[011]}" # yellow
   elif [[ $bat_charge -ge 20 ]]; then
-    color="$FG[208]" # orange
+    color="${fg[208]}" # orange
   elif [[ $bat_charge -ge 00 ]]; then
-    color="$FG[196]" # red
+    color="${fg[196]}" # red
   fi
   printf "%s%s %s%s"                   \
     "%{${color}%}"                     \

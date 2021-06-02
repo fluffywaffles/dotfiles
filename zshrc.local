@@ -11,9 +11,6 @@ bindkey '^?' backward-delete-char
 bindkey '^h' backward-delete-char
 bindkey '^w' backward-kill-word
 
-# Give me extended glob support
-setopt extendedglob
-
 #
 # Aliases, functions, source-able software (plugins), ...?
 #
@@ -31,49 +28,32 @@ source ~/.aliases
 export FZF_DEFAULT_COMMAND='ag -g ""'
 
 # Load z
-source $HOME/.local/zsh-functions/z/z.sh
+source ${HOME}/.local/zsh-functions/z/z.sh
 
 # Add cargo binaries to path (e.g. watchexec)
-export path=($HOME/.cargo/bin $path)
-
-#
-# ZLE (zsh line editor)
-#
-
-# NOTE: which characters should be removed during completion? (not pipe)
-export ZLE_REMOVE_SUFFIX_CHARS=$' \t\n;&'
-
-# NOTE: without this, there's space after the RPROMPT
-# NOTE: this can only be disabled within tmux
-if [[ "$TERM" == "tmux-256olor" ]]; then
-  export ZLE_RPROMPT_INDENT=0
-else
-  export ZLE_RPROMPT_INDENT=1
-fi
+export path=(${HOME}/.cargo/bin ${path})
 
 #
 # Prompt
 #
 
+vcs_prompt_formats=(
+  '%{${fg[yellow]}%}'
+  '${vcs[branch]:+ ∙ }'
+  '%{${fg[red]}%}${vcs[branch]}${vcs[dirty]:+*}'
+)
+
 # Only do all this if we're in a decent terminal...
 if [[ $TERM != "linux" ]]; then
-  # Shorten the prompt
-  # Stolen (!) from the "norm" zsh theme in OMZ
-  printf -v PROMPT "%s %s %s%s"         \
-    '%{$fg[yellow]%}▌ƒ▐'                \
-    '%{$fg[green]%}%c'                  \
-    '%{$fg[yellow]%}$(git_prompt_info)' \
-    '%{$reset_color%}'
-  ZSH_THEME_GIT_PROMPT_PREFIX="∙ %{$fg[red]%}"
-  ZSH_THEME_GIT_PROMPT_SUFFIX=" "
+  printf -v PROMPT '%s %s%s%%{${reset_color}%%} ' \
+    '%{$fg[yellow]%}▌ƒ▐'                          \
+    '%{$fg[green]%}%c'                            \
+    ${(j::)vcs_prompt_formats}
 else
-  printf -v PROMPT "%s %s %s%s"         \
-    '%{$fg[yellow]%}f'                  \
-    '%{$fg[green]%}%c'                  \
-    '%{$fg[yellow]%}$(git_prompt_info)' \
-    '%{$reset_color%}'
-  ZSH_THEME_GIT_PROMPT_PREFIX=". %{$fg[red]%}"
-  ZSH_THEME_GIT_PROMPT_SUFFIX=" "
+  printf -v PROMPT '%s %s%s%%{${reset_color}%%} ' \
+    '%{$fg[yellow]%}f'                            \
+    '%{$fg[green]%}%c'                            \
+    ${(j::)vcs_prompt_formats}
 fi
 
 #
@@ -81,17 +61,23 @@ fi
 # Print battery visual indicator and vim-mode on right-hand side of prompt
 #
 
-VIM_NORMAL_MODE="%{$FX[bold]$fg[blue]%}[nrm]%{$reset_color%}"
-VIM_INSERT_MODE="%{$FX[bold]$fg[grey]%}[ins]%{$reset_color%}"
-
 # Load batpower (for battery strength indicators in RPROMPT)
 source $HOME/.local/zsh-functions/batpower.zsh
 
+vcs_rprompt_formats+=(
+  '${vcs[staged]:+[}'
+  '%{${fg[blue]}%}${vcs[staged]:+staged}%{${reset_color}%}'
+  '${vcs[staged]:+]}'
+)
+
 # Draw at start of each line print, and when keymap changes
 function update-rprompt {
-  printf -v RPROMPT '%s%s$EPS1'                                         \
-    "${${KEYMAP/vicmd/$VIM_NORMAL_MODE}/(main|viins)/$VIM_INSERT_MODE}" \
-    "${batpower_enabled:+ }$(batpower-visual-battery)"
+  local normal="%{$fx[bold]$fg[blue]%}[nrm]%{$reset_color%}"
+  local insert="%{$fx[bold]$fg[white]%}[ins]%{$reset_color%}"
+  printf -v RPROMPT '%s%s%s${EPS1}'                     \
+    ${(j::)vcs_rprompt_formats}                         \
+    ${${KEYMAP/vicmd/${normal}}/(main|viins)/${insert}} \
+    ${batpower_enabled:+ }$(batpower-visual-battery)
 }
 
 # Widget functions (for when zsh redraws the prompt)
@@ -107,6 +93,3 @@ zle -N zle-keymap-select
 # Set up batpower and rprompt!
 batpower-setup >/dev/null
 update-rprompt
-
-# Make ls colors consistent
-export LS_COLORS="rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=0"
