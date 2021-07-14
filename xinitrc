@@ -3,7 +3,7 @@
 #
 # Run the random crufty xinitrc script stuff that Xorg provides
 #
-source .xinitrc.cruft.sh
+source ${HOME}/.xinitrc.cruft.sh
 
 #
 # ~ Do some actually interesting configuration ~
