@@ -1,3 +1,4 @@
 #!/bin/sh -e
-sudo yay -S brscan4 sane-airscan ipp-usb
+yay -S brscan4 sane-airscan ipp-usb
+vim /etc/sane.d/dll.conf
 scanimage -L
