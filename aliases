@@ -20,6 +20,43 @@ alias dd='dd status=progress'
 alias mkpw="head -c512 /dev/urandom | sha512sum | cut -d' ' -f1"
 
 #
+# scanning with scanimage (SANE)
+#
+# scan image, resize to lower ppi, convert to pdf
+#
+function scanpdf () {(
+  emulate -L zsh -e
+  if [[ $# -lt 1 ]]; then
+    echo $#
+    >&2 printf 'ERR: missing: why no name for out pls?\n'
+    return 1
+  fi
+  name="${1%%.pdf}"  # quoted: allow spaces in name
+  ppi=50; if [[ ${2} =~ "ppi=\d*" ]]; then
+    ppi=(${(s:=:)ppi}) # convert to array splitting on '='
+    ppi=${ppi[2]}      # select the number on right-hand side of '='
+  elif [[ -n ${2} ]]; then
+    >&2 printf 'ERR: bad arg: why u give bad ppi=N ??\n'
+    return 1
+  fi
+  # intermediary files
+  raw_pnm="${name}-raw.pnm"
+  ppi_pnm="${name}-${ppi}ppi.pnm"
+  intermediary_files=("${raw_pnm}" "${ppi_pnm}")
+  # output file
+  final_pdf="${name}.pdf"
+  # scan, redraw, convert, clean up
+  printf '◆ scan            (subsh)»  '
+  (set -x; scanimage --format=pnm > "${raw_pnm}")
+  printf '◆ redraw          (subsh)»  '
+  (set -x; mutool draw -r "${ppi}" -o "${ppi_pnm}" "${raw_pnm}")
+  printf '◆ convert to pdf  (subsh)»  '
+  (set -x; mutool convert -O compress -o "${final_pdf}" "${ppi_pnm}")
+  printf '◆ cleaning up     (subsh)»  '
+  (set -x; rm "${intermediary_files[@]}")
+)}
+
+#
 # zg
 #
 # z within the current git repository
