@@ -110,7 +110,7 @@ setopt share_history      # see commands from other still-running sessions
 # ∙ initialization
 setopt no_global_rcs      # [-d] don't source startup files from /etc
 # ∙ input / output
-setopt correct_all        # [-O] suggest corrections for all arguments
+setopt correct            # <default> suggest corrections for commands
 setopt no_clobber         # > won't truncate but >| or >! will
 setopt no_flow_control    # no start/stop (C-S/C-Q) control sequences
 # ∙ job control
