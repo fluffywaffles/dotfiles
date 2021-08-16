@@ -87,7 +87,7 @@ function git-push-set-upstream-branch-current () {(
   git push origin --set-upstream ${branch}
 )}
 
-function git-pull-rebase-then-force-with-lease () {(
+function git-pull-rebase-then-force-with-lease-includes () {(
   #
   # rebase given remote branch ($1) into current branch and then force-push
   # to given remote branch ($2) with lease. remote can be configured as a
@@ -105,7 +105,7 @@ function git-pull-rebase-then-force-with-lease () {(
   local branch=$(git rev-parse --abbrev-ref HEAD) # git-branch-current
   local remote=${remote:-origin}
   git pull --rebase ${remote} ${1:-${branch}}
-  git push --force-with-lease ${remote} ${2:-${branch}}
+  git push --force-with-lease --force-if-includes ${remote} ${2:-${branch}}
 )}
 
 #
@@ -113,8 +113,8 @@ function git-pull-rebase-then-force-with-lease () {(
 #
 alias gbc='git-branch-current'
 alias gpu='git-push-set-upstream-branch-current'
-alias glop='git-pull-rebase-then-force-with-lease'
-alias glomp='git-pull-rebase-then-force-with-lease master'
+alias glop='git-pull-rebase-then-force-with-lease-includes'
+alias glomp='git-pull-rebase-then-force-with-lease-includes master'
 
 #
 # shell aliases for common git commands
