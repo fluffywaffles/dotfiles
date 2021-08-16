@@ -74,7 +74,7 @@ function git-branch-current () {(
   #
   # returns the currently checked-out branch name at HEAD
   #
-  set -ex
+  set -e
   git rev-parse --abbrev-ref HEAD
 )}
 
