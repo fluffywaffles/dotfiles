@@ -76,7 +76,7 @@ vcs_rprompt_formats+=(
 uname=$(uname -s)
 function update-rprompt {
   local match mbegin mend
-  batpower-${uname:l}
+  >/dev/null batpower-${uname:l}
   local normal="%{$fx[bold]$fg[blue]%}[nrm]%{$reset_color%}"
   local insert="%{$fx[bold]$fg[white]%}[ins]%{$reset_color%}"
   printf -v RPROMPT '%s%s%s${EPS1}'                     \
