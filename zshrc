@@ -145,9 +145,9 @@ setopt no_beep            # don't fucking beep
 export DIRSTACKSIZE=100      # keep 100 entries in the directory stack
 export HISTFILE="${HOME}/.zsh_history"
 export HISTSIZE=50000        # keep 50k lines of internal session history
+export SAVEHIST=${HISTSIZE}  # and the same in the shared ${HISTFILE}
 export LISTMAX=0             # ask before listing if it won't fit onscreen
 unset NULLCMD                # error on redirection with no command
-export SAVEHIST=${HISTSIZE}  # and the same in the shared ${HISTFILE}
 # give all timings in ms (%m{U,S,E}) with max resident set size (%M)
 export timefmt=(
   "%J"              # job name
