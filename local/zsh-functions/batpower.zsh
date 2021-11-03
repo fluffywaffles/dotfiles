@@ -86,7 +86,7 @@ function batpower-visual-battery {
   elif [[ ${charge} -ge 50 ]]; then
     color="${fg[154]}" # yellow-green
   elif [[ ${charge} -ge 35 ]]; then
-    color="${fg[011]}" # yellow
+    color="${fg[11]}"  # yellow
   elif [[ ${charge} -ge 20 ]]; then
     color="${fg[208]}" # orange
   elif [[ ${charge} -ge 00 ]]; then
