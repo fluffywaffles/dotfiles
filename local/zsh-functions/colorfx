@@ -147,7 +147,7 @@ typeset -H pangram="the quick brown fox jumped over the lazy dog"
 function cls-fg16() {
   local color_name
   for color_name in ${(k)fg[(I)[a-z]*]}; do
-    print -P '${color_name}\t%{${fg[${color_name}]}${1:-${pangram}}${fx[reset]}%}'
+    print -P '${color_name}\t%{${fg[${color_name}]}%}${1:-${pangram}}%{${fx[reset]}%}'
   done
 }
 
