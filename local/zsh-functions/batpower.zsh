@@ -37,7 +37,6 @@ function batpower-linux {
 }
 
 function batpower-darwin {
-  typeset -g batpower_enabled=1
   local capacities=$(
     ioreg -rn AppleSmartBattery                                     \
       | sed -e 's/^[[:space:]]*//'                                  \
@@ -56,6 +55,7 @@ function batpower-darwin {
   local charge=$((100 * ${current_capacity} / ${max_capacity}))
   typeset -g batpower_charge=${charge}
   typeset -g batpower_status=${status}
+  typeset -g batpower_enabled=1
 }
 
 function batpower-enabled { [[ -n ${batpower_enabled} ]] }
