@@ -142,33 +142,46 @@ function bg-rgb() {
   print "[48;2;${r};${g};${b}m"
 }
 
-typeset -H pangram="the quick brown fox jumped over the lazy dog"
-
 function cls-fg16() {
   local color_name
+  local text=${1:-"the quick brown fox jumped over the lazy dog"}
   for color_name in ${(k)fg[(I)[a-z]*]}; do
-    print -P '${color_name}\t%{${fg[${color_name}]}%}${1:-${pangram}}%{${fx[reset]}%}'
+    print -P '${color_name}\t%{${fg[${color_name}]}%}${text}%{${fx[reset]}%}'
   done
 }
 
 function cls-fg256() {
   local color_index
+  local text=${1:-"the quick brown fox jumped over the lazy dog"}
+  local columns=${${2}:-5}
+  if   [[ ${#text} -ge 20 ]]; then
+    columns=1
+  elif [[ ${#text} -ge 10 ]]; then
+    columns=3
+  fi
   for color_index in ${(nik)fg[(I)[0-9]*]}; do
-    print -P '${(l:3::0:)color_index}\t%{${fg[${color_index}]}%}${1:-${pangram}}%{${fx[reset]}%}'
+    print -nP '${(l:3::0:)color_index}\t%{${fg[${color_index}]}%}${text}%{${fx[reset]}%}'
+    if [[ $((${color_index} % ${columns})) -eq 0 ]]; then
+      print '' # newline
+    else
+      print -n '\t' # tab between colors
+    fi
   done
 }
 
 function cls-bg16() {
   local color_name
+  local text=${1:-"the quick brown fox jumped over the lazy dog"}
   for color_name in ${(k)bg[(I)[a-z]*]}; do
-    print -P '${color_name}\t%{${bg[${color_name}]}${1:-${pangram}}${fx[reset]}%}'
+    print -P '${color_name}\t%{${bg[${color_name}]}${text}${fx[reset]}%}'
   done
 }
 
 function cls-bg256() {
   local color_index
+  local text=${1:-"the quick brown fox jumped over the lazy dog"}
   for color_index in ${(nik)bg[(I)[0-9]*]}; do
-    print -P '${(l:3::0:)color_index}\t%{${bg[${color_index}]}%}${1:-${pangram}}%{${fx[reset]}%}'
+    print -P '${(l:3::0:)color_index}\t%{${bg[${color_index}]}%}${text}%{${fx[reset]}%}'
   done
 }
 
