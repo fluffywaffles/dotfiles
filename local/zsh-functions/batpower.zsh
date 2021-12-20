@@ -69,7 +69,7 @@ function batpower-fmt-charge {
 function batpower-fmt-status {
   local status_symbol='?'
   case ${1} in
-    ( "Full" | "Unknown" ) status_symbol='▬';;
+    ( "Full" | "Unknown" ) status_symbol='━';;
     ( "Charging"         ) status_symbol='▲';;
     ( "Discharging"      ) status_symbol='▼';;
   esac
