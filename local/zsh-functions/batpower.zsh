@@ -96,4 +96,3 @@ function batpower-visual-battery {
     $(batpower-fmt-charge ${charge})             \
     $(batpower-fmt-status ${status})
 }
-
