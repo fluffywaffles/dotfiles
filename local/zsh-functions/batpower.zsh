@@ -22,12 +22,12 @@ function batpower-setup {
   # And if there are more batteries, issue a warning.
   if [[ ${#batteries} -gt 1 ]]; then
     printf 'batpower: multiple batteries detected! \n  %s\n' \
-      "batteries=($batteries)"
+      "batteries=(${batteries})"
   fi
   printf 'batpower: battery set: %s.\n' ${selected_battery}
   typeset -g batpower_enabled=1
-  typeset -gH capacity_file="$selected_battery/capacity"
-  typeset -gH status_file="$selected_battery/status"
+  typeset -gH capacity_file="${selected_battery}/capacity"
+  typeset -gH status_file="${selected_battery}/status"
 }
 
 function batpower-linux {
