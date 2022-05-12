@@ -16,7 +16,7 @@
 #     $ cp ifname.default ifname
 #
 #   Add a WiFi configuration using:
-#     $ wpa_passphrase {ssid} {passphrase} > ${HOME}/@/{name}.conf
+#     $ @/new_conf {ssid} [pass {passphrase}] > ${HOME}/@/{name}.conf
 #
 #   Symlink this script as @/{name}:
 #     $ ln -s ${HOME}/@/connect ${HOME}/@/{name}

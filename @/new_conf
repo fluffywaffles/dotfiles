@@ -1,0 +1,93 @@
+#!/bin/bash -e
+
+errf() {
+	>&2 printf "ERROR: ${1}" "${@}"
+}
+
+usage() {
+	printf "usage: ${0} <ssid> [{ pass <passphrase> | custom }]\n"
+}
+
+setmode() {
+	if [[ !(${#} -eq 1) ]]; then
+		errf "setmode: wrong # args ${#}\n"
+		return -1
+	fi
+	if [[ !("${mode}" == "${default_mode}") ]]; then
+		errf "setmode: overwriting mode; was: ${mode}\n"
+	fi
+	export mode="${1}"
+	return
+}
+
+##
+# Create a new wireless network configuration
+##
+# Requires
+#   wpa_supplicant
+#   sudo
+##
+# Usage
+#   Install in `${HOME}/@`; i.e.: `${HOME}/@/new_conf`
+#
+#   Emit a new wireless network configuration to stdout:
+#     $ @/new_conf {ssid} # no passphrase; unsecured network
+#     $ @/new_conf {ssid} pass {passphrase}
+#     $ @/new_conf {ssid} custom # clone full wpa_supplicant.conf template
+#
+#   If prompted, enter password for `sudo`.
+##
+if [[ $(id -u) -ne 0 ]]; then
+	exec sudo ${0} "${@}"
+fi
+
+# ensure at least one argument {ssid} is provided
+if [[ ${#} -lt 1 ]]; then
+	errf "not enough arguments.\n"
+	usage
+	exit -1
+fi
+
+# constants
+default_mode="simple"
+conf_template="/usr/share/doc/wpa_supplicant/wpa_supplicant.conf"
+
+# parse commands and detect mode
+mode="${default_mode}"
+ssid="${1}"; shift
+while [[ ${#} -gt 0 ]]; do
+	case "${1}" in
+		pass)
+			setmode "wpa_passphrase"
+			passphrase="${2}"
+			shift 2
+			break
+			;;
+		custom)
+			setmode "custom"
+			shift
+			break
+			;;
+		*)
+			errf "ignoring unexpected argument: %s\n" "${1}"
+			shift
+			;;
+	esac
+done
+
+# switch on mode to configure new wireless network and emit conf to stdout
+case "${mode}" in
+	(${default_mode})
+		printf 'network={\n\tssid="%s"\n\tkey_mgmt=%s\n}\n' "${ssid}" "NONE"
+		;;
+	(wpa_passphrase)
+		wpa_passphrase "${ssid}" "${passphrase}"
+		;;
+	(custom)
+		cat "${conf_template}"
+		;;
+	(*)
+		errf 'invalid mode: %s\n' "${mode}"
+		exit -1
+		;;
+esac
