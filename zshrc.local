@@ -45,7 +45,7 @@ vcs_prompt_formats=(
   '%{${fg[red]}%}${vcs[branch]}${vcs[dirty]:+*}'
 )
 
-# Only do all this if we're in a decent terminal...
+# Only use unicode if we're in a decent terminal...
 if [[ $TERM != "linux" ]]; then
   printf -v PROMPT '%s %s%s%%{${reset_color}%%} ' \
     '%{$fg[yellow]%}▌ƒ▐'                          \
