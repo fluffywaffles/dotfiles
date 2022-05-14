@@ -1,2 +1,2 @@
-#!/bin/sh
-xrandr -q | sed -nE '/connected primary/ p'
+#!/bin/zsh
+xrandr --query | sed --silent --regexp-extended "/${1} connected/ p"
