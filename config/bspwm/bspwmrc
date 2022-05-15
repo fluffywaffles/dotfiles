@@ -1,19 +1,87 @@
-#! /bin/sh
-bspc monitor -d I II III IV V
+#!/bin/sh
 
-bspc config border_width    0
-bspc config window_gap      0
+# bspwm configuration
+# man://bspwm(1)
+#
+# see also:
+#   ~/.config/sxhkd/sxhkdrc
+#   ~/.config/dunst/dunstrc
+
+#=========================================================================
+# Virtual desktop setup
+#-------------------------------------------------------------------------
+
+# Allocate five desktops named by their index in roman numerals.
+bspc monitor --reset-desktops I II III IV V
+
+#=========================================================================
+# Configuration setup
+#-------------------------------------------------------------------------
+
+#
+# If no selector is given to
+#
+#   bspc config [-{m,d,n} <{monitor,desktop,node}-sel>] <name> [<value>]
+#
+# then the configuration applies globally to all applicable monitors,
+# desktops, or nodes.
+#
+
+# Per-node settings.
+#-------------------------------------------------------------------------
+bspc config border_width 0 # Width of border around node; 0 to disable.
+
+# Per-monitor and/or per-desktop settings.
 bspc config top_padding    20
 bspc config left_padding   20
 bspc config right_padding  20
 bspc config bottom_padding 20
 
-bspc config split_ratio        0.50
+# Per-desktop settings.
+#-------------------------------------------------------------------------
+bspc config window_gap 0 # No gap between windows.
 
-bspc config borderless_monocle true
-bspc config gapless_monocle    true
+# Global settings
+#-------------------------------------------------------------------------
+bspc config presel_feedback_color "#e0c285" # Color of the node --presel-{dir,ratio} message feedback area.
+bspc config split_ratio                0.50 # Default split ratio when inserting a new node.
+bspc config borderless_monocle         true # Remove borders of tiled windows for the monocle desktop layout.
+bspc config gapless_monocle            true # Remove gaps of tiled windows for the monocle desktop layout.
+bspc config pointer_follows_focus      true # When focusing a window, put the pointer at its center.
+bspc config click_to_focus          button1 # Button used for focusing a window (or a monitor).
+bspc config center_pseudo_tiled        true # Center pseudo tiled windows into their tiling rectangles.
+bspc config pointer_modifier           mod4 # Super+mouse to perform pointer actions (move, resize).
 
-bspc config pointer_follows_focus true
-bspc config click_to_focus        button1
-
-bspc config center_pseudo_tiled true
+#=========================================================================
+# References
+#-------------------------------------------------------------------------
+#
+##
+#-------------------------------------------------------------------------
+# Mouse reference
+#-------------------------------------------------------------------------
+#   pointer_action1 is button1, default: move
+#   pointer_action2 is button2, default: resize_side
+#   pointer_action3 is button3, default: resize_corner
+##
+#-------------------------------------------------------------------------
+# Modifiers Reference (from `xmodmap -pm`)
+#-------------------------------------------------------------------------
+#
+# Preonic Waffles
+#
+#   shift     shift_l shift_r
+#   lock      n/a
+#   control   control_l[0x25] control_l[0x42] control_r
+#   mod1      alt_l alt_r meta_l
+#   mod2      num_lock
+#   mod3      n/a
+#   mod4      super_l super_r[0x86] super_r[0xce] hyper_l
+#   mod5      iso_level3_shift[0x5c] mode_switch[0xcb]
+##
+#-------------------------------------------------------------------------
+# Alignment tricks
+#-------------------------------------------------------------------------
+# To align on the last # (the trick is the space before, ruling out "#)
+#   Tabularize/\S\+ #/l1r1
+##
