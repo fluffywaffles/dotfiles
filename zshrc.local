@@ -36,6 +36,9 @@ export path=(${HOME}/.cargo/bin ${path})
 # Set configuration home directory for freedesktop user
 export XDG_CONFIG_HOME="${HOME}/.config"
 
+# Use neovim as Manpager
+export MANPAGER="nvim +':Man!'"
+
 #
 # Prompt
 #
