@@ -33,6 +33,7 @@ source ${HOME}/.local/zsh-functions/z/z.sh
 # Add cargo binaries to path (e.g. watchexec)
 export path=(${HOME}/.cargo/bin ${path})
 
+# Set configuration home directory for freedesktop user
 export XDG_CONFIG_HOME="${HOME}/.config"
 
 #
