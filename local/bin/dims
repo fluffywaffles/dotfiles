@@ -1,2 +1,0 @@
-#!/bin/sh
-tr ' ' '\n' | sed -nE '4 s/[x+]/\n/g p'
