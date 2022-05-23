@@ -1,0 +1,10 @@
+#!/bin/zsh --extendedglob
+# Parse resolutions from monitor modestrings
+
+digits=[[:digit:]]##
+
+while read monitor_mode; do
+  # remove offset suffix containing +x+y and rotation
+  offset=${monitor_mode%%+${~digits}+${~digits}*}
+  printf '%s\n' ${offset}
+done

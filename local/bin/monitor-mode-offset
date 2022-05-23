@@ -1,0 +1,12 @@
+#!/bin/zsh --extendedglob
+# Parse offsets from monitor modestrings
+
+digits=[[:digit:]]##
+
+while read monitor_mode; do
+  unset match
+  # select the offsets into ${match}
+  _=${monitor_mode/(#b)+(${~digits})+(${~digits})}
+  # reformat with an x between the x and y offsets
+  printf '%sx%s\n' ${match}
+done

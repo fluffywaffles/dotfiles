@@ -1,0 +1,27 @@
+#!/bin/zsh --extendedglob
+# Parse modestrings from monitor-info style input
+
+digits=[[:digit:]]##
+mode_pattern=${~digits}x${~digits}+${~digits}+${~digits}
+
+function filter() {
+  local array_name=${1}
+  local pattern_name=${2}
+  printf '${(M)%s:#${~%s}}' ${array_name} ${pattern_name}
+}
+
+while read monitor_info; do
+  # discard parenthetical and everything after
+  monitor_info=${monitor_info%%\(*\) *}
+  properties=(${=monitor_info}) # perform word-splitting into an array
+  mode=${(M)properties:#${~mode_pattern}}
+  # if the monitor is rotated left or right...
+  rotation=${(M)properties:#(left|right)}
+  if [[ -n ${rotation} ]]; then # reverse the mode
+    # this is fun: (#b) turns on backreferences; then, we swap the matches
+    mode=${mode/(#b)(${~digits})x(${~digits})/${match[2]}x${match[1]}}
+  else
+    rotation='normal'
+  fi
+  printf '%s rotate:%s\n' ${mode} ${rotation}
+done

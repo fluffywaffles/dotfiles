@@ -1,0 +1,6 @@
+#!/bin/zsh
+# Parses monitor output names from monitor-info style input
+while read monitor_info; do
+  properties=(${=monitor_info})  # perform word-splitting into an array
+  printf '%s\n' ${properties[1]} # select the first word, the output name
+done

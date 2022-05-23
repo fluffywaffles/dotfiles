@@ -1,0 +1,97 @@
+#!/bin/zsh --extendedglob
+
+# utilities
+script=${0}
+function usage() {
+  printf 'usage:\n\t%s <outputs>\n\trefresh the given outputs\n' ${script}
+}
+
+function errf() {
+  format="${1}"
+  arguments="${@::1}"
+  >&2 printf "ERROR: ${format}" "${arguments[@]}"
+}
+
+function turn_off_then_restore() {
+  # check arguments
+  if [[ ${#} -ne 2 ]]; then
+    errf 'turn_off_then_restore takes 2 args, not %d\n' ${#}
+  fi
+  outputs=${1}
+  restore_command=${2}
+  # toggle off the problematic output(s)
+  for output in ${=outputs}; do
+    xrandr --output ${output} --off
+  done
+  # wait ${refresh_delay} or 0.5 seconds for displays to cycle
+  sleep ${refresh_delay:-0.5}
+  # restore the full layout of every output
+  echo + ${restore_command}
+  eval ${restore_command}
+}
+
+# check arguments
+if [[ ${#} -lt 1 ]]; then
+  errf 'no output(s) given\n'
+  usage
+  exit 1
+fi
+outputs="${1}"
+
+# associative array of <output> → <output layout variable name>
+# e.g.
+#   indirect lookup of layout for HDMI-0:
+#     layout_variable=${layout_indirect_lookup_table["HDMI-0"]}
+#     ${(P)layout_variable} # (P) is an indirect lookup by var name
+typeset -A layout_indirect_lookup_table
+
+# parse the xrandr arguments from xrandr's nasty output
+monitor-info | while read info; do
+  # parse the modestring and the output from the monitor info
+  mode=$(monitor-mode     <<< ${info})
+  output=$(monitor-output <<< ${info})
+  # parse the offset and resolution from the mode
+  offset=$(monitor-mode-offset         <<< ${mode})
+  rotate=$(monitor-mode-rotation       <<< ${mode})
+  resolution=$(monitor-mode-resolution <<< ${mode})
+  # compute whether this output is the primary
+  is_primary=$([[ "${info}" =~ "primary" ]]; echo $?)
+  # construct keys and values...
+  keys=(raw_info    output    rotate    resolution    is_primary    offset)
+  values=(${info} ${output} ${rotate} ${resolution} ${is_primary} ${offset})
+  # compute the xrandr arguments to restore this output's layout
+  xrandr_arguments=(
+    "--output ${output}"
+    "--rotate ${rotate}"
+    "--mode ${resolution}"
+    "--pos ${offset}"
+  )
+  if [[ ${is_primary} -eq 0 ]]; then
+    xrandr_arguments+=("--primary")
+  fi
+  # and then add the xrandr argument string to the keys and values
+  keys+=(xrandr_argstring)
+  values+=(${(j: :)xrandr_arguments}) # (which means join args with " ")
+  # ...then zip everything into an associative array named by output
+  layout_variable="monitor_${output/-/_}_info"
+  eval "typeset -Ag ${layout_variable}=(\${keys:^values})"
+  # and store the variable name for the layout in an indirect lookup table
+  layout_indirect_lookup_table+=([${output}]=${layout_variable})
+done
+
+# build the xrandr command for restoring all the monitor layouts
+restore_command="xrandr"
+for layout_variable in ${layout_indirect_lookup_table}; do
+  xrandr_argstring=${${(P)layout_variable}[xrandr_argstring]}
+  restore_command+=" ${xrandr_argstring}"
+  output=${${(P)layout_variable}[output]}
+done
+
+# turn off selected outputs, then restore layout
+turn_off_then_restore "${outputs}" "${restore_command}"
+# do it again with a delay if --hard is passed
+if [[ ${2} == "--hard" ]]; then
+  delay=${3}
+  sleep ${delay:-2}
+  turn_off_then_restore "${outputs}" "${restore_command}"
+fi
