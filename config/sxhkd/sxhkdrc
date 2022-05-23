@@ -1,10 +1,18 @@
+#=========================================================================
+# sxhkd (simple x hotkey daemon)
+#-------------------------------------------------------------------------
+# see also:
+#   ~/.config/bspwm/bspwmrc
+#   ~/.config/dunst/dunstrc
+#   ~/.slock-config.h
+
 #
-# wm independent hotkeys
+# Application launch hotkeys
 #
 
 # lock + suspend
 super + l
-	slock systemctl suspend -i
+	slock systemctl suspend --check-inhibitors=no
 
 # terminal emulator
 super + Return
