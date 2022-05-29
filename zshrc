@@ -81,24 +81,24 @@ alias tree='tree -C'
 # wide-ranging default settings
 # man://zshoptions(1)
 #
-# ∙ changing directories
+# • changing directories
 setopt auto_cd            # [-J] if a command is a directory, `cd {dir}`
 setopt auto_pushd         # [-N] automatically pushd when cd
 setopt pushd_ignore_dups  # don't push duplicates onto dirstack
 setopt chase_links        # [-w] follow symlinks when changing directory
-# ∙ completion
+# • completion
 setopt auto_param_slash   # <default> add slashes when completing paths
 setopt auto_remove_slash  # <default> remove last slash of completed path
 setopt list_types         # <default> show type markers of file candidates
 setopt no_list_ambiguous  # show menu even if unambiguous prefix [1]
 setopt complete_in_word   # complete partial words, e.g. mk|r<tab> → mkdir
 setopt globcomplete       # interpret * as part of completion in a word
-# ∙ globbing
+# • globbing
 setopt extended_glob      # extended globbing, eg. *~*.txt (exclude *.txt)
 setopt glob_star_short    # **.js expands to **/*.js; same for ***
 setopt numeric_glob_sort  # numeric file names expand sorted numerically
 setopt warn_create_global # warn on creating globals except `typeset -g`
-# ∙ history
+# • history
 setopt extended_history   # add timestamp to histfile entries
 setopt hist_find_no_dups  # don't display duplicates in history expansion
 setopt hist_ignore_space  # [-g] commands with leading space are not saved
@@ -107,22 +107,22 @@ setopt hist_no_store      # don't store `history` invocations in history
 setopt hist_save_no_dups  # don't save dups within the same session
 setopt hist_verify        # don't execute expanded history right away
 setopt share_history      # see commands from other still-running sessions
-# ∙ initialization
+# • initialization
 setopt no_global_rcs      # [-d] don't source startup files from /etc
-# ∙ input / output
+# • input / output
 setopt correct            # <default> suggest corrections for commands
 setopt no_clobber         # > won't truncate but >| or >! will
 setopt no_flow_control    # no start/stop (C-S/C-Q) control sequences
-# ∙ job control
+# • job control
 setopt long_list_jobs     # [-R] print job notifications in long format
-# ∙ prompting
+# • prompting
 setopt prompt_subst       # command subst, arith & param expn in [R]PROMPT
 setopt transient_rprompt  # rprompt only shows on current ineractive line
-# ∙ scripts and functions
+# • scripts and functions
 setopt pipe_fail          # sets $? to non-zero if any pipe element fails
-# ∙ shell emulation
+# • shell emulation
 setopt append_create      # >> creates new files despite no_clobber
-# ∙ zsh line editor (zle)
+# • zsh line editor (zle)
 setopt no_beep            # don't fucking beep
 # options notes
 #
