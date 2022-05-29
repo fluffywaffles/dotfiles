@@ -66,6 +66,7 @@ typeset -AHg fx=(
 )
 
 # export special ${reset_color} variable common in existing scripts
+# NOTE: in new code, prefer ${fx[reset]}
 typeset -g reset_color="[${codes[reset]}m"
 
 #
@@ -102,11 +103,11 @@ done
 
 # compute foreground 24 bit colors
 function fg-rgb() {
-  if [[ $# -ne 3 ]]; then
-    >&2 print "ERROR fg-rgb wrong number arguments ($#) for RGB"
+  if [[ ${#} -ne 3 ]]; then
+    >&2 print "ERROR fg-rgb wrong number arguments (${#}) for RGB"
     exit 1
   fi
-  local r=$1 g=$2 b=$3
+  local r=${1} g=${2} b=${3}
   print "[38;2;${r};${g};${b}m"
 }
 
@@ -134,11 +135,11 @@ done
 
 # compute background 24 bit colors
 function bg-rgb() {
-  if [[ ! $# -eq 3 ]]; then
+  if [[ ! ${#} -eq 3 ]]; then
     >&2 print "ERROR bg-rgb wrong number arguments for RGB"
     exit 1
   fi
-  local r=$1 g=$2 b=$3
+  local r=${1} g=${2} b=${3}
   print "[48;2;${r};${g};${b}m"
 }
 
@@ -146,7 +147,7 @@ function cls-fg16() {
   local color_name
   local text=${1:-"the quick brown fox jumped over the lazy dog"}
   for color_name in ${(k)fg[(I)[a-z]*]}; do
-    print -P '${color_name}\t%{${fg[${color_name}]}%}${text}%{${fx[reset]}%}'
+    print -P "${color_name}\t%{${fg[${color_name}]}%}${text}%{${fx[reset]}%}"
   done
 }
 
@@ -160,7 +161,7 @@ function cls-fg256() {
     columns=3
   fi
   for color_index in ${(nik)fg[(I)[0-9]*]}; do
-    print -nP '${(l:3::0:)color_index}\t%{${fg[${color_index}]}%}${text}%{${fx[reset]}%}'
+    print -nP "${(l:3::0:)color_index}\t%{${fg[${color_index}]}%}${text}%{${fx[reset]}%}"
     if [[ $((${color_index} % ${columns})) -eq 0 ]]; then
       print '' # newline
     else
@@ -173,7 +174,7 @@ function cls-bg16() {
   local color_name
   local text=${1:-"the quick brown fox jumped over the lazy dog"}
   for color_name in ${(k)bg[(I)[a-z]*]}; do
-    print -P '${color_name}\t%{${bg[${color_name}]}${text}${fx[reset]}%}'
+    print -P "${color_name}\t%{${bg[${color_name}]}${text}${fx[reset]}%}"
   done
 }
 
@@ -181,7 +182,7 @@ function cls-bg256() {
   local color_index
   local text=${1:-"the quick brown fox jumped over the lazy dog"}
   for color_index in ${(nik)bg[(I)[0-9]*]}; do
-    print -P '${(l:3::0:)color_index}\t%{${bg[${color_index}]}%}${text}%{${fx[reset]}%}'
+    print -P "${(l:3::0:)color_index}\t%{${bg[${color_index}]}%}${text}%{${fx[reset]}%}"
   done
 }
 
@@ -209,7 +210,7 @@ function cls-24bit-rect() {
   function blu-xy() { print $((8 / 5 * (${2} - 32))) }
   function pad-rgb() { print "${(l:3::0:)1} ${(l:3::0:)2} ${(l:3::0:)3}" }
   function header-footer() {
-    local y=$1
+    local y=${1}
     local x r g b arrow
     if   [[ ${y} -eq 000 ]]; then arrow='↓'
     elif [[ ${y} -eq 255 ]]; then arrow='↑'
