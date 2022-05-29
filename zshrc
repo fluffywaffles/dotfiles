@@ -198,8 +198,8 @@ bindkey -M menuselect '^o' accept-and-infer-next-history
 # TODO(jordan): recreate COMPLETION_WAITING_DOTS functionality
 # ~/.oh-my-zsh/lib/completion.zsh:61
 
-# Add custom zsh scripts and binaries to path
-export path=(${HOME}/.local/bin ${HOME}/.local/zsh-scripts ${path})
+# Add custom scripts and binaries to path
+export path=(${HOME}/.local/bin ${path})
 
 # perform compinit as late as possible, as it may override other settings
 autoload -U compinit && compinit
