@@ -97,7 +97,6 @@ setopt globcomplete       # interpret * as part of completion in a word
 setopt extended_glob      # extended globbing, eg. *~*.txt (exclude *.txt)
 setopt glob_star_short    # **.js expands to **/*.js; same for ***
 setopt numeric_glob_sort  # numeric file names expand sorted numerically
-setopt warn_create_global # warn on creating globals except `typeset -g`
 # • history
 setopt extended_history   # add timestamp to histfile entries
 setopt hist_find_no_dups  # don't display duplicates in history expansion
@@ -120,6 +119,7 @@ setopt prompt_subst       # command subst, arith & param expn in [R]PROMPT
 setopt transient_rprompt  # rprompt only shows on current ineractive line
 # • scripts and functions
 setopt pipe_fail          # sets $? to non-zero if any pipe element fails
+setopt warn_create_global # warn on creating globals except `typeset -g`
 # • shell emulation
 setopt append_create      # >> creates new files despite no_clobber
 # • zsh line editor (zle)
