@@ -192,9 +192,6 @@ zstyle ':completion:*' use-cache yes              # cache candidates
 process_complete_command="ps -ww -u ${USERNAME} -o pid,user,comm"
 zstyle ':completion:*:*:*:*:processes' command ${process_complete_command}
 
-# ctrl-o will accept the selected match and start completing the next word
-bindkey -M menuselect '^o' accept-and-infer-next-history
-
 # TODO(jordan): recreate COMPLETION_WAITING_DOTS functionality
 # ~/.oh-my-zsh/lib/completion.zsh:61
 
