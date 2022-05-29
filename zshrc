@@ -232,21 +232,18 @@ zstyle ':vcs_info:git:*' stagedstr   1 # %c=1 if staged changes found
 zstyle ':vcs_info:git:*' unstagedstr 1 # %u=1 if unstaged changes found
 zstyle ':vcs_info:git:*' formats '%b' '%c' '%u' # branch, staged, unstaged
 zstyle ':vcs_info:git:*' check-for-changes true # yes, compute %c and %u
-zstyle ':vcs_info:git:*:*' check-untracked true
+zstyle ':vcs_info:git:*:*' check-untracked true # can turn off per-repo
 
 #
 # parse-vcs-info()
 #
 # parse ${vcs_info_msg_N_} variables into an associative array, vcs
-#   [branch]            branch name
-#   [untracked_files]   list of untracked files (NOTE: may be slow?)
-#   [dirty]             1 if unstaged or untracked changes
-#   [staged]            1 if staged changes
-#   [unstaged]          1 if unstaged changes
-#   [untracked]         1 if there are untracked files
-#
-# OPTIMIZE? setting for disabling detection of untracked files?
-# hard to say without further testing if `git ls-files --other` is slow.
+#   [branch]            branch name, if in a git repo; else, null
+#   [untracked_files]   list of untracked files (NOTE: may be slow)
+#   [dirty]             1 if unstaged or untracked changes, else null
+#   [staged]            1 if staged changes, else null
+#   [unstaged]          1 if unstaged changes, else null
+#   [untracked]         1 if there are untracked files, else null
 #
 typeset -Ag vcs=([branch]='')
 function parse-vcs-info() {
@@ -274,8 +271,7 @@ function parse-vcs-info() {
     vcs[untracked_files]=$(git ls-files --exclude-standard --others)
   fi
   vcs[untracked]=${vcs[untracked_files]:+1}
-  vcs[dirty]=${vcs[dirty]:=${vcs[unstaged]}}
-  vcs[dirty]=${vcs[dirty]:=${vcs[untracked]}}
+  vcs[dirty]=${vcs[unstaged]:-${vcs[untracked]}}
 }
 
 precmd() {
