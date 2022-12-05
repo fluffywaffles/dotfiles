@@ -195,7 +195,7 @@ zstyle ':completion:*:*:*:*:processes' command ${process_complete_command}
 # TODO(jordan): recreate COMPLETION_WAITING_DOTS functionality
 # ~/.oh-my-zsh/lib/completion.zsh:61
 
-# Add custom scripts and binaries to path
+# Add user-home-local binaries to path
 export path=(${HOME}/.local/bin ${path})
 
 # perform compinit as late as possible, as it may override other settings
@@ -271,6 +271,7 @@ function parse-vcs-info() {
   vcs[dirty]=${vcs[unstaged]:-${vcs[untracked]}}
 }
 
+# Load and parse vcs info for working directory before drawing prompt
 precmd() {
   set +o warn_nested_var
   vcs_info # sets ${vcs_info_msg_N_} variables
@@ -280,13 +281,3 @@ precmd() {
 
 # Custom configuration
 source ~/.zshrc.local
-
-# Report slow / high-memory commands AFTER running global and local setup
-export REPORTMEMORY=100      # print timing stats for commands using >100k
-export REPORTTIME=1          # print timing stats for commands taking >1s
-
-# Host-specific configuration and overrides
-# This should come last so it can override e.g. REPORTTIME
-if [ -e ${HOME}/.zshrc.${HOST} ]; then
-  source ${HOME}/.zshrc.${HOST}
-fi

@@ -39,6 +39,10 @@ export XDG_CONFIG_HOME="${HOME}/.config"
 # Use neovim as Manpager
 export MANPAGER="nvim +':Man!'"
 
+# Report slow / high-memory commands AFTER running global and local setup
+export REPORTMEMORY=100      # print timing stats for commands using >100k
+export REPORTTIME=1          # print timing stats for commands taking >1s
+
 #
 # Prompt
 #
@@ -50,7 +54,7 @@ vcs_prompt_formats=(
 )
 
 # Only use unicode if we're in a decent terminal...
-if [[ $TERM != "linux" ]]; then
+if [[ ${TERM} != "linux" ]]; then
   printf -v PROMPT '%s %s%s%%{${reset_color}%%} ' \
     '%{$fg[yellow]%}▌ƒ▐'                          \
     '%{$fg[green]%}%c'                            \
@@ -68,8 +72,9 @@ fi
 #
 
 # Load batpower (for battery strength indicators in RPROMPT)
-source $HOME/.local/zsh-functions/batpower.zsh
+source ${HOME}/.local/zsh-functions/batpower.zsh
 
+# Format string for conditionally displaying version control info
 vcs_rprompt_formats+=(
   '${vcs[staged]:+[}'
   '%{${fg[blue]}%}${vcs[staged]:+staged}%{${reset_color}%}'
@@ -102,3 +107,9 @@ zle -N zle-keymap-select
 
 # set up rprompt on load
 update-rprompt
+
+# Host-specific configuration and overrides
+# This should come last so it can override e.g. REPORTTIME
+if [ -e ${HOME}/.zshrc.${HOST} ]; then
+  source ${HOME}/.zshrc.${HOST}
+fi
