@@ -1,0 +1,2 @@
+#!/bin/sh
+openssl enc -chacha20 -md blake2b512 -pbkdf2 -e ${@}
