@@ -168,8 +168,12 @@ export ZLE_REMOVE_SUFFIX_CHARS=$' \t\n;&'
 # special zsh array parameters
 # default path, very POSIX
 export path=(/usr/local/sbin /usr/local/bin /usr/sbin /usr/bin /sbin /bin)
-# Add custom zsh functions to path so we can autoload them
-export fpath=(${HOME}/.local/zsh-functions ${fpath})
+# Add custom zsh functions and completions to path so we can autoload them
+export fpath=(
+  ${HOME}/.local/zsh-functions
+  ${HOME}/.local/zsh-completions
+  ${fpath}
+)
 
 # zshmodules
 # loads the zstyle, zformat, zparseopts, zregexparse builtins
