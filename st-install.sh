@@ -5,7 +5,7 @@
 mkdir -p ~/software
 cd ~/software
 
-yay -G st
+yay -G st-git
 
 cd ~/software/st
 
