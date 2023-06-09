@@ -63,7 +63,7 @@ function scanpdf () {(
 #
 function zg () {
   local root=$(git rev-parse --show-toplevel)
-  [[ -n "${root}" ]] && 2>&1 _z "${root}" $@ || return 1
+  [[ -n ${root} ]] && 2>&1 _z ${root} ${@}
 }
 
 #
