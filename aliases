@@ -147,6 +147,14 @@ alias glom='git pull --rebase origin master'
 alias gloga='git log --oneline --decorate --graph --all'
 
 #
+# worktree setup aliases
+#
+alias gwa='git worktree add'
+alias gwl='git worktree list'
+alias gwm='git worktree move'
+alias gwrm='git worktree remove'
+
+#
 # HOST-specific aliases [if any]
 #
 if [[ -s ~/.aliases.${HOST} ]]; then
