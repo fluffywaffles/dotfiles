@@ -6,6 +6,11 @@
  * font: see http://freedesktop.org/software/fontconfig/fontconfig-user.html
  */
 static char *font = "monospace:size=9:antialias=true:autohint=true";
+/* Spare fonts */
+static char *font2[] = {
+	/* "Unifont:pixelsize=9:antialias=true:autohint=true", */
+};
+
 static int borderpx = 0;
 
 /*
