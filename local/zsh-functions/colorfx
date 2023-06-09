@@ -1,5 +1,9 @@
 #!/bin/zsh
 
+# Only load definitions once even if sourced / autoloaded multiple times
+if [[ -n ${_colorfx_loaded} ]]; then return; fi
+typeset -g _colorfx_loaded=1
+
 # colorfx provides shorthand for terminal colors and effects
 #
 # inspiration taken from:
