@@ -277,12 +277,14 @@ function parse-vcs-info() {
 }
 
 # Load and parse vcs info for working directory before drawing prompt
-precmd() {
+function parse-vcs-info__precmd() {
   set +o warn_nested_var
   vcs_info # sets ${vcs_info_msg_N_} variables
   set -o warn_nested_var
   parse-vcs-info
 }
+
+precmd_functions+=(parse-vcs-info__precmd)
 
 # Custom configuration
 source ~/.zshrc.local
