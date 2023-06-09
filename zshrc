@@ -247,6 +247,7 @@ function parse-vcs-info() {
   typeset -Ag vcs=(
     [branch]=${vcs_info_msg_0_}
     [untracked_files]=''
+    [bare]=''
     [dirty]=''
     [staged]=${vcs_info_msg_1_}
     [unstaged]=${vcs_info_msg_2_}
@@ -254,6 +255,10 @@ function parse-vcs-info() {
   )
   # don't continue parsing info if we can already tell we're not in a repo
   if [[ -z ${vcs[branch]} ]]; then
+    return 0
+  fi
+  if [[ $(git rev-parse --is-bare-repository) = true ]]; then
+    vcs[bare]=true
     return 0
   fi
   local git_root=$(git rev-parse --show-toplevel)
