@@ -1,2 +1,2 @@
-#!/bin/sh
-scrot -s
+#!/bin/zsh
+scrot --select --file="${HOME}/screenshots/%FT%T_${1:-"screenshot"}.png"
