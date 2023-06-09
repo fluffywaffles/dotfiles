@@ -108,9 +108,15 @@ function git-pull-rebase-then-force-with-lease-includes () {(
   git push --force-with-lease --force-if-includes ${remote} ${2:-${branch}}
 )}
 
+function git-cd-toplevel () {
+  local root=$(git rev-parse --show-toplevel)
+  [[ -n "${root}" ]] && cd ${root}
+}
+
 #
 # shell aliases for custom git functions
 #
+alias grt='git-cd-toplevel'
 alias gbc='git-branch-current'
 alias gpu='git-push-set-upstream-branch-current'
 alias glop='git-pull-rebase-then-force-with-lease-includes'
