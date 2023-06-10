@@ -216,7 +216,7 @@ autoload -U bashcompinit && bashcompinit # also load bash completions
 # basically a mashup of the best ideas from zshcontrib colors and
 # spectrum.zsh.
 #
-autoload -U colorfx && colorfx >/dev/null
+autoload -U colorfx && colorfx
 
 # use vcs_info for git prompt information, ships with zsh in zshcontrib
 autoload -U vcs_info
