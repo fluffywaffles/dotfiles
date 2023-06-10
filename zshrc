@@ -220,6 +220,7 @@ autoload -U colorfx && colorfx
 
 # use vcs_info for git prompt information, ships with zsh in zshcontrib
 autoload -U vcs_info
+
 #
 # vcs_info is configured with styles of the format:
 #   :vcs_info:{vcs}:{user-context}:{repo-root}
@@ -280,7 +281,7 @@ function parse-vcs-info() {
   vcs[dirty]=${vcs[unstaged]:-${vcs[untracked]}}
 }
 
-# Load and parse vcs info for working directory before drawing prompt
+# set up a precmd to parse vcs into in the current working directory
 function parse-vcs-info__precmd() {
   set +o warn_nested_var
   vcs_info # sets ${vcs_info_msg_N_} variables
@@ -288,6 +289,7 @@ function parse-vcs-info__precmd() {
   parse-vcs-info
 }
 
+# add the parse-vsc-info precmd to precmd hooks
 precmd_functions+=(parse-vcs-info__precmd)
 
 # Custom configuration
