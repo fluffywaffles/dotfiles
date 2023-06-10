@@ -1,0 +1,2 @@
+# manually set the display filetype language for some unusual filenames
+zshrc.local linguist-language=zsh
