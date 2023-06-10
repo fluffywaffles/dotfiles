@@ -54,9 +54,11 @@ export REPORTTIME=1          # print timing stats for commands taking >1s
 #
 
 vcs_prompt_formats=(
-  '%{${fg[yellow]}%}'
-  '${vcs[branch]:+ ∙ }'
-  '%{${fg[red]}%}${vcs[branch]}${vcs[dirty]:+*}'
+  '%{${fg[yellow]}%}${vcs[branch]:+ ∙ }'
+  '%{${fg[9]}%}'
+  '${vcs[branch]}${vcs[dirty]:+*}'
+  '%{${fg[11]}%}${vcs[bare]:+ !bare}'
+  '%{${fg[219]}%}${vcs[worktree_root]:+ @worktree/root}'
 )
 
 # Only use unicode if we're in a decent terminal...
@@ -119,3 +121,248 @@ update-rprompt
 if [ -e ${HOME}/.zshrc.${HOST} ]; then
   source ${HOME}/.zshrc.${HOST}
 fi
+
+
+
+#
+#
+#### WORKTREE MAGIC
+#
+#
+
+
+# Autoload custom git functions
+autoload git-worktree-root
+alias gwr='git-worktree-root'
+function gwk() { cd $(gwr) }
+
+vcs-user__precmd() {
+  if ! (&>/dev/null git rev-parse --git-dir); then
+    return 0
+  fi
+  if [[ $(git-worktree-root --silent) = ${PWD} ]]; then
+    vcs[bare]=''
+    vcs[worktree_root]=true
+  fi
+}
+
+# function git-worktree-entries {
+#   git worktree list --porcelain \
+#     | grep -B2 'branch'         \
+#     | grep -E 'branch|worktree' \
+#     | sed -Ee 's\branch refs/heads/|worktree \\'
+# }
+
+function git-worktree-paths {
+  typeset -A entries=($(git-worktree-entries))
+  print ${(kj:\n:)entries}
+}
+
+# function git-worktree-branches {
+#   typeset -A entries=($(git-worktree-entries))
+#   print ${(vj:\n:)entries}
+# }
+
+# function git-branch-list-porcelain {
+#   git show-ref --heads \
+#     | sed -Ee 's\[0-9a-f]+ refs/heads/\\'
+# }
+
+function git-worktree-find-for-branch {
+  local branch=${1}
+  typeset -A worktree_entries=($(git-worktree-entries))
+  local index=${${(v)worktree_entries}[(i)${branch}]}
+  local tree_path=${${(k)worktree_entries}[${index}]}
+  print ${tree_path}
+}
+
+function git-worktree-create-if-not-exists {
+  local branch=${@[-1]}
+  local tree_path=$(git-worktree-find-for-branch ${branch})
+  if [[ -n ${tree_path} ]]; then
+    print -f '┯ Worktree already exists for %s\n└ Path: %s\n' \
+      ${branch} ${tree_path}
+    return 0
+  fi
+  # worktree does not exist, create it
+  local target_path=${2:-$(git-worktree-default-branch-path ${branch})}
+  print -f '┯ New worktree\n├ Branch: %s\n└ Path:   %s\n' \
+    ${branch} ${target_path}
+  git worktree add ${@[1,-2]} ${target_path} ${branch}
+}
+
+function git-worktree-remove-for-branch {
+  local tree=$(git-worktree-find-for-branch ${1})
+  if [[ -z ${tree} ]]; then
+    print -f '┯ %s\n└ %s\n'                            \
+      'Cannot remove worktree for branch, none exists' \
+      "Branch: ${1}"
+    return 1
+  fi
+  git worktree remove ${tree}
+  rm -rf ${tree}
+}
+
+function git-worktree-default-branch-path {
+  local branch=${1}
+  print $(git-worktree-root)/${branch}
+}
+
+function zwk {
+  local root=$(git-worktree-root --silent)
+  if [[ -z ${root} ]]; then
+    return 1
+  fi
+  local worktree_paths=($(git-worktree-paths))
+  # if a worktree reference is provided, jump to the matching worktree
+  if [[ -n ${1} ]]; then
+    local match=${worktree_paths[(r)*${1}*]}
+    _z -c ${root} ${match}
+    return 0
+  fi
+  # otherwise, launch an interactive worktree selector
+  local selected
+  print ${(j:\n:)worktree_paths#${root}/}                               \
+    | fzf                                                               \
+          --reverse                                                     \
+          --height 50                                                   \
+          --bind 'ctrl-s:toggle-preview'                                \
+          --bind 'ctrl-x:execute(print !{remove} {})+accept'            \
+          --bind 'ctrl-space:execute(print !cd {})+accept'              \
+          --preview 'git --git-dir={}/.git show --format=short --color' \
+          --preview-window hidden,up,40                                 \
+    | read selected
+  if [[ ${selected} =~ '^!(.+)' ]]; then
+    print -z ${selected[2,-1]}
+    return 0
+  elif [[ -n ${selected} && ! ${PWD##${root}/} = ${selected} ]]; then
+    cd ${selected}
+  fi
+}
+
+function zwb {
+  local root=$(git-worktree-root --silent)
+  if [[ -z ${root} ]]; then
+    return 1
+  fi
+  typeset -A worktree_entries=($(git-worktree-entries))
+  # if a branch referece was provided, [create and] jump to its worktree
+  if [[ -n ${1} ]]; then
+    local branch=${1}
+    local worktree_path=$(git-worktree-root)/${branch}
+    local match=${worktree_entries[(r)${branch}]}
+    # if the worktree does not exist, create it
+    if [[ -z ${match} ]]; then
+      git-worktree-create-if-not-exists -b ${branch};
+    fi
+    # change directory into the desired worktree
+    cd ${worktree_path}
+    return 0
+  fi
+  # otherwise, launch an interactive branch selector
+  local all_branches=($(git-branch-list-porcelain))
+  local worktree_branches=(${(v)worktree_entries})
+  local selected
+  _zwb-toggle-list worktree-branches                                \
+    | fzf                                                           \
+          --reverse                                                 \
+          --height 50                                               \
+          --bind 'ctrl-s:toggle-preview'                            \
+          --bind 'ctrl-t:reload(_zwb-toggle-list)'                  \
+          --bind 'ctrl-x:execute(print "!{remove} {}")+accept'      \
+          --bind 'ctrl-space:execute(print "!{default} {}")+accept' \
+          --preview 'git show {} --format=short --color'            \
+          --preview-window hidden,50                                \
+    | read selected
+  # construct a branch-name-based worktree path...
+  function default_command {
+    local branch commands worktree_path
+    branch=${1}
+    # create-if-not-exists and then cd into the worktree
+    worktree_path=$(git-worktree-default-branch-path ${branch})
+    commands=(
+      "git-worktree-create-if-not-exists ${branch}"
+      "cd ${worktree_path}"
+    )
+    print ${(j: && :)commands}
+  }
+  # prefixed with '!' means print the command
+  local match mbegin mend
+  if [[ ${selected} =~ '^!(.+) (.+)$' ]]; then
+    if [[ ${match[1]} = '{default}' ]]; then
+      print -z $(default_command ${match[2]})
+    elif [[ ${match[1]} = '{remove}' ]]; then
+      print -z git-worktree-remove-for-branch ${match[2]}
+    fi
+  elif [[ -n ${selected} ]]; then
+    eval $(default_command ${selected})
+  fi
+}
+
+# typeset -Ag _zwb_lists=(
+#   [all-branches]=git-branch-list-porcelain
+#   [worktree-branches]=git-worktree-branches
+# )
+
+# typeset -g _zwb_current_list_file="${HOME}/.cache/zwb_current_list"
+# typeset -g _zwb_current_list=${${(k)_zwb_lists}[1]}
+# if [[ -f ${_zwb_current_list_file} ]]; then
+#   zwb_current_list=$(<${_zwb_current_list_file})
+# fi
+
+# function _zwb-toggle-list {
+#   # if a valid key of _zwb_lists was passed, set _zwb_current_list to it
+#   if [[ -n ${1} && -n ${_zwb_lists[(i)${1}]} ]]; then
+#     _zwb_current_list=${1}
+#   fi
+#   # check that _zwb_current_list is a valid key of _zwb_lists
+#   if [[ -z ${_zwb_lists[(i)${_zwb_current_list}]} ]]; then
+#     print -f '┯ Invalid ${_zwb_current_list}\n└ Valid lists: (%s)\n' \
+#       "${(k)_zwb_lists}"
+#     return 1
+#   fi
+#   # invoke the list generation function defined at _zwb_current_list
+#   ${_zwb_lists[${_zwb_current_list}]}
+#   # find the index of the current list by its key name
+#   typeset -i index=${${(k)_zwb_lists}[(i)${_zwb_current_list}]}
+#   # find the next index, remembering that zsh arrays are 1-indexed
+#   typeset -i next_index=$((1 + ${index} % ${#_zwb_lists}))
+#   # get the key in the _zwb_lists associative array at the next index
+#   typeset next_key=${${(Ak)_zwb_lists}[${next_index}]}
+#   # update _zwb_current_list to the next key
+#   _zwb_current_list=${next_key}
+#   print ${_zwb_current_list} >! ${_zwb_current_list_file}
+# }
+
+zmodload zsh/complete
+
+compdef _gitbranches                \
+  zwb                               \
+  git-worktree-create-if-not-exists \
+  git-worktree-find-for-branch
+
+function _gitbranches {
+  branches=($(git-branch-list-porcelain))
+  _describe 'branch' branches
+}
+
+compdef _worktree-paths \
+  zwk
+
+function _worktree-paths {
+  worktrees=($(git-worktree-paths))
+  _describe 'worktree' worktrees
+}
+
+compdef _worktree-branches \
+  git-worktree-remove-for-branch
+
+function _worktree-branches {
+  branches=($(git-worktree-branches))
+  _describe 'branch' branches
+}
+
+if [[ -n ${precmd_functions[(r)parse-vcs-info__precmd]} ]]; then
+  precmd_functions+=(vcs-user__precmd)
+fi
+
