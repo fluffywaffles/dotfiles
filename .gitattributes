@@ -1,2 +1,8 @@
-# manually set the display filetype language for some unusual filenames
+#
+# GitHub needs help figuring out the syntax highlighting language for
+# certain files. It uses something called "linguist" that allows
+# overrides. You set them in .gitattributes.
+#
+# https://github.com/github-linguist/linguist/blob/master/docs/overrides.md#overrides
+#
 zshrc.local linguist-language=zsh
