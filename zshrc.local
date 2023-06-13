@@ -137,7 +137,7 @@ alias gwr='git-worktree-root'
 function gwk() { cd $(gwr) }
 
 vcs-user__precmd() {
-  if ! (&>/dev/null git rev-parse --git-dir); then
+  if [[ -n ${vcs[bare]} ]] || [[ -z ${vcs[branch]} ]]; then
     return 0
   fi
   if [[ $(git-worktree-root --silent) = ${PWD} ]]; then
