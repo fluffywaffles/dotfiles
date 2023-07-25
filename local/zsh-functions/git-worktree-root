@@ -4,20 +4,22 @@ function git-worktree-root() {
   local worktree_list main_worktree commitish worktree_root_link
   local match mbegin mend # zsh regexp match variables set by =~
 
-  # formatted error printing, if not [-]-s[ilent]
-  local silent=${1}
-  function eprintf { [[ ${silent} =~ ^-+s(ilent|)$ ]] || >&2 printf ${@} }
+  # formatted error printing, only if [-]-v[erbose]
+  local verbose=${1}
+  function eprintf {
+    if [[ ${verbose} =~ ^-+v(erbose|)$ ]]; then
+      >&2 printf ${@}
+    fi
+  }
 
   # exit if not in a git directory
-  local git_root=$(git rev-parse --show-toplevel)
+  local git_root=$(git rev-parse --show-toplevel 2>/dev/null)
   if ! git rev-parse --git-dir &>/dev/null; then return 0; fi
 
   # get the main worktree, which is the first result in the list
   git worktree list --porcelain | { read main_worktree; read commitish }
   # regex parse the worktree path
   [[ "${main_worktree}" =~ worktree\ ([^$'\n']+) ]]
-
-  echo ${main_worktree} ${commitish}
 
   # error if the main worktree path is NOT a bare repository
   if ! [[ ${commitish} =~ ^bare$ ]]; then

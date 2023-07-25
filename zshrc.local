@@ -133,14 +133,14 @@ fi
 
 # Autoload custom git functions
 autoload git-worktree-root
-alias gwr='git-worktree-root'
+alias gwr='git-worktree-root --verbose'
 function gwk() { cd $(gwr) }
 
 vcs-user__precmd() {
   if [[ -n ${vcs[bare]} ]] || [[ -z ${vcs[branch]} ]]; then
     return 0
   fi
-  if [[ $(git-worktree-root --silent) = ${PWD} ]]; then
+  if [[ $(git-worktree-root) = ${PWD} ]]; then
     vcs[bare]=''
     vcs[worktree_root]=true
   fi
@@ -168,6 +168,11 @@ function git-worktree-paths {
 #     | sed -Ee 's\[0-9a-f]+ refs/heads/\\'
 # }
 
+#
+# Taking advantage of the fact that there can only be one checked-out
+# worktree per branch at any given time, find the worktree corresponding
+# to the given branch (if any).
+#
 function git-worktree-find-for-branch {
   local branch=${1}
   typeset -A worktree_entries=($(git-worktree-entries))
@@ -177,24 +182,45 @@ function git-worktree-find-for-branch {
 }
 
 function git-worktree-create-if-not-exists {
-  local branch=${@[-1]}
+  local match mbegin mend
+  local branch=${1}
+  # find existing worktree for branch, if any
   local tree_path=$(git-worktree-find-for-branch ${branch})
   if [[ -n ${tree_path} ]]; then
-    print -f '┯ Worktree already exists for %s\n└ Path: %s\n' \
-      ${branch} ${tree_path}
+    print -nf '┯ %s\n└ %s\n'                  \
+      "Worktree already exists for ${branch}" \
+      "Path: ./${tree_path##$(git-worktree-root)/}"
     return 0
   fi
-  # worktree does not exist, create it
+  # if no worktree exists, select a worktree path for it
   local target_path=${2:-$(git-worktree-default-branch-path ${branch})}
-  print -f '┯ New worktree\n├ Branch: %s\n└ Path:   %s\n' \
-    ${branch} ${target_path}
-  git worktree add ${@[1,-2]} ${target_path} ${branch}
+  # find an existing branch, whether local or remote
+  local extant_branches=($(git-branch-list-porcelain --all))
+  local existing=${extant_branches[(r)*${branch}]}
+  local remotes=($(git remote))
+  # build the argument list for 'git-worktree add'
+  local -a args
+  # if the existing branch points to a remote branch, or none exists...
+  if   [[ -z ${existing} ]] \
+    || [[ ${existing} =~ ^(${(j:|:)remotes})/${branch}$ ]]
+  then
+    # create a new branch tracking the remote branch (if any)
+    args=(--track -b ${branch} ${target_path} ${existing})
+  else # otherwise, the branch exists locally
+    # however no worktree exists, so check it out to ${target_path}
+    args=(${target_path} ${branch})
+  fi
+  # finally, add the new worktree
+  print -nf '┯ New worktree\n├ %s\n└ %s\n' \
+    "Branch: ${branch}"                    \
+    "Path:   ./${target_path##$(git-worktree-root)/}"
+  git worktree add ${args[@]}
 }
 
 function git-worktree-remove-for-branch {
   local tree=$(git-worktree-find-for-branch ${1})
   if [[ -z ${tree} ]]; then
-    print -f '┯ %s\n└ %s\n'                            \
+    print -nf '┯ %s\n└ %s\n'                           \
       'Cannot remove worktree for branch, none exists' \
       "Branch: ${1}"
     return 1
@@ -209,7 +235,7 @@ function git-worktree-default-branch-path {
 }
 
 function zwk {
-  local root=$(git-worktree-root --silent)
+  local root=$(git-worktree-root)
   if [[ -z ${root} ]]; then
     return 1
   fi
@@ -240,30 +266,36 @@ function zwk {
   fi
 }
 
+# given a branch, worktree-create-if-not-exists and then cd into it
+function _zwb-default-command {
+  local commands=(
+    "git-worktree-create-if-not-exists ${1}"
+    "cd \$(git-worktree-find-for-branch ${1})"
+  )
+  print ${(j: && :)commands}
+}
+
 function zwb {
-  local root=$(git-worktree-root --silent)
+  # get the root of the current worktree forest, and if none, bail
+  local root=$(git-worktree-root)
   if [[ -z ${root} ]]; then
     return 1
   fi
+  # first argument, if given, should be a branch name
+  local branch=${1}
+  # load all worktrees into an associative array of path->branch
   typeset -A worktree_entries=($(git-worktree-entries))
-  # if a branch referece was provided, [create and] jump to its worktree
-  if [[ -n ${1} ]]; then
-    local branch=${1}
-    local worktree_path=$(git-worktree-root)/${branch}
+  # if a branch reference was provided, [create and] jump to its worktree
+  if [[ -n ${branch} ]]; then
     local match=${worktree_entries[(r)${branch}]}
-    # if the worktree does not exist, create it
-    if [[ -z ${match} ]]; then
-      git-worktree-create-if-not-exists -b ${branch};
-    fi
-    # change directory into the desired worktree
-    cd ${worktree_path}
+    # if a worktree does not exist for the branch, create one and cd in
+    eval $(_zwb-default-command ${branch})
+    # git-worktree-create-if-not-exists ${branch}
+    # cd $(git-worktree-find-for-branch ${branch})
     return 0
   fi
   # otherwise, launch an interactive branch selector
-  local all_branches=($(git-branch-list-porcelain))
-  local worktree_branches=(${(v)worktree_entries})
-  local selected
-  _zwb-toggle-list worktree-branches                                \
+  local selected; _zwb-toggle-list worktree-branches                \
     | fzf                                                           \
           --reverse                                                 \
           --height 50                                               \
@@ -274,28 +306,22 @@ function zwb {
           --preview 'git show {} --format=short --color'            \
           --preview-window hidden,50                                \
     | read selected
-  # construct a branch-name-based worktree path...
-  function default_command {
-    local branch commands worktree_path
-    branch=${1}
-    # create-if-not-exists and then cd into the worktree
-    worktree_path=$(git-worktree-default-branch-path ${branch})
-    commands=(
-      "git-worktree-create-if-not-exists ${branch}"
-      "cd ${worktree_path}"
-    )
-    print ${(j: && :)commands}
-  }
-  # prefixed with '!' means print the command
+  # strip remote prefix from selected ref, if any
   local match mbegin mend
-  if [[ ${selected} =~ '^!(.+) (.+)$' ]]; then
+  local remotes=($(git remote))
+  if [[ ${selected} =~ ^(${(j:|:)remotes})/(.+)$ ]]
+  then branch=${match[2]} # strip the remote name, grab the branch name
+  else branch=${selected} # otherwise, the whole thing is the branch name
+  fi
+  # prefixed with '!' means 'print the following command to the prompt'
+  if [[ ${branch} =~ '^!(.+) (.+)$' ]]; then
     if [[ ${match[1]} = '{default}' ]]; then
-      print -z $(default_command ${match[2]})
+      print -z $(_zwb-default-command ${match[2]})
     elif [[ ${match[1]} = '{remove}' ]]; then
       print -z git-worktree-remove-for-branch ${match[2]}
     fi
-  elif [[ -n ${selected} ]]; then
-    eval $(default_command ${selected})
+  elif [[ -n ${branch} ]]; then
+    eval $(_zwb-default-command ${branch})
   fi
 }
 
@@ -365,4 +391,3 @@ function _worktree-branches {
 if [[ -n ${precmd_functions[(r)parse-vcs-info__precmd]} ]]; then
   precmd_functions+=(vcs-user__precmd)
 fi
-

@@ -5,20 +5,26 @@ function git-worktree-entries {
     | sed -Ee 's\branch refs/heads/|worktree \\'
 }
 
+# all        -a -all        --all
+# local      -l -local      --local
+# remote[s]  -r -remote[s]  --remote[s]
 function git-branch-list-porcelain {
-  local match mbegin mend
-  if [[ ${1} =~ ^-*r(emotes*|)$ ]]; then
-    git show-ref                   \
-      | grep 'refs/remotes/origin' \
-      | sed -Ee 's\[0-9a-f]+ refs/remotes/origin/\\'
+  local filter match mbegin mend
+  if   [[ ${1} =~ ^-*a(ll|)$      ]]; then         filter='(heads|remotes)'
+  elif [[ ${1} =~ ^-*r(emotes*|)$ ]]; then         filter='remotes'
+  elif [[ ${1} =~ ^-*l(ocal|)$ || -z ${1} ]]; then filter='heads'
   else
-    git show-ref --heads | sed -Ee 's\[0-9a-f]+ refs/heads/\\'
+    >&2 print "ERROR: ${0}: unrecognized argument or flag: ${1}"
+    return 1
   fi
+  git show-ref                 \
+    | grep -E "refs/${filter}" \
+    | sed -Ee "s~[0-9a-f]+ refs/${filter}/~~"
 }
 
 function git-worktree-branches {
   typeset -A entries=($(git-worktree-entries))
-  print ${(vj:\n:)entries}
+  print -n ${(vj:\n:)entries}
 }
 
 typeset -Ag _zwb_lists=(
@@ -56,4 +62,3 @@ function _zwb-toggle-list {
   _zwb_current_list=${next_key}
   print ${_zwb_current_list} >! ${_zwb_current_list_file}
 }
-
