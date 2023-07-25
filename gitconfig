@@ -6,6 +6,11 @@
 	smudge = git-lfs smudge -- %f
 	process = git-lfs filter-process
 	required = true
+[push]
+	useForceIfIncludes = true
+[rebase]
+	autoStash  = true
+	autoSquash = true
 [pull]
 	rebase = true
 [init]
