@@ -279,9 +279,29 @@ function zwb {
   # get the root of the current worktree forest, and if none, bail
   local root=$(git-worktree-root)
   if [[ -z ${root} ]]; then
+    >&2 printf 'ERR: empty root. missing `worktree-root` link?\n'
     return 1
   fi
-  # first argument, if given, should be a branch name
+  # by default, zwb will fuzzy find on branches with worktrees
+  local list=worktree-branches
+  # by default, include all remotes and do not filter on name
+  local named_remotes=''
+  # configure list and named_remotes with flags
+  # -r -remote[s] --remote[s]   -- include remotes
+  # -o -only --only {remotes}   -- only include the given remote(s)
+  #                              └ separate multiple remotes by pipe `|`
+  if [[ ${1} =~ ^-*r(emotes*|)$ ]]; then shift; list=remote-branches; fi
+  if [[ ${1} =~ ^-*o(nly|)$     ]]; then
+    local named_remotes=${2}
+    shift 2
+    list="remote-branches ${named_remotes}"
+  fi
+  # if there is only one remote, set named_remotes to that remote
+  typeset -a remotes=($(git remote))
+  if [[ ${#remotes} -eq 1 ]]; then
+    named_remotes=${remotes[1]}
+  fi
+  # first argument after flags, if given, should be a branch name
   local branch=${1}
   # load all worktrees into an associative array of path->branch
   typeset -A worktree_entries=($(git-worktree-entries))
@@ -290,12 +310,17 @@ function zwb {
     local match=${worktree_entries[(r)${branch}]}
     # if a worktree does not exist for the branch, create one and cd in
     eval $(_zwb-default-command ${branch})
-    # git-worktree-create-if-not-exists ${branch}
-    # cd $(git-worktree-find-for-branch ${branch})
     return 0
   fi
+  # if there are no worktree entries, automatically list remote branches
+  if [[ ${#worktree_entries} -eq 0 ]]; then
+    printf '┯ %s\n└ %s\n'                                           \
+      'no local worktrees, listing branches on configured remotes.' \
+      "remotes: ${named_remotes:-${remotes}}"
+    list="remote-branches ${named_remotes}"
+  fi
   # otherwise, launch an interactive branch selector
-  local selected; _zwb-toggle-list worktree-branches                \
+  local selected; _zwb-toggle-list ${=list}                         \
     | fzf                                                           \
           --reverse                                                 \
           --height 50                                               \
@@ -324,41 +349,6 @@ function zwb {
     eval $(_zwb-default-command ${branch})
   fi
 }
-
-# typeset -Ag _zwb_lists=(
-#   [all-branches]=git-branch-list-porcelain
-#   [worktree-branches]=git-worktree-branches
-# )
-
-# typeset -g _zwb_current_list_file="${HOME}/.cache/zwb_current_list"
-# typeset -g _zwb_current_list=${${(k)_zwb_lists}[1]}
-# if [[ -f ${_zwb_current_list_file} ]]; then
-#   zwb_current_list=$(<${_zwb_current_list_file})
-# fi
-
-# function _zwb-toggle-list {
-#   # if a valid key of _zwb_lists was passed, set _zwb_current_list to it
-#   if [[ -n ${1} && -n ${_zwb_lists[(i)${1}]} ]]; then
-#     _zwb_current_list=${1}
-#   fi
-#   # check that _zwb_current_list is a valid key of _zwb_lists
-#   if [[ -z ${_zwb_lists[(i)${_zwb_current_list}]} ]]; then
-#     print -f '┯ Invalid ${_zwb_current_list}\n└ Valid lists: (%s)\n' \
-#       "${(k)_zwb_lists}"
-#     return 1
-#   fi
-#   # invoke the list generation function defined at _zwb_current_list
-#   ${_zwb_lists[${_zwb_current_list}]}
-#   # find the index of the current list by its key name
-#   typeset -i index=${${(k)_zwb_lists}[(i)${_zwb_current_list}]}
-#   # find the next index, remembering that zsh arrays are 1-indexed
-#   typeset -i next_index=$((1 + ${index} % ${#_zwb_lists}))
-#   # get the key in the _zwb_lists associative array at the next index
-#   typeset next_key=${${(Ak)_zwb_lists}[${next_index}]}
-#   # update _zwb_current_list to the next key
-#   _zwb_current_list=${next_key}
-#   print ${_zwb_current_list} >! ${_zwb_current_list_file}
-# }
 
 zmodload zsh/complete
 
