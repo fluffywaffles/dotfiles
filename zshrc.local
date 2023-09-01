@@ -184,12 +184,21 @@ function git-worktree-find-for-branch {
 function git-worktree-create-if-not-exists {
   local match mbegin mend
   local branch=${1}
+  if [[ -z ${branch} ]]; then
+    printf -nf '━ !! %s' 'cannot create branch with no name'
+    return 1
+  fi
+  # get the worktree root, bail early if it does not exist
+  local root=$(git-worktree-root)
+  if [[ -z ${root} ]]; then
+    return 1
+  fi
   # find existing worktree for branch, if any
   local tree_path=$(git-worktree-find-for-branch ${branch})
   if [[ -n ${tree_path} ]]; then
     print -nf '┯ %s\n└ %s\n'                  \
       "Worktree already exists for ${branch}" \
-      "Path: ./${tree_path##$(git-worktree-root)/}"
+      "Path: ./${tree_path##${root}/}"
     return 0
   fi
   # if no worktree exists, select a worktree path for it
