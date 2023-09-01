@@ -11,6 +11,25 @@ bindkey '^?' backward-delete-char
 bindkey '^h' backward-delete-char
 bindkey '^w' backward-kill-word
 
+# Set a keybinding that re-sources the entire zsh env.
+typeset -ag _zsh_rcs=(
+  ${HOME}/.zshenv
+  ${HOME}/.zshrc
+)
+function _widget_reload-zsh-env {
+  local rc
+  # So long as this shell was not started with 'norcs', load rc files
+  if set -o | grep '^norcs[[:space:]]\+off$' &> /dev/null; then
+    for rc (${_zsh_rcs}); do source ${rc}; done
+    print -f '\n» source %s' ${_zsh_rcs}
+    zle accept-line
+  else
+    >&2 print "!! no-op: this shell was started with 'setopt norcs'"
+  fi
+}
+zle -N reload-zsh-env _widget_reload-zsh-env
+bindkey '^S' reload-zsh-env
+
 #
 # Aliases, functions, source-able software (plugins), ...?
 #
