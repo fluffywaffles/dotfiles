@@ -83,7 +83,7 @@ fi
 source ${HOME}/.local/zsh-functions/batpower.zsh
 
 # Format string for conditionally displaying version control info
-vcs_rprompt_formats+=(
+vcs_rprompt_formats=(
   '${vcs[staged]:+[}'
   '%{${fg[blue]}%}${vcs[staged]:+staged}%{${reset_color}%}'
   '${vcs[staged]:+]}'
