@@ -20,16 +20,17 @@ function git-worktree-entries {
 #
 function git-branch-list-porcelain {
   local reftype match mbegin mend
-  if   [[ ${1} =~ ^-*a(ll|)$              ]]; then shift; reftype='(heads|remotes)'
-  elif [[ ${1} =~ ^-*r(emotes*|)$         ]]; then shift; reftype='remotes'
-  elif [[ ${1} =~ ^-*l(ocal|)$ || -z ${1} ]]; then shift; reftype='heads'
+  if   [[ ${1} =~ ^-*a(ll|)$      ]]; then shift; reftype='(heads|remotes)'
+  elif [[ ${1} =~ ^-*r(emotes*|)$ ]]; then shift; reftype='remotes'
+  elif [[ ${1} =~ ^-*l(ocal|)$    ]]; then shift; reftype='heads'
+  elif [[ -z ${1}                 ]]; then reftype='heads'
   else
     >&2 print "ERROR: ${0}: unrecognized argument or flag: ${1}"
     return 1
   fi
   # first non-flag argument is an additional prefix after the reftype
   local prefix=${1}
-  if [[ ! ${prefix} =~ ^/ ]]; then
+  if [[ ${#prefix} -gt 0 && ! ${prefix} =~ ^/ ]]; then
     prefix=/${prefix} # if leading slash omitted, prepend /
   fi
   git show-ref                           \
