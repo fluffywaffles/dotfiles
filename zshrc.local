@@ -82,14 +82,14 @@ vcs_prompt_formats=(
 
 # Only use unicode if we're in a decent terminal...
 if [[ ${TERM} != "linux" ]]; then
-  printf -v PROMPT '%s %s%s%%{${reset_color}%%} ' \
-    '%{$fg[yellow]%}▌ƒ▐'                          \
-    '%{$fg[green]%}%c'                            \
+  print -v PROMPT -f '%s %s%s%%{${reset_color}%%} ' \
+    '%{$fg[yellow]%}▌ƒ▐'                            \
+    '%{$fg[green]%}%c'                              \
     ${(j::)vcs_prompt_formats}
 else
-  printf -v PROMPT '%s %s%s%%{${reset_color}%%} ' \
-    '%{$fg[yellow]%}f'                            \
-    '%{$fg[green]%}%c'                            \
+  print -v PROMPT -f '%s %s%s%%{${reset_color}%%} ' \
+    '%{$fg[yellow]%}f'                              \
+    '%{$fg[green]%}%c'                              \
     ${(j::)vcs_prompt_formats}
 fi
 
@@ -115,7 +115,7 @@ function update-rprompt {
   >/dev/null batpower-${uname:l}
   local normal="%{$fx[bold]$fg[blue]%}[nrm]%{$reset_color%}"
   local insert="%{$fx[bold]$fg[white]%}[ins]%{$reset_color%}"
-  printf -v RPROMPT '%s%s%s${EPS1}'                     \
+  print -v RPROMPT -f '%s%s%s${EPS1}'                   \
     ${(j::)vcs_rprompt_formats}                         \
     ${${KEYMAP/vicmd/${normal}}/(main|viins)/${insert}} \
     "${batpower_enabled:+ }$(batpower-visual-battery)"
@@ -204,7 +204,7 @@ function git-worktree-create-if-not-exists {
   local match mbegin mend
   local branch=${1}
   if [[ -z ${branch} ]]; then
-    printf -nf '━ !! %s' 'cannot create branch with no name'
+    print -nf '━ !! %s' 'cannot create branch with no name'
     return 1
   fi
   # get the worktree root, bail early if it does not exist
@@ -308,7 +308,7 @@ function zwb {
   # get the root of the current worktree forest, and if none, bail
   local root=$(git-worktree-root)
   if [[ -z ${root} ]]; then
-    >&2 printf 'ERR: empty root. missing `worktree-root` link?\n'
+    >&2 print -nf 'ERR: empty root. missing `worktree-root` link?\n'
     return 1
   fi
   # by default, zwb will fuzzy find on branches with worktrees
@@ -336,14 +336,13 @@ function zwb {
   typeset -A worktree_entries=($(git-worktree-entries))
   # if a branch reference was provided, [create and] jump to its worktree
   if [[ -n ${branch} ]]; then
-    local match=${worktree_entries[(r)${branch}]}
     # if a worktree does not exist for the branch, create one and cd in
     eval $(_zwb-default-command ${branch})
     return 0
   fi
   # if there are no worktree entries, automatically list remote branches
   if [[ ${#worktree_entries} -eq 0 ]]; then
-    printf '┯ %s\n└ %s\n'                                           \
+    print -nf '┯ %s\n└ %s\n'                                        \
       'no local worktrees, listing branches on configured remotes.' \
       "remotes: ${named_remotes:-${remotes}}"
     list="remote-branches ${named_remotes}"
