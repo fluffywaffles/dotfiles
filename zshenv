@@ -1,8 +1,10 @@
 function git-worktree-entries {
-  git worktree list --porcelain \
-    | grep -B2 'branch'         \
-    | grep -E 'branch|worktree' \
-    | sed -Ee 's\branch refs/heads/|worktree \\'
+  local prefix=${1:-'.*'}
+  git worktree list --porcelain                  \
+    | grep -B2 'branch'                          \
+    | grep -E 'branch|worktree'                  \
+    | sed -Ee 's\branch refs/heads/|worktree \\' \
+    | grep -E "${prefix}"
 }
 
 # all        -a -all        --all
@@ -34,7 +36,7 @@ function git-branch-list-porcelain {
 }
 
 function git-worktree-branches {
-  typeset -A entries=($(git-worktree-entries))
+  typeset -A entries=($(git-worktree-entries ${1}))
   print -n ${(vj:\n:)entries}
 }
 
