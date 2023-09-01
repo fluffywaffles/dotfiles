@@ -29,7 +29,9 @@ function git-branch-list-porcelain {
   fi
   # first non-flag argument is an additional prefix after the reftype
   local prefix=${1}
-  prefix=${prefix:+/${prefix/\//}} # if leading slash omitted, prepend /
+  if [[ ! ${prefix} =~ ^/ ]]; then
+    prefix=/${prefix} # if leading slash omitted, prepend /
+  fi
   git show-ref                           \
     | grep -E "refs/${reftype}${prefix}" \
     | sed -Ee "s~[0-9a-f]+ refs/${reftype}${prefix}/~~"
