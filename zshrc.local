@@ -270,8 +270,8 @@ function zwk {
   local worktree_paths=($(git-worktree-paths))
   # if a worktree reference is provided, jump to the matching worktree
   if [[ -n ${1} ]]; then
-    local match=${worktree_paths[(r)*${1}*]}
-    _z -c ${root} ${match}
+    local matched_path=${worktree_paths[(r)*${1}*]}
+    _z -c ${root} ${matched_path}
     return 0
   fi
   # otherwise, launch an interactive worktree selector
@@ -304,6 +304,7 @@ function _zwb-default-command {
 }
 
 function zwb {
+  local match mbegin mend
   # get the root of the current worktree forest, and if none, bail
   local root=$(git-worktree-root)
   if [[ -z ${root} ]]; then
@@ -360,7 +361,6 @@ function zwb {
           --preview-window hidden,50                                \
     | read selected
   # strip remote prefix from selected ref, if any
-  local match mbegin mend
   local remotes=($(git remote))
   if [[ ${selected} =~ ^(${(j:|:)remotes})/(.+)$ ]]
   then branch=${match[2]} # strip the remote name, grab the branch name
