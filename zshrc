@@ -165,9 +165,6 @@ export ZLE_RPROMPT_INDENT=$((!${+TMUX}))
 # zle: which characters should be removed during completion? (not pipe)
 export ZLE_REMOVE_SUFFIX_CHARS=$' \t\n;&'
 
-# special zsh array parameters
-# default path, very POSIX
-export path=(/usr/local/sbin /usr/local/bin /usr/sbin /usr/bin /sbin /bin)
 # Add custom zsh functions and completions to path so we can autoload them
 export fpath=(
   ${HOME}/.local/zsh-functions
