@@ -322,12 +322,15 @@ function zwb {
   # -r -remote[s] --remote[s]   -- include remotes
   # -o -only --only {pattern}   -- only include branches matching pattern
   #                              └ separate multiple branches by pipe `|`
-  if [[ ${1} =~ ^-*r(emotes*|)$ ]]; then shift; list=remote-branches; fi
-  if [[ ${1} =~ ^-*o(nly|)$     ]]; then
-    local named_remotes=${2}
-    shift 2
-    list+=" ${named_remotes}"
-  fi
+  while {
+    if [[ ${1} =~ ^-*r(emotes*|)$ ]]; then shift; list=remote-branches; fi
+    if [[ ${1} =~ ^-*o(nly|)$     ]]; then
+      local named_remotes=${2}
+      shift 2
+      list+=" ${named_remotes}"
+    fi
+    break
+  } do {:} done
   # if there is only one remote, set named_remotes to that remote
   typeset -a remotes=($(git remote))
   if [[ ${#remotes} -eq 1 ]]; then
