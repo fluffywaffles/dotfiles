@@ -26,7 +26,7 @@ function git-worktree-entries {
 #
 function git-branch-list-porcelain {
   local reftype match mbegin mend
-  while {
+  while true; do
     if   [[ ${1} =~ ^-*a(ll|)$      ]]; then shift; reftype='(heads|remotes)'
     elif [[ ${1} =~ ^-*r(emotes*|)$ ]]; then shift; reftype='remotes'
     elif [[ ${1} =~ ^-*l(ocal|)$    ]]; then shift; reftype='heads'
@@ -35,7 +35,7 @@ function git-branch-list-porcelain {
       >&2 print "ERROR: ${0}: unrecognized argument or flag: ${1}"
     fi
     break
-  } do {:} done
+  done
   # first non-flag argument is an additional prefix after the reftype
   local prefix=${1}
   if [[ ${#prefix} -gt 0 && ! ${prefix} =~ ^/ ]]; then
