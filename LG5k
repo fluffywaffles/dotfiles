@@ -1,36 +1,43 @@
 #!/bin/env -S zsh -euo pipefail
 
 function up {
-  printf 'combining DP3,DP4 into one LG5k 5120x2880...\n'
+  printf '(xrandr)» combining DP3,DP4 into one LG5k 5120x2880...\n'
   xrandr --setmonitor LG5k 5120/600x2880/340+0+0 DP3,DP4
   xrandr --output DP3 --mode 2560x2880
   xrandr --output DP4 --right-of DP3 --mode 2560x2880
   sleep 1
-  printf 'repositioning eDP1 centered below LG5k...\n'
+
+  printf '(xrandr)» repositioning eDP1 centered below LG5k...\n'
   xrandr --output eDP1 --pos 640x2880
 
-  printf 'adding LG5k to bspc...\n'
+  printf '(bspc)» removing DP3 and DP4 from bspwm...\n'
+  bspc monitor DP3 --remove
+  bspc monitor DP4 --remove
+  printf '(bspc)» adding LG5k to bspwm...\n'
   bspc wm --add-monitor LG5k 5120x2880+0+0
-  printf 'resetting desktops across LG5k and eDP1...\n'
-  bspc monitor eDP1 --reset-desktops I II III VII
-  bspc monitor LG5k --reset-desktops IV V VI VIII
+  printf '(bspc)» resetting desktops across LG5k and eDP1...\n'
+  bspc wm --reorder-monitors LG5k eDP1
+  bspc monitor LG5k --reset-desktops I III V
+  bspc monitor eDP1 --reset-desktops II IV VI
   printf 'resetting wallpaper(s)...\n'
   ~/.feh-set-background
+
   printf 'ok! LG5k up.\n'
 }
 
 function down {
-  printf 'deleting LG5k from xRandR and powering it off...\n'
+  printf '(xrandr)» deleting LG5k from xRandR and powering it off...\n'
   xrandr --delmonitor LG5k
   xrandr --output DP3 --off
   xrandr --output DP4 --off
-  sleep 1
-  printf 'removing LG5k from bspc...\n'
+
+  printf '(bspc)» removing LG5k from bspwm...\n'
   bspc monitor LG5k --remove
-  printf 'resetting desktops...\n'
-  bspc monitor eDP1 --reset-desktops I II III IV
-  printf 'adopting orphans to focused monitor...\n'
+  printf '(bspc)» resetting desktops...\n'
+  bspc monitor eDP1 --reset-desktops I II III IV V VI
+  printf '(bspc)» adopting orphans to focused monitor...\n'
   bspc wm --adopt-orphans
+
   printf 'ok! LG5k down.\n'
 }
 
