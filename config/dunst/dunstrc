@@ -318,6 +318,10 @@
 # NOTE: It might be helpful to run dunst -print in a terminal in order
 # to find fitting options for rules.
 
+[simplify_empty_body]
+    body =
+    format = "%a: <i>%s</i>"
+
 # Disable the transient hint so that idle_threshold cannot be bypassed from the
 # client
 #[transient_disable]
