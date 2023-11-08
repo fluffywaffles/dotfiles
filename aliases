@@ -114,13 +114,34 @@ function git-cd-toplevel () {
 }
 
 #
+# rebase remote branch (${1}) from remote (${remote}) into the currently
+# checked-out branch. remote can be configured as a variable, as in:
+#
+#   remote=xyz glom
+#
+# the positional argument defaults to the configured default branch name;
+# that is:
+#
+#   git config init.defaultbranch
+#
+# this is often 'master', but can be altered in ${HOME}/.gitconfig.
+#
+function git-pull-rebase-origin-main() {(
+  set -ex
+  local branch=${1:-$(git config init.defaultbranch)}
+  local remote=${remote:-origin}
+  git pull --rebase ${remote} ${branch}
+)}
+
+
+#
 # shell aliases for custom git functions
 #
 alias grt='git-cd-toplevel'
 alias gbc='git-branch-current'
 alias gpu='git-push-set-upstream-branch-current'
+alias glom='git-pull-rebase-origin-main'
 alias glop='git-pull-rebase-then-force-with-lease-includes'
-alias glomp='git-pull-rebase-then-force-with-lease-includes master'
 
 #
 # shell aliases for common git commands
@@ -143,7 +164,6 @@ alias gsh='git show'
 alias gst='git status'
 alias gwd='git diff --word-diff=color'
 alias glog='git log --oneline --decorate --graph'
-alias glom='git pull --rebase origin master'
 alias gloga='git log --oneline --decorate --graph --all'
 
 #
