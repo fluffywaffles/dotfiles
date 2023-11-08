@@ -20,9 +20,13 @@ alias dd='dd status=progress'
 alias mkpw="head -c512 /dev/urandom | sha512sum | cut -d' ' -f1"
 
 #
-# scanning with scanimage (SANE)
+# scanpdf
 #
-# scan image, resize to lower ppi, convert to pdf
+# use scanimage (SANE) to scan image, resize to lower ppi, convert to pdf,
+# and output to target (${1}).
+#
+# ppi can be configured as an argument, as in:
+#   scanpdf out.pdf ppi=100
 #
 function scanpdf () {(
   emulate -L zsh -e
@@ -66,56 +70,55 @@ function zg () {
   [[ -n ${root} ]] && 2>&1 _z ${root} ${@}
 }
 
-#
+#-------------------------------------------------------------------------
 # the long git section
-#
+#-------------------------------------------------------------------------
 
+#
+# git-branch-current
+#
+# returns the local ref name for the currently checked-out HEAD
+#
 function git-branch-current () {(
-  #
-  # returns the currently checked-out branch name at HEAD
-  #
   set -e
   git rev-parse --abbrev-ref HEAD
 )}
 
-function git-push-set-upstream-branch-current () {(
-  #
-  # pushes the current branch to origin, setting upsteam to branch name
-  #
-  set -ex
-  local branch=$(git rev-parse --abbrev-ref HEAD) # git-branch-current
-  git push origin --set-upstream ${branch}
+#
+# git-branch-upstream
+#
+# returns the remote ref name for the upstream configured for HEAD
+#
+function git-branch-upstream () {(
+  set -e
+  git rev-parse --abbrev-ref HEAD@{u}
 )}
-
-function git-pull-rebase-then-force-with-lease-includes () {(
-  #
-  # rebase given remote branch ($1) into current branch and then force-push
-  # to given remote branch ($2) with lease. remote can be configured as a
-  # variable, as in:
-  #
-  #   remote=xyz glop
-  #
-  # positional arguments default to the currently checked-out branch.
-  #   $1 allows rebasing a different remote branch into the current branch
-  #   $2 allows force-pushing-with-lease to a different remote branch
-  # the use-case for using both arguments seems far-fetched, overall. most
-  # usages will just be `glop` or `glop master`.
-  #
-  set -ex
-  local branch=$(git rev-parse --abbrev-ref HEAD) # git-branch-current
-  local remote=${remote:-origin}
-  git pull --rebase ${remote} ${1:-${branch}}
-  git push --force-with-lease --force-if-includes ${remote} ${2:-${branch}}
-)}
-
-function git-cd-toplevel () {
-  local root=$(git rev-parse --show-toplevel)
-  [[ -n "${root}" ]] && cd ${root}
-}
 
 #
+# git-push-set-upstream-branch-current
+#
+# pushes the current HEAD to a remote branch (${1}), setting upsteam to
+# the remote branch (${1}). remote can be configured as a variable, as in:
+#
+#   remote=xyz gpu
+#
+# the positional argument for remote branch defaults to the current branch
+# name; so, without arguments, this creates the local branch if it does
+# not exist at the remote.
+#
+function git-push-set-upstream-branch-current () {(
+  local branch=$(git rev-parse --abbrev-ref HEAD) # git-branch-current
+  local remote=${remote:-origin}
+  local remote_branch=${1:-${branch}}
+  set -ex
+  git push ${remote} --set-upstream ${remote_branch}
+)}
+
+#
+# git-pull-rebase-origin-main
+#
 # rebase remote branch (${1}) from remote (${remote}) into the currently
-# checked-out branch. remote can be configured as a variable, as in:
+# checked-out HEAD. remote can be configured as a variable, as in:
 #
 #   remote=xyz glom
 #
@@ -126,12 +129,89 @@ function git-cd-toplevel () {
 #
 # this is often 'master', but can be altered in ${HOME}/.gitconfig.
 #
-function git-pull-rebase-origin-main() {(
-  set -ex
+function git-pull-rebase-origin-main () {(
   local branch=${1:-$(git config init.defaultbranch)}
   local remote=${remote:-origin}
+  set -ex
   git pull --rebase ${remote} ${branch}
 )}
+
+#
+# git-pull-rebase-then-force-with-lease-includes-origin-main
+#
+# rebase given remote branch (${1}) into current branch and then
+# force-push to given remote branch (${2}) with lease. remote can be
+# configured as a variable, as in:
+#
+#   remote=xyz glop
+#
+# positional arguments default to the currently checked-out HEAD.
+#   ${1} selects a different remote branch to rebase into HEAD
+#   ${2} selects a different remote branch for force-pushing-with-lease
+#
+# typical use-case is:
+#   glop main
+#
+# this pulls-with-rebase from the mainline branch, then force-pushes to
+# the upstream branch. in shorthand: "rebase main" on the remote.
+#
+# Nb. the use-case for using both arguments seems far-fetched, overall.
+# most usages will just be `glop` or `glop main`, to rebase either the
+# upstream or the mainline branch into the current branch and then push
+# the new HEAD to the upstream.
+#
+function git-pull-rebase-then-force-with-lease-includes-origin-main () {(
+  local upstream=$(git rev-parse --abbrev-ref HEAD@{u}) # git-branch-upstream
+  local remote=${remote:-origin}
+  local pull_branch=${1:-${upstream}}
+  local push_branch=${2:-${upstream}}
+  set -ex
+  git pull --rebase ${remote} ${pull_branch}
+  git push --force-with-lease --force-if-includes ${remote} ${push_branch}
+)}
+
+#
+# git-push-current-branch
+#
+# push the currently checked-out HEAD to remote branch (${1}). remote can
+# be configured as a variable, as in:
+#
+#   remote=xyz gpc
+#
+# supports passthrough flags, as in:
+#
+#   gpc --force-with-lease --force-if-includes
+#
+# the positional argument defaults to the current branch name.
+#
+# providing a different branch name does not change the local branch name,
+# nor does it set an upstream; it just pushes to that name, on the remote.
+#
+function git-push-current-branch () {(
+  local match mbegin mend
+  local flags=(); while true; do
+    if [[ ${1} =~ ^(-+[[:alnum:]]+)$ ]]; then shift; flags+=(${match})
+    else
+      break
+    fi
+  done
+  # positional arguments
+  local branch=$(git rev-parse --abbrev-ref HEAD) # git-branch-current
+  local remote=${remote:-origin}
+  local remote_branch=${1:-${branch}}
+  set -ex
+  git push ${flags[@]} ${remote} ${branch}:${remote_branch}
+)}
+
+#
+# git-cd-toplevel
+#
+# change directory into the top-level directory of the current git repo.
+#
+function git-cd-toplevel () {
+  local root=$(git rev-parse --show-toplevel)
+  [[ -n "${root}" ]] && cd ${root}
+}
 
 
 #
@@ -140,8 +220,10 @@ function git-pull-rebase-origin-main() {(
 alias grt='git-cd-toplevel'
 alias gbc='git-branch-current'
 alias gpu='git-push-set-upstream-branch-current'
+alias gpc='git-push-current-branch'
+alias gpf='git-push-current-branch --force-with-lease --force-if-includes'
 alias glom='git-pull-rebase-origin-main'
-alias glop='git-pull-rebase-then-force-with-lease-includes'
+alias glop='git-pull-rebase-then-force-with-lease-includes-origin-main'
 
 #
 # shell aliases for common git commands
@@ -156,13 +238,11 @@ alias gl='git pull'
 alias gm='git merge --ff-only'
 alias gp='git push'
 alias gr='git rebase'
-alias gc!='git commit --verbose --amend'
-alias gp!='git push --force'
 alias gco='git checkout'
 alias gfa='git fetch --all'
 alias gsh='git show'
 alias gst='git status'
-alias gwd='git diff --word-diff=color'
+alias gdc='git diff --word-diff=color'
 alias glog='git log --oneline --decorate --graph'
 alias gloga='git log --oneline --decorate --graph --all'
 
