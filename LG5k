@@ -17,8 +17,8 @@ function up {
   bspc wm --add-monitor LG5k 5120x2880+0+0
   printf '(bspc)» resetting desktops across LG5k and eDP1...\n'
   bspc wm --reorder-monitors LG5k eDP1
-  bspc monitor LG5k --reset-desktops I III V
-  bspc monitor eDP1 --reset-desktops II IV VI
+  bspc monitor LG5k --reset-desktops I II III
+  bspc monitor eDP1 --reset-desktops IV V VI
   printf 'resetting wallpaper(s)...\n'
   ~/.feh-set-background
 
