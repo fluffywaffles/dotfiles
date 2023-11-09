@@ -25,25 +25,23 @@ function git-worktree-entries {
 #   git-branch-list-porcelain --remote origin # matches remote origin/ branches
 #
 function git-branch-list-porcelain {
-  local reftype match mbegin mend
+  local prefix match mbegin mend reftype='heads'
   while true; do
     if   [[ ${1} =~ ^-*a(ll|)$      ]]; then shift; reftype='(heads|remotes)'
     elif [[ ${1} =~ ^-*r(emotes*|)$ ]]; then shift; reftype='remotes'
     elif [[ ${1} =~ ^-*l(ocal|)$    ]]; then shift; reftype='heads'
-    elif [[ -z ${1}                 ]]; then reftype='heads'
+    # first non-flag argument is an additional prefix after the reftype
+    elif [[ -n ${1}                 ]]; then prefix=${1}; shift
+    elif [[ -z ${1}                 ]]; then break
     else
       >&2 print "ERROR: ${0}: unrecognized argument or flag: ${1}"
+      return 1
     fi
-    break
   done
-  # first non-flag argument is an additional prefix after the reftype
-  local prefix=${1}
-  if [[ ${#prefix} -gt 0 && ! ${prefix} =~ ^/ ]]; then
-    prefix=/${prefix} # if leading slash omitted, prepend /
-  fi
-  git show-ref                           \
-    | grep -E "refs/${reftype}${prefix}" \
-    | sed -Ee "s~[0-9a-f]+ refs/${reftype}${prefix}/~~"
+  prefix=${${prefix%%/}##/} # strip leading and trailing slash
+  git show-ref                            \
+    | grep -E "refs/${reftype}/${prefix}" \
+    | sed -Ee "s~[0-9a-f]+ refs/${reftype}/${prefix}/~~"
 }
 
 function git-worktree-branches {
