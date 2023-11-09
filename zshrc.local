@@ -168,27 +168,10 @@ vcs-user__precmd() {
   fi
 }
 
-# function git-worktree-entries {
-#   git worktree list --porcelain \
-#     | grep -B2 'branch'         \
-#     | grep -E 'branch|worktree' \
-#     | sed -Ee 's\branch refs/heads/|worktree \\'
-# }
-
 function git-worktree-paths {
   typeset -A entries=($(git-worktree-entries))
   print ${(kj:\n:)entries}
 }
-
-# function git-worktree-branches {
-#   typeset -A entries=($(git-worktree-entries))
-#   print ${(vj:\n:)entries}
-# }
-
-# function git-branch-list-porcelain {
-#   git show-ref --heads \
-#     | sed -Ee 's\[0-9a-f]+ refs/heads/\\'
-# }
 
 #
 # Taking advantage of the fact that there can only be one checked-out
