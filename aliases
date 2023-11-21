@@ -139,37 +139,68 @@ function git-pull-rebase-origin-main () {(
 )}
 
 #
-# git-pull-rebase-then-force-with-lease-includes-origin-main
+# git-pull-rebase-then-force-push-origin-with-lease-includes
 #
-# rebase given remote branch (${1}) into current branch and then
-# force-push to given remote branch (${2}) with lease. remote can be
-# configured as a variable, as in:
+# rebase given upstream branch (${1}) into current branch and then
+# force-push to given downstream branch (${2}) with lease. upstream and
+# downstream default to the remotes for HEAD@{upstream} and HEAD@{push}
+# respectively. these can be configured as variables, like so:
 #
-#   remote=xyz glop
+#   upstream=upstream downstream=production glop
+#
+#     pulls from upstream/{upstream-branch}
+#     pushes to production/{downstream-branch}
+#
+# technically, the upstream and downstream can customize the branches too:
+#
+#   upstream=origin/main downstream=fork/trunk glop
+#
+#     pulls from origin/main into current HEAD
+#     pushes to fork/trunk with current HEAD
 #
 # positional arguments default to the currently checked-out HEAD.
-#   ${1} selects a different remote branch to rebase into HEAD
-#   ${2} selects a different remote branch for force-pushing-with-lease
+#   ${1} selects a different upstream branch to rebase into HEAD
+#   ${2} selects a different downstream branch to force-push-with-lease
 #
-# typical use-case is:
+# note that the positional branches supersede branch names given by the
+# upstream and downstream variables, if any.
+#
+# the typical use-case is:
 #   glop main
 #
-# this pulls-with-rebase from the mainline branch, then force-pushes to
-# the upstream branch. in shorthand: "rebase main" on the remote.
+# this pulls-with-rebase from the upstream mainline branch, then
+# force-pushes to the downstream branch for HEAD.
 #
-# Nb. the use-case for using both arguments seems far-fetched, overall.
-# most usages will just be `glop` or `glop main`, to rebase either the
-# upstream or the mainline branch into the current branch and then push
-# the new HEAD to the upstream.
+# typically, the upstream downstream are the same, and so:
+#   glop main
+# is the same as:
+#   git pull --rebase origin main && git push --force-with-lease --force-if-includes
 #
-function git-pull-rebase-then-force-with-lease-includes-origin-main () {(
-  local upstream=$(git rev-parse --abbrev-ref HEAD@{u}) # git-branch-upstream
-  local remote=${remote:-origin}
-  local pull_branch=${1:-${upstream}}
-  local push_branch=${2:-${upstream}}
+function git-pull-rebase-then-force-push-origin-with-lease-includes () {(
+  # parse upstream (pull target)
+  local upstream=${upstream:-$(git rev-parse --abbrev-ref HEAD@{upstream})}
+  local upstream_remote upstream_branch
+  if [[ ${upstream} =~ [[:alnum:]]+/[[:alnum:]]+ ]]; then
+    upstream=(${(s:/:)upstream})
+    upstream_remote=${upstream[1]}
+    upstream_branch=${(j:/:)upstream[2,-1]}
+  fi
+  # parse downstream (push target)
+  local downstream=${downstream:-$(git rev-parse --abbrev-ref HEAD@{push})}
+  local downstream_remote downstream_branch
+  if [[ ${downstream} =~ [[:alnum:]]+/[[:alnum:]]+ ]]; then
+    downstream=(${(s:/:)downstream})
+    downstream_remote=${downstream[1]}
+    downstream_branch=${(j:/:)downstream[2,-1]}
+  fi
+  #
+  # now we have our default upstream / downstream; customize with args
+  #
+  local pull_branch=${1:-${upstream_branch}}
+  local push_branch=${2:-${downstream_branch}}
   set -ex
-  git pull --rebase ${remote} ${pull_branch}
-  git push --force-with-lease --force-if-includes ${remote} ${push_branch}
+  git pull --rebase ${upstream_remote} ${pull_branch}
+  git push --force-with-lease --force-if-includes ${downstream_remote} ${push_branch}
 )}
 
 #
@@ -221,7 +252,7 @@ alias gpu='git-push-set-upstream-branch-current'
 alias gpc='git-push-current-branch'
 alias gpf='git-push-current-branch --force-with-lease --force-if-includes'
 alias glom='git-pull-rebase-origin-main'
-alias glop='git-pull-rebase-then-force-with-lease-includes-origin-main'
+alias glop='git-pull-rebase-then-force-push-origin-with-lease-includes'
 
 #
 # shell aliases for common git commands
