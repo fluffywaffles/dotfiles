@@ -31,7 +31,7 @@ alias mkpw="head -c512 /dev/urandom | sha512sum | cut -d' ' -f1"
 #   ppi=100 scanpdf out.pdf
 #
 function scanpdf () {(
-  emulate -L zsh -e
+  setopt err_exit
   if [[ $# -lt 1 ]]; then
     echo $#
     >&2 printf 'ERR: missing: why no name for out pls?\n'
@@ -82,7 +82,7 @@ function zg () {
 # returns the local ref name for the currently checked-out HEAD
 #
 function git-branch-current () {(
-  set -e
+  setopt err_exit
   git rev-parse --abbrev-ref HEAD
 )}
 
@@ -92,7 +92,7 @@ function git-branch-current () {(
 # returns the remote ref name for the upstream configured for HEAD
 #
 function git-branch-upstream () {(
-  set -e
+  setopt err_exit
   git rev-parse --abbrev-ref HEAD@{u}
 )}
 
@@ -109,10 +109,11 @@ function git-branch-upstream () {(
 # not exist at the remote.
 #
 function git-push-set-upstream-branch-current () {(
+  setopt err_exit
   local branch=$(git rev-parse --abbrev-ref HEAD) # git-branch-current
   local remote=${remote:-origin}
   local remote_branch=${1:-${branch}}
-  set -ex
+  setopt xtrace
   git push ${remote} --set-upstream ${remote_branch}
 )}
 
@@ -132,9 +133,10 @@ function git-push-set-upstream-branch-current () {(
 # this is often 'master', but can be altered in ${HOME}/.gitconfig.
 #
 function git-pull-rebase-origin-main () {(
+  setopt err_exit
   local branch=${1:-$(git config init.defaultbranch)}
   local remote=${remote:-origin}
-  set -ex
+  setopt xtrace
   git pull --rebase ${remote} ${branch}
 )}
 
@@ -177,6 +179,7 @@ function git-pull-rebase-origin-main () {(
 #   git pull --rebase origin main && git push --force-with-lease --force-if-includes
 #
 function git-pull-rebase-then-force-push-origin-with-lease-includes () {(
+  setopt err_exit
   # parse upstream (pull target)
   local upstream=${upstream:-$(git rev-parse --abbrev-ref HEAD@{upstream})}
   local upstream_remote upstream_branch
@@ -198,7 +201,7 @@ function git-pull-rebase-then-force-push-origin-with-lease-includes () {(
   #
   local pull_branch=${1:-${upstream_branch}}
   local push_branch=${2:-${downstream_branch}}
-  set -ex
+  setopt xtrace
   git pull --rebase ${upstream_remote} ${pull_branch}
   git push --force-with-lease --force-if-includes ${downstream_remote} ${push_branch}
 )}
@@ -221,6 +224,7 @@ function git-pull-rebase-then-force-push-origin-with-lease-includes () {(
 # nor does it set an upstream; it just pushes to that name, on the remote.
 #
 function git-push-current-branch () {(
+  setopt err_exit
   local flags=() match mbegin mend
   while [[ ${1} =~ ^(-+[[:alnum:]]+)$ ]]; do shift; flags+=(${match}); done
   local branch=$(git rev-parse --abbrev-ref HEAD) # git-branch-current
@@ -228,7 +232,7 @@ function git-push-current-branch () {(
   local remote=${remote:-origin}
   # positional arguments
   local remote_branch=${1:-${branch}}
-  set -ex
+  setopt xtrace
   git push ${flags[@]} ${remote} ${branch}:${remote_branch}
 )}
 
