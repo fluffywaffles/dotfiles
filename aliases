@@ -27,6 +27,8 @@ alias mkpw="head -c512 /dev/urandom | sha512sum | cut -d' ' -f1"
 #
 # ppi can be configured as an argument, as in:
 #   scanpdf out.pdf ppi=100
+# or as an environment variable, as in:
+#   ppi=100 scanpdf out.pdf
 #
 function scanpdf () {(
   emulate -L zsh -e
@@ -36,9 +38,9 @@ function scanpdf () {(
     return 1
   fi
   name="${1%%.pdf}"  # quoted: allow spaces in name
-  ppi=50; if [[ ${2} =~ "ppi=\d*" ]]; then
-    ppi=(${(s:=:)ppi}) # convert to array splitting on '='
-    ppi=${ppi[2]}      # select the number on right-hand side of '='
+  ppi=${ppi:-50}; if [[ ${2} =~ "ppi=\d*" ]]; then
+    ppi=(${(s:=:)2}) # convert to array splitting on '='
+    ppi=${ppi[2]}    # select the number on right-hand side of '='
   elif [[ -n ${2} ]]; then
     >&2 printf 'ERR: bad arg: why u give bad ppi=N ??\n'
     return 1
