@@ -190,16 +190,12 @@ function git-pull-rebase-then-force-with-lease-includes-origin-main () {(
 # nor does it set an upstream; it just pushes to that name, on the remote.
 #
 function git-push-current-branch () {(
-  local match mbegin mend
-  local flags=(); while true; do
-    if [[ ${1} =~ ^(-+[[:alnum:]]+)$ ]]; then shift; flags+=(${match})
-    else
-      break
-    fi
-  done
-  # positional arguments
+  local flags=() match mbegin mend
+  while [[ ${1} =~ ^(-+[[:alnum:]]+)$ ]]; do shift; flags+=(${match}); done
   local branch=$(git rev-parse --abbrev-ref HEAD) # git-branch-current
+  # named arguments
   local remote=${remote:-origin}
+  # positional arguments
   local remote_branch=${1:-${branch}}
   set -ex
   git push ${flags[@]} ${remote} ${branch}:${remote_branch}
@@ -240,10 +236,11 @@ alias gl='git pull'
 alias gm='git merge --ff-only'
 alias gp='git push'
 alias gr='git rebase'
+alias gs='git show'
 alias gco='git checkout'
 alias gfa='git fetch --all'
-alias gsh='git show'
 alias gst='git status'
+alias gsq='git rebase --interactive --autosquash'
 alias gdc='git diff --word-diff=color'
 alias glog='git log --oneline --decorate --graph'
 alias gloga='git log --oneline --decorate --graph --all'
