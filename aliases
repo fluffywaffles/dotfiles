@@ -226,7 +226,7 @@ function git-pull-rebase-then-force-push-origin-with-lease-includes () {(
 function git-push-current-branch () {(
   setopt err_exit
   local flags=() match mbegin mend
-  while [[ ${1} =~ ^(-+[[:alnum:]]+)$ ]]; do shift; flags+=(${match}); done
+  while [[ ${1} =~ ^(-+[-[:alnum:]]+)$ ]]; do shift; flags+=(${match}); done
   local branch=$(git rev-parse --abbrev-ref HEAD) # git-branch-current
   # named arguments
   local remote=${remote:-origin}
