@@ -297,10 +297,16 @@ function zwb {
     >&2 print -nf 'ERR: empty root. missing `worktree-root` link?\n'
     return 1
   fi
+  # load up the list of configured remotes
+  typeset -a remotes=($(git remote))
   # by default, zwb will fuzzy find on branches with worktrees
   local list=worktree-branches
   # by default, include all remotes and do not filter on name
   local named_remotes=''
+  # if there is only one remote, default named_remotes to that remote
+  if [[ ${#remotes} -eq 1 ]]; then
+    named_remotes=${remotes[1]}
+  fi
   # configure list and named_remotes with flags
   # -r -remote[s] --remote[s]   -- include remotes
   # -o -only --only {pattern}   -- only include branches matching pattern
@@ -314,11 +320,6 @@ function zwb {
     fi
     break
   done
-  # if there is only one remote, set named_remotes to that remote
-  typeset -a remotes=($(git remote))
-  if [[ ${#remotes} -eq 1 ]]; then
-    named_remotes=${remotes[1]}
-  fi
   # first argument after flags, if given, should be a branch name
   local branch=${1}
   # load all worktrees into an associative array of path->branch
@@ -329,6 +330,7 @@ function zwb {
     eval $(_zwb-default-command ${branch})
     return 0
   fi
+  # if there is no branch given, select one interactively
   # if there are no worktree entries, automatically list remote branches
   if [[ ${#worktree_entries} -eq 0 ]]; then
     print -nf '┯ %s\n└ %s\n'                                        \
