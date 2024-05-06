@@ -403,7 +403,12 @@ with config.pattern('https://meet.google.com/*') as meet:
 ##
 ## Type: Dict
 ## }}}
-# c.content.javascript.log_message.excludes = {'userscript:_qute_stylesheet': ['*Refused to apply inline style because it violates the following Content Security Policy directive: *']}
+
+# Do not display annoying error messages when using caret mode
+c.content.javascript.log_message.excludes = {
+    "userscript:_qute_stylesheet": ["*Refused to apply inline style because it violates the following Content Security Policy directive: *"],
+    "userscript:_qute_js": ["*TrustedHTML*"]
+}
 
 ## Javascript message sources/levels to show in the qutebrowser UI. {{{
 ## When a JavaScript message is logged from a location matching the glob
