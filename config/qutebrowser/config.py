@@ -130,7 +130,7 @@ c.changelog_after_upgrade = 'minor'
 ##
 ## Type: Bool
 ## }}}
-c.session.lazy_restore = False
+c.session.lazy_restore = True
 
 ##
 ## editor configuration for e.g. edit-url
