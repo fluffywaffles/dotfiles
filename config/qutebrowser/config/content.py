@@ -138,6 +138,12 @@ config.set('content.notifications.enabled', True, 'https://calendar.google.com')
 ## }}}
 # c.content.media.video_capture = 'ask'
 
+# allow google meet
+with config.pattern('https://meet.google.com/*') as meet:
+    meet.content.media.audio_video_capture = True
+    meet.content.media.video_capture = True
+    meet.content.media.audio_capture = True
+
 ##
 ## unused configuration options and defaults.
 ##
