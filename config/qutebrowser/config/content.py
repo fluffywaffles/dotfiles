@@ -24,7 +24,7 @@ c.content.blocking.enabled = True
 ##
 ## Type: List of Url
 ## }}}
-c.content.blocking.hosts.lists = ['https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts']
+c.content.blocking.hosts.lists = ['https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews-gambling/hosts']
 
 ## A list of patterns that should always be loaded, even if blocked {{{
 ## by the ad-/host-blocker. Local domains are always exempt from
