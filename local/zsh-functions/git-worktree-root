@@ -21,7 +21,7 @@ function git-worktree-root() {
 
   # error if the main worktree path is NOT a bare repository
   if ! [[ ${commitish} =~ ^bare$ ]]; then
-    if [[ ${verbose} =~ ^-+v(erbose|)$ ]]; then
+    if [[ ${verbose} =~ ^-+v(erbose)*$ ]]; then
       eprintf '!! ─ The main worktree is not a separate bare repository\n'
     fi
     return 1

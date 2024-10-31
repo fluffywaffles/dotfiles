@@ -27,9 +27,9 @@ function git-worktree-entries {
 function git-branch-list-porcelain {
   local prefix match mbegin mend reftype='heads'
   while true; do
-    if   [[ ${1} =~ ^-*a(ll|)$      ]]; then shift; reftype='(heads|remotes)'
-    elif [[ ${1} =~ ^-*r(emotes*|)$ ]]; then shift; reftype='remotes'
-    elif [[ ${1} =~ ^-*l(ocal|)$    ]]; then shift; reftype='heads'
+    if   [[ ${1} =~ ^-*a(ll)*$      ]]; then shift; reftype='(heads|remotes)'
+    elif [[ ${1} =~ ^-*r(emotes*)*$ ]]; then shift; reftype='remotes'
+    elif [[ ${1} =~ ^-*l(ocal)*$    ]]; then shift; reftype='heads'
     # first non-flag argument is an additional prefix after the reftype
     elif [[ -n ${1}                 ]]; then prefix=${1}; shift
     elif [[ -z ${1}                 ]]; then break
