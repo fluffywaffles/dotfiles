@@ -9,7 +9,7 @@ function git-worktree-entries {
   git worktree list --porcelain                  \
     | grep -B2 'branch'                          \
     | grep -E 'branch|worktree'                  \
-    | sed -Ee 's\branch refs/heads/|worktree \\' \
+    | sed -Ee 's!branch refs/heads/|worktree !!' \
     | grep -E "${prefix}"
 }
 
