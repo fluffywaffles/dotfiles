@@ -4,6 +4,11 @@ export path=(/usr/local/sbin /usr/local/bin /usr/sbin /usr/bin /sbin /bin)
 # add home local binaries
 export path=(${HOME}/.local/bin ${path})
 
+# add nixpkgs, if ~/.nix-profile link exists
+if [[ -L ${HOME}/.nix-profile ]]; then
+  export path=(${HOME}/.nix-profile/bin ${path})
+fi
+
 function git-worktree-entries {
   local prefix=${1:-'.*'}
   git worktree list --porcelain                  \
