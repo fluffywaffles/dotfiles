@@ -364,16 +364,17 @@ function zwb {
     list="remote-branches ${named_remotes}"
   fi
   # otherwise, launch an interactive branch selector
-  local selected; _zwb-toggle-list ${=list}                         \
-    | fzf                                                           \
-          --reverse                                                 \
-          --height 50                                               \
-          --bind 'ctrl-s:toggle-preview'                            \
-          --bind 'ctrl-t:reload(_zwb-toggle-list)'                  \
-          --bind 'ctrl-x:execute(print "!{remove} {}")+accept'      \
-          --bind 'ctrl-space:execute(print "!{default} {}")+accept' \
-          --preview 'git show {} --format=short --color'            \
-          --preview-window hidden,50                                \
+  local selected; _zwb-toggle-list ${=list}              \
+    | fzf                                                \
+          --reverse                                      \
+          --height 50                                    \
+          --bind 'ctrl-s:toggle-preview'                 \
+          --bind 'ctrl-t:reload(_zwb-toggle-list)'       \
+          --bind 'ctrl-x:print(!{remove})+accept'        \
+          --bind 'ctrl-space:print(!{default})+accept'   \
+          --preview 'git show {} --format=short --color' \
+          --preview-window hidden,50                     \
+    | tr '\n' ' '                                        \
     | read selected
   # strip remote prefix from selected ref, if any
   local remotes=($(git remote))
@@ -384,12 +385,12 @@ function zwb {
   # prefixed with '!' means 'print the following command to the prompt'
   if [[ ${branch} =~ '^!(.+) (.+)$' ]]; then
     if [[ ${match[1]} = '{default}' ]]; then
-      print -z $(_zwb-default-command ${match[2]})
+      print -z $(_zwb-default-command "'${match[2]}'")
     elif [[ ${match[1]} = '{remove}' ]]; then
-      print -z git-worktree-remove-for-branch ${match[2]}
+      print -z git-worktree-remove-for-branch "'${match[2]}'"
     fi
   elif [[ -n ${branch} ]]; then
-    eval $(_zwb-default-command ${branch})
+    eval $(_zwb-default-command "'${branch}'")
   fi
 }
 
