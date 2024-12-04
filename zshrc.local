@@ -251,6 +251,12 @@ function git-worktree-create-if-not-exists {
 }
 
 function git-worktree-remove-for-branch {
+  local flags=()
+  while true; do
+    if [[ ${1} =~ ^-+.+$ ]]; then flags+=(${1}); shift;
+    else break
+    fi
+  done
   local tree=$(git-worktree-find-for-branch ${1})
   if [[ -z ${tree} ]]; then
     print -nf '┯ %s\n└ %s\n'                           \
@@ -258,7 +264,7 @@ function git-worktree-remove-for-branch {
       "Branch: ${1}"
     return 1
   fi
-  git worktree remove ${tree}
+  git worktree remove ${flags[@]} ${tree}
   rm -rf ${tree}
 }
 
