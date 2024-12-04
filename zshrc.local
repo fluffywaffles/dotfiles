@@ -74,6 +74,12 @@ export path=(
   ${path}
 )
 
+# On macOS, the Kitty application binary is not added to PATH
+if [[ $(uname) =~ Darwin ]]; then
+  # alias kitty=/Applications/kitty.app/Contents/MacOS/kitty
+  export path=(/Applications/kitty.app/Contents/MacOS ${path})
+fi
+
 # Set configuration home directory for freedesktop user
 export XDG_CONFIG_HOME="${HOME}/.config"
 
