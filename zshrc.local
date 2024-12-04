@@ -80,6 +80,14 @@ if [[ $(uname) =~ Darwin ]]; then
 fi
 
 #
+# Application configuration settings
+#
+
+# turn on shared prompt history for elixir's IEx REPL and erlang
+# and bump up the size of the saved history to ~1mb (ordinarly 512kb)
+export ERL_AFLAGS="-kernel shell_history enabled -kernel shell_history_file_bytes 1024000"
+
+#
 # Prompt
 #
 
