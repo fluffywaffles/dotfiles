@@ -1,0 +1,4 @@
+#!/bin/sh
+
+# leave the big TV off by default
+xrandr --output HDMI-0 --off

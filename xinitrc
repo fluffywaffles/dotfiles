@@ -5,6 +5,10 @@
 #
 source ${HOME}/.xinitrc.cruft.sh
 
+if [[ -f ${HOME}/.xinitrc.$(uname -n) ]]; then
+  source ${HOME}/.xinitrc.$(uname -n)
+fi
+
 #
 # ~ Do some actually interesting configuration ~
 #
