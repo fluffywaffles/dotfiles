@@ -16,7 +16,7 @@ super + l
 
 # terminal emulator
 super + Return
-	st -e tmux new-s
+	kitty
 
 # program launcher
 super + space
