@@ -11,8 +11,12 @@
 #
 
 # lock + suspend
-super + l
+super + shift + l
 	slock systemctl suspend --check-inhibitors=no
+
+# lock + hibernate
+super + shift + h
+	systemctl hibernate
 
 # terminal emulator
 super + Return
