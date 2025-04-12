@@ -1,0 +1,48 @@
+#!/bin/zsh
+
+# set up options and args
+args=()
+opts=(--mkdir)
+
+# parse options
+while [[ ${#} -ne 0 ]]; do
+  if [[ ${1} =~ ^-+o(pt|ption|ptions)*$ ]]; then shift;
+    opts+=(--options=${1})
+    shift
+  elif [[ ${1} =~ ^-+m(kdir)*$ ]]; then shift;
+  elif [[ ${1} =~ ^-+[[:alnum:]]+$ ]]; then
+    >&2 print "ERROR: ${0:t}: unrecognized flag: ${1}"
+    exit 1
+  else
+    args+=(${1})
+    shift
+  fi
+done
+
+# parse parameters
+if [[ -z ${args[1]} ]]; then
+  >&2 print "ERROR: ${0:t}: mount-device missing"
+  exit 2
+fi
+
+# determine mount device and mount point
+device=${args[1]}
+mountpoint=${args[2]:-${HOME}/mnt}
+relpoint=${mountpoint##$(pwd)/}
+
+if mountpoint --quiet ${mountpoint}; then
+  print "ERROR: ${0:t}: mountpoint ${mountpoint} is already mounted!"
+  print "     ├ df --output=source ${relpoint}"
+  info=$(df --output=source ${mountpoint} | tail -n1)
+  print "     └── ${info}"
+  exit 1
+fi
+
+# execute the mount operation as root
+if sudo mount ${device} ${opts[@]} ${mountpoint}; then
+  print "OK! mount ${device} ${opts[@]} ${mountpoint}"
+  exit 0
+else
+  >&2 print "ERROR: mount: bad usage:\n\tmount ${device} ${opts[@]} ${mountpoint}"
+  exit 2
+fi
