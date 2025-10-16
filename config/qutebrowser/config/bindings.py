@@ -71,6 +71,7 @@ config.bind('tcb', 'config-cycle --print --temp --pattern {url} content.blocking
 # config.bind('<Ctrl-Shift-W>', 'close')
 # config.bind('<Ctrl-T>', 'open -t')
 # config.bind('<Ctrl-Tab>', 'tab-focus last')
+config.bind('\\\\', 'tab-focus last')
 # config.bind('<Ctrl-U>', 'scroll-page 0 -0.5')
 # config.bind('<Ctrl-V>', 'mode-enter passthrough')
 # config.bind('<Ctrl-W>', 'tab-close')
