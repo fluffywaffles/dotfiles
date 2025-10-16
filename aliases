@@ -53,6 +53,8 @@ function scanpdf () {(
   intermediary_files=("${raw_pnm}" "${ppi_pnm}")
   # output file
   final_pdf="${name}.pdf"
+  # pre-clean intermediary files in case of prior failed run
+  rm -f "${intermediary_files[@]}"
   # scan, redraw, convert, clean up
   printf '◆ scan            (subsh)»  '
   (set -x; scanimage --format=pnm > "${raw_pnm}")
