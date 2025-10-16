@@ -1,0 +1,3 @@
+# On macOS, the Kitty application binary is not added to PATH
+# alias kitty=/Applications/kitty.app/Contents/MacOS/kitty
+export path=(/Applications/kitty.app/Contents/MacOS ${path})
