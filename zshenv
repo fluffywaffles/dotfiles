@@ -9,6 +9,9 @@ if [[ -L ${HOME}/.nix-profile ]]; then
   export path=(${HOME}/.nix-profile/bin ${path})
 fi
 
+# autoload some git worktree magic functions
+autoload git-worktree-root
+
 function git-worktree-entries {
   local prefix=${1:-'.*'}
   git worktree list --porcelain                  \
