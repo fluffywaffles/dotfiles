@@ -436,3 +436,7 @@ function _worktree-branches {
 if [[ -n ${precmd_functions[(r)parse-vcs-info__precmd]} ]]; then
   precmd_functions+=(vcs-user__precmd)
 fi
+
+if [[ -f ${HOME}/.zshrc.${HOST} ]]; then
+  source ${HOME}/.zshrc.${HOST}
+fi
