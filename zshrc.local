@@ -49,6 +49,16 @@ export FZF_DEFAULT_COMMAND='ag -g ""'
 # Load z
 source ${HOME}/.local/zsh-functions/z/z.sh
 
+# Add npm binaries to path, if npm is installed
+if command -v npm &>/dev/null; then
+  export path=($(npm config get prefix)/bin ${path})
+fi
+
+# Add swiftly binaries to path
+if command -v swiftly &>/dev/null; then
+  export path=(${HOME}/.local/share/swiftly/bin ${path})
+fi
+
 # Add cargo binaries to path (e.g. watchexec)
 export path=(${HOME}/.cargo/bin ${path})
 
