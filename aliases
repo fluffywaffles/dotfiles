@@ -121,6 +121,30 @@ function git-push-set-upstream-branch-current () {(
   git push ${remote} --set-upstream ${remote_branch}
 )}
 
+# git-pull-rebase
+#
+# shorthand for `git pull --rebase=true` with custom flags for modifying
+# the rebase option, and passthrough for any other flags.
+#
+# custom flags expand as follows:
+#   (no flags)          ->   --rebase=true
+#   -i --interactive    ->   --rebase=interactive
+#   -n --no-rebase      ->   --rebase=false
+#
+function git-pull-rebase () {(
+  setopt err_exit
+  local rebase_opt=true flags=() match mbegin mend
+  while true; do
+    if   [[ ${1} =~ ^-+i(nteractive)*$ ]]; then shift; rebase_opt=interactive;
+    elif [[ ${1} =~ ^-+n(o-rebase)*$   ]]; then shift; rebase_opt=false;
+    elif [[ ${1} =~ ^-+[[:alnum:]]+$   ]]; then shift; flags+=(${match});
+    else break;
+    fi
+  done
+  setopt xtrace
+  git pull ${flags[@]} --rebase=${rebase_opt} ${@}
+)}
+
 #
 # git-pull-rebase-origin-main
 #
@@ -138,10 +162,11 @@ function git-push-set-upstream-branch-current () {(
 #
 function git-pull-rebase-origin-main () {(
   setopt err_exit
+  local rebase_opt=true flags=() match mbegin mend
+  while [[ ${1} =~ ^-+[[:alnum:]]+$ ]]; do shift; flags+=(${match}); done
   local branch=${1:-$(git config init.defaultbranch)}
   local remote=${remote:-origin}
-  setopt xtrace
-  git pull --rebase ${remote} ${branch}
+  git-pull-rebase ${flags[@]} ${remote} ${branch}
 )}
 
 #
@@ -201,12 +226,21 @@ function git-pull-rebase-then-force-push-origin-with-lease-includes () {(
     downstream_branch=${(j:/:)downstream[2,-1]}
   fi
   #
-  # now we have our default upstream / downstream; customize with args
+  # passthrough flags:
+  #   -l* and --pull-* are flags for git-pull; e.g. -ln, --pull-no-rebase
+  #   -p* and --push-* are flags for git-push; e.g. -pf, --push-force
+  #
+  local pull_flags=() push_flags=() match mbegin mend
+  while [[ ${1} =~ ^-+(l|pull)-*[[:alnum:]]+$ ]]; do shift; pull_flags+=(${match}); done
+  while [[ ${1} =~ ^-+(p|push)-*[[:alnum:]]+$ ]]; do shift; push_flags+=(${match}); done
+  #
+  # positional arguments can customize the upstream or downstream branch
   #
   local pull_branch=${1:-${upstream_branch}}
   local push_branch=${2:-${downstream_branch}}
+  # pull
+  git-pull-rebase ${flags[@]} ${upstream_remote} ${pull_branch}
   setopt xtrace
-  git pull --rebase ${upstream_remote} ${pull_branch}
   git push --force-with-lease --force-if-includes ${downstream_remote} ${push_branch}
 )}
 
@@ -271,7 +305,7 @@ alias gb='git branch'
 alias gc='git commit --verbose'
 alias gd='git diff'
 alias gf='git fetch'
-alias gl='git pull'
+alias gl='git-pull-rebase'
 alias gm='git merge --ff-only'
 alias gp='git push'
 alias gr='git rebase'
