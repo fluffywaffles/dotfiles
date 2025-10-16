@@ -49,7 +49,7 @@ function git-branch-list-porcelain {
   prefix=${${prefix%%/}##/} # strip leading and trailing slash
   git show-ref                            \
     | grep -E "refs/${reftype}/${prefix}" \
-    | sed -Ee "s~[0-9a-f]+ refs/${reftype}/${prefix}~~"
+    | sed -Ee "s~[0-9a-f]+ refs/${reftype}/~~"
 }
 
 function git-worktree-branches {
