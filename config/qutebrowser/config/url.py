@@ -63,7 +63,7 @@
 ##
 ## Type: Dict
 ## }}}
-# c.url.searchengines = {'DEFAULT': 'https://duckduckgo.com/?q={}'}
+c.url.searchengines = {'DEFAULT': 'https://duckduckgo.com/?q={}'}
 
 ## Page(s) to open at the start. {{{
 ##
