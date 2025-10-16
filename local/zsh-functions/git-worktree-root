@@ -34,5 +34,5 @@ function git-worktree-root() {
     exit 1
   fi
 
-  printf '%s\n' $(readlink -e ${worktree_root_link})
+  printf '%s\n' $(readlink -f ${worktree_root_link})
 }
