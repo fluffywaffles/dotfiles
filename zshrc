@@ -10,7 +10,9 @@ export path=(${HOME}/.local/bin ${path})
 source ~/.zshrc.local
 
 # platform-specific overrides (i.e. Darwin vs. Linux)
-source ~/.zshrc.$(uname -s)
+if [[ -f ${HOME}/.zshrc.$(uname -s) ]]; then
+  source ~/.zshrc.$(uname -s)
+fi
 
 # hostname-specific overrides (i.e. apoplexy vs. hyperion vs. w/e)
 if [[ -f ${HOME}/.zshrc.${HOST} ]]; then
