@@ -275,6 +275,42 @@ function git-push-current-branch () {(
 )}
 
 #
+# git-amend-then-force-push
+#
+# amend the current HEAD commit, then force-push to the remote branch
+# (${1}). remote can be configured as a variable, as in:
+#
+#   remote=xyz git-amend-then-force-push
+#
+# supports passthrough flags for the `git commit amend`, as in:
+#
+#   git-amend-then-force-push --no-edit
+#
+# customarily, one uses the following aliases with this function:
+#
+#   gapf='git-amend-then-force-push --no-edit'
+#   gapfe='git-amend-then-force-push'
+#
+# note that the shorter alias is `--no-edit`, and both aliases could be
+# roughly pronounced as "gaffe," as in, "an unintentional public mistake."
+#
+# the positional argument defaults to the current branch name.
+#
+# providing a different branch name does not change the local branch name,
+# nor does it set an upstrea; it just pushes to that name, on the remote.
+#
+function git-amend-then-force-push () {(
+  setopt err_exit
+  local flags=() match mbegin mend
+  while [[ ${1} =~ ^(-+[-[:alnum:]]+)$ ]]; do shift; flags+=(${match}); done
+  # amend, then proxy to git-push-current-branch
+  setopt xtrace
+  git commit --amend ${flags[@]}
+  unsetopt xtrace
+  git-push-current-branch ${1} --force-if-includes --force-with-lease
+)}
+
+#
 # git-cd-toplevel
 #
 # change directory into the top-level directory of the current git repo.
@@ -283,7 +319,6 @@ function git-cd-toplevel () {
   local root=$(git rev-parse --show-toplevel)
   [[ -n "${root}" ]] && cd ${root}
 }
-
 
 #
 # shell aliases for custom git functions
@@ -295,6 +330,8 @@ alias gpc='git-push-current-branch'
 alias gpf='git-push-current-branch --force-with-lease --force-if-includes'
 alias glom='git-pull-rebase-origin-main'
 alias glop='git-pull-rebase-then-force-push-origin-with-lease-includes'
+alias gapf='git-amend-then-force-push --no-edit'
+alias gapfe='git-amend-then-force-push'
 
 #
 # shell aliases for common git commands
