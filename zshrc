@@ -3,9 +3,6 @@ alias ls='ls --color=auto'
 alias grep='grep --color=auto'
 alias tree='tree -C'
 
-# add user-home-local binaries to path
-export path=(${HOME}/.local/bin ${path})
-
 # custom configuration
 source ~/.zshrc.local
 

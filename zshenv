@@ -219,6 +219,9 @@ zstyle ':completion:*:*:*:*:processes' command ${process_complete_command}
 # default path, very POSIX
 export path=(/usr/local/sbin /usr/local/bin /usr/sbin /usr/bin /sbin /bin)
 
+# add user-home-local binaries to path
+export path=(${HOME}/.local/bin ${path})
+
 # if nix is installed, make sure we add the `nix` binary + friends
 # TODO: is this needed since we source nix-daemon.sh above?
 # TODO: does this duplicate adding "nix profile binaries" below? (symlink)
