@@ -1,3 +1,8 @@
 #!/bin/zsh
 
-ffmpeg -i ${1} -c:v x265 -o ${1}
+if [[ -z ${1} ]]; then
+  >&2 printf "usage: h265 <file>\n"
+  exit 1
+fi
+
+ffmpeg -i ${1} -c:v libx265 -o ${1}
