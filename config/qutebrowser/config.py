@@ -145,7 +145,7 @@ c.session.lazy_restore = True
 ##
 ## Type: ShellCommand
 ## }}}
-c.editor.command = ['st', '-e', 'nvim', '-f', '{file}', '-c', 'normal {line}G{column0}l']
+c.editor.command = ['kitty', 'nvim', '-f', '{file}', '-c', 'normal {line}G{column0}l']
 
 ## Encoding to use for the editor. {{{
 ##
