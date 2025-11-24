@@ -45,6 +45,7 @@ source ~/.aliases
 
 # Better FZF (using ag for filtering)
 export FZF_DEFAULT_COMMAND='ag -g ""'
+export FZF_CTRL_T_COMMAND="${FZF_DEFAULT_COMMAND}"
 
 # Load z
 source ${HOME}/.local/zsh-functions/z/z.sh
