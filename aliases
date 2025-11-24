@@ -357,6 +357,9 @@ alias glogm='git log --oneline --decorate --graph'
 alias gloga='git log --oneline --decorate --graph --all --no-merges'
 alias glogam='git log --oneline --decorate --graph --all'
 
+alias gam='git commit --amend --no-edit'
+alias game='git commit --amend'
+
 #
 # worktree setup aliases
 #
