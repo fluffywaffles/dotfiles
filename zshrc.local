@@ -91,18 +91,6 @@ export XDG_CONFIG_HOME="${HOME}/.config"
 # Use neovim as Manpager
 export MANPAGER="nvim +':Man!'"
 
-# Report slow / high-memory commands AFTER running global and local setup
-export REPORTMEMORY=100      # print timing stats for commands using >100k
-export REPORTTIME=1          # print timing stats for commands taking >1s
-
-if [[ $(uname) =~ Darwin ]]; then
-  # on macos, we don't want to report memory usage until it exceeds 7000k
-  #
-  # IIRC, this is because git performs very slowly on macos. so inside of
-  # a git repo, when we're getting vcs_info etc., it's slow as balls.
-  export REPORTMEMORY=7000
-fi
-
 #
 # Application configuration settings
 #
