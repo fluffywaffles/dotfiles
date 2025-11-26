@@ -331,7 +331,7 @@ alias gpf='git-push-current-branch --force-with-lease --force-if-includes'
 alias glom='git-pull-rebase-origin-main'
 alias glop='git-pull-rebase-then-force-push-origin-with-lease-includes'
 alias gapf='git-amend-then-force-push --no-edit'
-alias gapfe='git-amend-then-force-push'
+alias gapfe='git-amend-then-force-push --patch'
 
 #
 # shell aliases for common git commands
@@ -358,7 +358,7 @@ alias gloga='git log --oneline --decorate --graph --all --no-merges'
 alias glogam='git log --oneline --decorate --graph --all'
 
 alias gam='git commit --amend --no-edit'
-alias game='git commit --amend'
+alias game='git commit --amend --patch'
 
 #
 # worktree setup aliases
