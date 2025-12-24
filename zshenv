@@ -89,6 +89,27 @@ export HISTSIZE=50000        # keep 50k lines of internal session history
 export SAVEHIST=${HISTSIZE}  # and the same in the shared ${HISTFILE}
 export LISTMAX=0             # ask before listing if it won't fit onscreen
 unset NULLCMD                # error on redirection with no command
+
+# nvim pls
+export EDITOR="nvim"
+
+# Use neovim as Manpager
+export MANPAGER="nvim +':Man!'"
+
+# Set configuration home directory for freedesktop user
+export XDG_CONFIG_HOME="${HOME}/.config"
+
+# turn on shared prompt history for elixir's IEx REPL and erlang
+# and bump up the size of the saved history to ~1mb (ordinarly 512kb)
+export ERL_AFLAGS="-kernel shell_history enabled -kernel shell_history_file_bytes 1024000"
+
+# Better FZF (using ag for filtering)
+export FZF_DEFAULT_COMMAND='ag -g ""'
+export FZF_CTRL_T_COMMAND="${FZF_DEFAULT_COMMAND}"
+
+# Specifically provide ANVIL_PATH for random scripts
+export ANVIL_PATH=${HOME}/.config/.foundry/bin/anvil
+
 # give all timings in ms (%m{U,S,E}) with max resident set size (%M)
 export timefmt=(
   "%J"              # job name
@@ -240,6 +261,34 @@ export fpath=(
 if [[ -L ${HOME}/.nix-profile ]]; then
   export path=(${HOME}/.nix-profile/bin ${path})
 fi
+
+# Add swiftly swift versions to path
+if [[ -f ${HOME}/.swiftly/env.sh ]]; then
+  source ${HOME}/.swiftly/env.sh
+fi
+
+# Add google-cloud-sdk to PATH (completion is in zshrc)
+if [[ -f ${HOME}/Downloads/google-cloud-sdk/path.zsh.inc ]]; then
+  source ${HOME}/Downloads/google-cloud-sdk/path.zsh.inc
+fi
+
+# Add Windsurf / codeium binaries to path
+export path=(${HOME}/.codeium/windsurf/bin ${path})
+
+# Add npm binaries to path
+export path=(${HOME}/.npm-packages/bin ${path})
+
+# Add cargo binaries to path (e.g. watchexec)
+export path=(${HOME}/.cargo/bin ${path})
+
+# Add foundry to path
+export path=(${HOME}/.config/.foundry/bin ${path})
+
+# Add select git-contrib binaries to path
+export path=(
+  /usr/share/git/diff-highlight
+  ${path}
+)
 
 #-----------
 # autoloads
