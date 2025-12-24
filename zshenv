@@ -107,9 +107,6 @@ export ERL_AFLAGS="-kernel shell_history enabled -kernel shell_history_file_byte
 export FZF_DEFAULT_COMMAND='ag -g ""'
 export FZF_CTRL_T_COMMAND="${FZF_DEFAULT_COMMAND}"
 
-# Specifically provide ANVIL_PATH for random scripts
-export ANVIL_PATH=${HOME}/.config/.foundry/bin/anvil
-
 # give all timings in ms (%m{U,S,E}) with max resident set size (%M)
 export timefmt=(
   "%J"              # job name
@@ -262,33 +259,6 @@ if [[ -L ${HOME}/.nix-profile ]]; then
   export path=(${HOME}/.nix-profile/bin ${path})
 fi
 
-# Add swiftly swift versions to path
-if [[ -f ${HOME}/.swiftly/env.sh ]]; then
-  source ${HOME}/.swiftly/env.sh
-fi
-
-# Add google-cloud-sdk to PATH (completion is in zshrc)
-if [[ -f ${HOME}/Downloads/google-cloud-sdk/path.zsh.inc ]]; then
-  source ${HOME}/Downloads/google-cloud-sdk/path.zsh.inc
-fi
-
-# Add Windsurf / codeium binaries to path
-export path=(${HOME}/.codeium/windsurf/bin ${path})
-
-# Add npm binaries to path
-export path=(${HOME}/.npm-packages/bin ${path})
-
-# Add cargo binaries to path (e.g. watchexec)
-export path=(${HOME}/.cargo/bin ${path})
-
-# Add foundry to path
-export path=(${HOME}/.config/.foundry/bin ${path})
-
-# Add select git-contrib binaries to path
-export path=(
-  /usr/share/git/diff-highlight
-  ${path}
-)
 
 #-----------
 # autoloads

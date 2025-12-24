@@ -39,10 +39,39 @@ source ~/.aliases
 # Load z
 source ${HOME}/.local/zsh-functions/z/z.sh
 
-# Load google-cloud-sdk zsh compdefs (path is in zshenv)
+# Specifically provide ANVIL_PATH for random scripts
+export ANVIL_PATH=${HOME}/.config/.foundry/bin/anvil
+
+# Add swiftly swift versions to path
+if [[ -f ${HOME}/.swiftly/env.sh ]]; then
+  source ${HOME}/.swiftly/env.sh
+fi
+
+# Add google-cloud-sdk to PATH and load zsh compdefs
+if [[ -f ${HOME}/Downloads/google-cloud-sdk/path.zsh.inc ]]; then
+  source ${HOME}/Downloads/google-cloud-sdk/path.zsh.inc
+fi
 if [[ -f ${HOME}/Downloads/google-cloud-sdk/completion.zsh.inc ]]; then
   source ${HOME}/Downloads/google-cloud-sdk/completion.zsh.inc
 fi
+
+# Add Windsurf / codeium binaries to path
+export path=(${HOME}/.codeium/windsurf/bin ${path})
+
+# Add npm binaries to path
+export path=(${HOME}/.npm-packages/bin ${path})
+
+# Add cargo binaries to path (e.g. watchexec)
+export path=(${HOME}/.cargo/bin ${path})
+
+# Add foundry to path
+export path=(${HOME}/.config/.foundry/bin ${path})
+
+# Add select git-contrib binaries to path
+export path=(
+  /usr/share/git/diff-highlight
+  ${path}
+)
 
 #
 # Prompt
