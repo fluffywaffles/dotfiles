@@ -259,7 +259,6 @@ if [[ -L ${HOME}/.nix-profile ]]; then
   export path=(${HOME}/.nix-profile/bin ${path})
 fi
 
-
 #-----------
 # autoloads
 #-----------

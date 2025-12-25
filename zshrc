@@ -31,10 +31,10 @@ zle -N reload-zsh-env _widget_reload-zsh-env
 bindkey '^S' reload-zsh-env
 
 # Aliases
-source ~/.aliases
+source ${HOME}/.aliases
 
 # Load FZF
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+[ -f ${HOME}/.fzf.zsh ] && source ${HOME}/.fzf.zsh
 
 # Load z
 source ${HOME}/.local/zsh-functions/z/z.sh
@@ -404,7 +404,7 @@ fi
 
 # platform-specific overrides (i.e. Darwin vs. Linux)
 if [[ -f ${HOME}/.zshrc.$(uname -s) ]]; then
-  source ~/.zshrc.$(uname -s)
+  source ${HOME}/.zshrc.$(uname -s)
 fi
 
 # hostname-specific overrides (i.e. apoplexy vs. hyperion vs. w/e)
