@@ -89,6 +89,24 @@ export HISTSIZE=50000        # keep 50k lines of internal session history
 export SAVEHIST=${HISTSIZE}  # and the same in the shared ${HISTFILE}
 export LISTMAX=0             # ask before listing if it won't fit onscreen
 unset NULLCMD                # error on redirection with no command
+
+# nvim pls
+export EDITOR="nvim"
+
+# Use neovim as Manpager
+export MANPAGER="nvim +':Man!'"
+
+# Set configuration home directory for freedesktop user
+export XDG_CONFIG_HOME="${HOME}/.config"
+
+# turn on shared prompt history for elixir's IEx REPL and erlang
+# and bump up the size of the saved history to ~1mb (ordinarly 512kb)
+export ERL_AFLAGS="-kernel shell_history enabled -kernel shell_history_file_bytes 1024000"
+
+# Better FZF (using ag for filtering)
+export FZF_DEFAULT_COMMAND='ag -g ""'
+export FZF_CTRL_T_COMMAND="${FZF_DEFAULT_COMMAND}"
+
 # give all timings in ms (%m{U,S,E}) with max resident set size (%M)
 export timefmt=(
   "%J"              # job name
