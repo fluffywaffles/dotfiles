@@ -8,6 +8,7 @@
 	required = true
 [push]
 	useForceIfIncludes = true
+	autoSetupRemote = true
 [rebase]
 	autoStash  = true
 	autoSquash = true
