@@ -1,0 +1,6 @@
+[Unit]
+Description=appointment reminder (%i min before)
+
+[Service]
+Type=oneshot
+ExecStart=/home/fluffywaffles/.dotfiles/local/bin/reminder %i appointment

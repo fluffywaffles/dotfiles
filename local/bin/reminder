@@ -1,0 +1,20 @@
+#!/bin/zsh
+# send a reminder notification
+#
+# usage: reminder <minutes-until> <label>
+
+if [[ $# -lt 2 ]]; then
+  >&2 printf "usage: reminder <minutes-until> <label>\n"
+  exit 1
+fi
+
+minutes=${1}
+label=${2}
+
+if [[ ${minutes} -eq 0 ]]; then
+  body="<b>now!</b>"
+else
+  body="in ${minutes} min"
+fi
+
+notify-send -a reminder -u critical "${label}" "${body}"

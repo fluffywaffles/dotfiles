@@ -1,0 +1,9 @@
+[Unit]
+Description=appointment reminder at start
+
+[Timer]
+OnCalendar=Mon *-*-* 14:30:00
+Persistent=false
+
+[Install]
+WantedBy=timers.target

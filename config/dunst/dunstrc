@@ -322,6 +322,15 @@
     body =
     format = "%a: <i>%s</i>"
 
+[reminder]
+    appname = "reminder"
+    background = "#6cb4ee"
+    foreground = "#0d1b2a"
+    highlight = "#ffffff"
+    timeout = 0
+    urgency = critical
+    fullscreen = show
+
 # Disable the transient hint so that idle_threshold cannot be bypassed from the
 # client
 #[transient_disable]
