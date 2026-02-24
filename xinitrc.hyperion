@@ -2,3 +2,6 @@
 
 # leave the big TV off by default
 xrandr --output HDMI-0 --off
+
+# distribute 6 desktops across our 2 configured monitors
+bspc monitor DP-2 --reset-desktops I II III && bspc monitor DP-0 --reset-desktops IV V VI
