@@ -232,15 +232,17 @@ function git-worktree-remove-for-branch {
     else break
     fi
   done
-  local tree=$(git-worktree-find-for-branch ${1})
-  if [[ -z ${tree} ]]; then
-    print -nf '┯ %s\n└ %s\n'                           \
-      'Cannot remove worktree for branch, none exists' \
-      "Branch: ${1}"
-    return 1
-  fi
-  git worktree remove ${flags[@]} ${tree}
-  rm -rf ${tree}
+  for branch in ${@}; do
+    local tree=$(git-worktree-find-for-branch ${branch})
+    if [[ -z ${tree} ]]; then
+      print -nf '┯ %s\n└ %s\n'                           \
+        'Cannot remove worktree for branch, none exists' \
+        "Branch: ${branch}"
+      continue
+    fi
+    git worktree remove ${flags[@]} ${tree}
+    rm -rf ${tree}
+  done
 }
 
 function git-worktree-default-branch-path {
@@ -341,11 +343,12 @@ function zwb {
   # otherwise, launch an interactive branch selector
   local selected; _zwb-toggle-list ${=list}              \
     | fzf                                                \
+          --multi                                        \
           --reverse                                      \
           --height 50                                    \
           --bind 'ctrl-s:toggle-preview'                 \
           --bind 'ctrl-t:reload(_zwb-toggle-list)'       \
-          --bind 'ctrl-x:print(!{remove})+accept'        \
+          --bind 'ctrl-x:become(echo !{remove} {+})'     \
           --bind 'ctrl-space:print(!{default})+accept'   \
           --preview 'git show {} --format=short --color' \
           --preview-window hidden,50                     \
@@ -358,11 +361,13 @@ function zwb {
   else branch=${selected} # otherwise, the whole thing is the branch name
   fi
   # prefixed with '!' means 'print the following command to the prompt'
-  if [[ ${branch} =~ '^!(.+) (.+)$' ]]; then
-    if [[ ${match[1]} = '{default}' ]]; then
-      print -z $(_zwb-default-command "'${match[2]}'")
-    elif [[ ${match[1]} = '{remove}' ]]; then
-      print -z git-worktree-remove-for-branch "'${match[2]}'"
+  if [[ ${branch} =~ '^!([^ ]+) (.+)$' ]]; then
+    local action=${match[1]}
+    local targets=${match[2]}
+    if [[ ${action} = '{default}' ]]; then
+      print -z $(_zwb-default-command "'${targets}'")
+    elif [[ ${action} = '{remove}' ]]; then
+      print -z git-worktree-remove-for-branch ${targets}
     fi
   elif [[ -n ${branch} ]]; then
     eval $(_zwb-default-command "'${branch}'")
