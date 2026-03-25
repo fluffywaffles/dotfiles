@@ -17,3 +17,5 @@
 	defaultBranch = trunk
 [stash]
 	showIncludeUntracked = true
+[alias]
+	sha = rev-parse --short HEAD
