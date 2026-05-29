@@ -12,7 +12,6 @@ personal dotfiles managed by [rcm](https://github.com/thoughtbot/rcm).
 │   ├── conky/           system monitor
 │   ├── dunst/           notification daemon
 │   ├── fontconfig/      font configuration
-│   ├── kitty/           terminal emulator
 │   ├── qutebrowser/     web browser
 │   ├── sxhkd/           hotkey daemon
 │   ├── systemd/user/    user systemd units
