@@ -1,0 +1,206 @@
+/*
+ * Custom Vieb Theme (custom.css)
+ * Moves tabs to top, hides logo, moves commandline/navbar to bottom, and aligns suggestion boxes.
+ */
+
+:root {
+    --tab-split: #43d08a; /* Green highlight color from tmux config */
+}
+
+/* Reorder main application containers using Flexbox order */
+#tabs {
+    order: 1;
+    background: #222222; /* Sleek dark background for tab bar */
+    border-bottom: 1px solid #444444; /* Matches active tab background so they blend */
+    height: auto; /* Auto height to perfectly fit tabs and top padding without clipping */
+    padding-top: 2px; /* Exactly 2px padding above the tabs */
+    padding-bottom: 0;
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+    gap: 0; /* No gap/padding between tabs so they touch */
+    align-items: flex-end; /* Flush tabs to the bottom of the tabbar container */
+}
+
+/* Flexbox margins on the first and last tabs to ensure padding on both ends is always respected,
+   even when the tab bar overflows/scrolls (avoiding the Chromium scrollable-padding bug). */
+#tabs > span:first-child {
+    margin-left: 2px; /* Spacing of exactly 2px on the leftmost side */
+}
+
+#tabs > span:last-child {
+    margin-right: 2px; /* Spacing of exactly 2px on the rightmost side */
+}
+
+#page-container {
+    order: 2;
+    flex: 1;
+}
+
+#navbar {
+    order: 3;
+    border-top: 1px solid var(--bg); /* Top border blends with page background */
+    border-bottom: 1.5px solid var(--mode-normal-fg); /* Bottom border color-codes the mode */
+    background: #2d2d2d;
+}
+
+/* Color-code navbar bottom border based on current Vieb mode */
+[current-mode=command] #navbar { border-bottom-color: var(--mode-command-fg); }
+[current-mode=insert] #navbar { border-bottom-color: var(--mode-insert-fg); }
+[current-mode=follow] #navbar { border-bottom-color: var(--mode-follow-fg); }
+[current-mode=explore] #navbar { border-bottom-color: var(--mode-explore-fg); }
+[current-mode=search] #navbar { border-bottom-color: var(--mode-search-fg); }
+[current-mode=pointer] #navbar { border-bottom-color: var(--mode-pointer-fg); }
+[current-mode=visual] #navbar { border-bottom-color: var(--mode-visual-fg); }
+
+/* Add a mode-colored border to the bottom of the modeline (mode block) */
+#mode-container {
+    border-bottom: 2px solid var(--mode-normal-fg);
+}
+[current-mode=command] #mode-container { border-bottom-color: var(--mode-command-fg); }
+[current-mode=insert] #mode-container { border-bottom-color: var(--mode-insert-fg); }
+[current-mode=follow] #mode-container { border-bottom-color: var(--mode-follow-fg); }
+[current-mode=explore] #mode-container { border-bottom-color: var(--mode-explore-fg); }
+[current-mode=search] #mode-container { border-bottom-color: var(--mode-search-fg); }
+[current-mode=pointer] #mode-container { border-bottom-color: var(--mode-pointer-fg); }
+[current-mode=visual] #mode-container { border-bottom-color: var(--mode-visual-fg); }
+
+/* Hide the Vieb logo */
+#logo {
+    display: none;
+}
+
+/* Make modeline (mode), command line (url), and tab labels the same uniform size */
+#mode, #url, #tabs > span {
+    font-size: 0.8em;
+}
+
+/* Make popup dialogue notifications and context menus slightly larger than the URL text */
+#notifications, #context-menu {
+    font-size: 0.85em;
+}
+
+/* Make general suggestion dropdown slightly larger than the rest of the modeline text (0.9em vs 0.8em) */
+#suggest-dropdown {
+    font-size: 0.9em;
+}
+
+/* Make the hover pop-up on the modeline (mode suggestions) the same size as the rest of the modeline text */
+#mode-suggestions div,
+#mode-container #mode-suggestions div {
+    font-size: 0.8em;
+}
+
+/* Make the mapping suggestions popover the same size as the rest of the modeline text */
+#mapsuggest,
+#app #mapsuggest {
+    font-size: 0.8em;
+}
+
+/* Remove url input border and replace with a narrow left border that color-codes the mode */
+#url {
+    border: none;
+    border-left: 1.5px solid var(--mode-normal-fg); /* Narrow default left border (Normal) */
+    padding-left: 0.4em; /* Prevent text from overlapping the left border */
+}
+
+/* Color-code left border based on current Vieb mode */
+[current-mode=command] #url { border-left-color: var(--mode-command-fg); }
+[current-mode=insert] #url { border-left-color: var(--mode-insert-fg); }
+[current-mode=follow] #url { border-left-color: var(--mode-follow-fg); }
+[current-mode=explore] #url { border-left-color: var(--mode-explore-fg); }
+[current-mode=search] #url { border-left-color: var(--mode-search-fg); }
+[current-mode=pointer] #url { border-left-color: var(--mode-pointer-fg); }
+[current-mode=visual] #url { border-left-color: var(--mode-visual-fg); }
+
+/* Style tabs to be smaller, clean, with rounded corners, and allow unlimited shrinking */
+#tabs > span {
+    height: 1.6em; /* Shorter tab height (default is 2em) */
+    background: #222222; /* Background tabs match tabbar background (#222) */
+    color: #888888; /* Inactive foreground tab text */
+    font-style: italic; /* Italicize background tabs */
+    border-radius: 3px 3px 0 0;
+    margin-top: 0; /* Remove top margin so padding-top rules the top spacing */
+    margin-bottom: 0; /* Ensure no bottom margin pushes the tab up */
+    border-top: 1.5px solid transparent; /* Base border to prevent vertical shift */
+    border-bottom: 1px solid transparent; /* Base border to prevent vertical shift */
+    border-left: 1px solid transparent; /* Base left border to prevent horizontal shift */
+    border-right: none;
+    transition: background 0.2s ease, color 0.2s ease;
+    min-width: 0; /* Allow tabs to shrink as tiny as needed */
+    flex: 1 1 0%; /* Grow and shrink evenly to fit */
+    padding: 2px 2px 0 2px;
+}
+
+/* Highlight background tabs slightly on hover */
+#tabs > span:not(#current-tab):hover {
+    background: #2a2a2a;
+    color: #cccccc;
+}
+
+/* Insert a tiny light-grey divider bar (1px solid #555) between any 2 adjacent inactive tabs */
+#tabs > span:not(#current-tab) + span:not(#current-tab) {
+    border-left-color: #555555;
+}
+
+/* Resize icons in the tab bar to match the smaller tabs */
+#tabs > span > img {
+    height: 1.1em; /* Smaller icon (default is 1.5em) */
+    width: 1.1em;
+    min-height: 1.1em;
+    min-width: 1.1em;
+    padding-right: 1px;
+}
+
+#tabs #current-tab {
+    background: #444444; /* Toned down grey active tab background */
+    color: var(--fg); /* Light text for readability on dark background */
+    font-style: normal; /* Selected tab text is not italic */
+    border-top-color: var(--tab-split); /* Green accent line on top */
+    border-bottom-color: transparent; /* Remove bottom border */
+    border-left-color: transparent;
+}
+
+/* Position suggestion dropdown directly above the bottom navbar */
+#suggest-dropdown {
+    top: auto;
+    bottom: 0.1em;
+}
+
+/* Ensure mode suggestions open upwards since navbar is at the bottom */
+#mode-suggestions {
+    top: auto;
+    bottom: 2.2em;
+}
+
+/* Slide navbar down out of screen when hidden, instead of sliding up */
+#app.navigationhidden #navbar {
+    position: absolute;
+    bottom: -10em;
+    top: auto;
+}
+
+/* Window dragging behavior:
+   Allow dragging the window via empty space on the tabbar,
+   but ensure tab interactions remain clickable.
+ */
+#tabs {
+    -webkit-app-region: drag;
+}
+#tabs > span, #tabs > div, #tabs > button, #tabs > a {
+    -webkit-app-region: no-drag;
+}
+
+/* Pinned tabs: hide title and only show favicon by default */
+#tabs > span.pinned > span {
+    display: none;
+}
+
+/* Pinned tabs: show title on hover and expand tab width */
+#tabs > span.pinned:hover {
+    min-width: fit-content;
+    max-width: 15em;
+    width: auto;
+    padding-right: 0.5em;
+}
+#tabs > span.pinned:hover > span {
+    display: inline-block;
+}

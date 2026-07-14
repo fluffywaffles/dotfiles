@@ -10,16 +10,29 @@ set mintabwidth=0
 " Display keybinding hints (mapping suggestions) at the bottom-right corner
 set mapsuggestposition=bottomright
 
+" Place follow labels inside the top-left corner of elements (top-left inset)
+set followlabelposition=insidetopleft
+
+" Show dialog popups for alerts, confirms, and prompts instead of auto-handling or blocking them
+set dialogconfirm=show
+set dialogalert=show
+set dialogprompt=show
+
+" Configure external editor to use kitty terminal with neovim
+set vimcommand="kitty nvim"
+
 " Apply our custom colorscheme (which places tabs on top, command bar on bottom, and hides the logo)
 colorscheme custom
 
 " Custom key mappings
-" ;t to follow link in the same tab
-nmap ;t <startFollowCurrentTab>
+" Configure follow mode to temporarily filter for inputs when using ;t,
+" and restore default clickable elements when using f, F, or ;r.
+nmap f <:set followelement=["url","onclick","inputs-insert","inputs-click","media","image","other"]><startFollowCurrentTab>
+nmap F <:set followelement=["url","onclick","inputs-insert","inputs-click","media","image","other"]><startFollowNewTab>
+nmap ;r <:set followelement=["url","onclick","inputs-insert","inputs-click","media","image","other"]><startFollowNewTab>
 
-" ;r to follow link in a new tab (multi-select / background tabs)
-" Note: Hold Shift when typing the hint characters to keep opening tabs in the background
-nmap ;r <startFollowNewTab>
+" ;t to follow only form inputs in the same tab
+nmap ;t <:set followelement=["inputs-insert","inputs-click"]><startFollowCurrentTab>
 
 " gt to open the command line with ":buffer " for interactive tab selection
 nmap gt <toCommandMode>buffer<Space>
@@ -37,31 +50,67 @@ nunmap E
 " Map o and O to explore (open url) instead of e and E
 nmap o <toExploreMode>
 nmap O <:tabnew><toExploreMode>
-" Remap "move tab to end" (originally O) to g$
-nmap g$ <moveTabEnd>
+" Map e and E to edit the current URL in neovim (similar to qutebrowser edit-url)
+nmap e <toExploreMode><editWithVim>
+nmap E <:tabnew><toExploreMode><editWithVim>
 
-" Bindings to move the current tab to specific positions
-nmap g0 <moveTabStart>
-nmap g1 <moveTabStart>1<moveTabForward>
-nmap g2 <moveTabStart>2<moveTabForward>
-nmap g3 <moveTabStart>3<moveTabForward>
-nmap g4 <moveTabStart>4<moveTabForward>
-nmap g5 <moveTabStart>5<moveTabForward>
-nmap g6 <moveTabStart>6<moveTabForward>
-nmap g7 <moveTabStart>7<moveTabForward>
-nmap g8 <moveTabStart>8<moveTabForward>
-nmap g9 <moveTabStart>9<moveTabForward>
+" Bindings to navigate to tabs by index (g0 ... g9, g$)
+nmap g0 <:buffer 0>
+nmap g1 <:buffer 1>
+nmap g2 <:buffer 2>
+nmap g3 <:buffer 3>
+nmap g4 <:buffer 4>
+nmap g5 <:buffer 5>
+nmap g6 <:buffer 6>
+nmap g7 <:buffer 7>
+nmap g8 <:buffer 8>
+nmap g9 <:buffer 9>
+nmap g$ <:buffer -1>
 
+" Bindings to move the current tab to specific positions (gm0 ... gm9, gm$)
+nmap gm0 <moveTabStart>
+nmap gm1 <moveTabStart>1<moveTabForward>
+nmap gm2 <moveTabStart>2<moveTabForward>
+nmap gm3 <moveTabStart>3<moveTabForward>
+nmap gm4 <moveTabStart>4<moveTabForward>
+nmap gm5 <moveTabStart>5<moveTabForward>
+nmap gm6 <moveTabStart>6<moveTabForward>
+nmap gm7 <moveTabStart>7<moveTabForward>
+nmap gm8 <moveTabStart>8<moveTabForward>
+nmap gm9 <moveTabStart>9<moveTabForward>
+nmap gm$ <moveTabEnd>
 
 " gJ and gK to move tab forward/backward
 nmap gJ <moveTabForward>
 nmap gK <moveTabBackward>
 
-" d to close tab and focus right (subsequent tab)
-nmap d <:set tabclosefocus=right><:close>
+" Unmap default d and D mappings
+nunmap d
+nunmap D
 
-" D to close tab and focus left (preceding tab)
+" D should close tab and follow tab left; d should close tab and follow tab right
+nmap d <:set tabclosefocus=right><:close>
 nmap D <:set tabclosefocus=left><:close>
+
+" Map Ctrl-p to pin the current tab
+nmap <C-p> <:pin>
+
+" Map Ctrl-Tab and \\ to switch to the last active tab (alternate tab)
+nmap <C-Tab> <:buffer #>
+nmap <Bslash><Bslash> <:buffer #>
+
+" Enable custom styles for webpages to set default zoom to 85%
+set userstyle
+
+" Always restore open tabs from the previous session on startup
+set restoretabs
+
+" Disable F11 for fullscreen
+nmap <F11> <nop>
+imap <F11> <nop>
+cmap <F11> <nop>
+
+" --- NEW ADDITIONS FROM ~/.viebrc ---
 
 " Unmap default 't' and 'T' in Normal mode
 nunmap t
@@ -83,4 +132,3 @@ nmap ti :set images!<CR>
 nmap tb :set spell!<CR>
 " tu to toggle custom userstyles globally
 nmap tu :set userstyle!<CR>
-
