@@ -38,8 +38,9 @@
 #navbar {
     order: 3;
     border-top: 1px solid var(--bg); /* Top border blends with page background */
-    border-bottom: 1.5px solid var(--mode-normal-fg); /* Bottom border color-codes the mode */
+    border-bottom: 2px solid var(--mode-normal-fg); /* Bottom border color-codes the mode */
     background: #2d2d2d;
+    position: relative;
 }
 
 /* Color-code navbar bottom border based on current Vieb mode */
@@ -51,17 +52,7 @@
 [current-mode=pointer] #navbar { border-bottom-color: var(--mode-pointer-fg); }
 [current-mode=visual] #navbar { border-bottom-color: var(--mode-visual-fg); }
 
-/* Add a mode-colored border to the bottom of the modeline (mode block) */
-#mode-container {
-    border-bottom: 2px solid var(--mode-normal-fg);
-}
-[current-mode=command] #mode-container { border-bottom-color: var(--mode-command-fg); }
-[current-mode=insert] #mode-container { border-bottom-color: var(--mode-insert-fg); }
-[current-mode=follow] #mode-container { border-bottom-color: var(--mode-follow-fg); }
-[current-mode=explore] #mode-container { border-bottom-color: var(--mode-explore-fg); }
-[current-mode=search] #mode-container { border-bottom-color: var(--mode-search-fg); }
-[current-mode=pointer] #mode-container { border-bottom-color: var(--mode-pointer-fg); }
-[current-mode=visual] #mode-container { border-bottom-color: var(--mode-visual-fg); }
+/* Removed mode-container borders to keep a continuous border on the navbar instead */
 
 /* Hide the Vieb logo */
 #logo {
@@ -78,9 +69,9 @@
     font-size: 0.85em;
 }
 
-/* Make general suggestion dropdown slightly larger than the rest of the modeline text (0.9em vs 0.8em) */
+/* Make general suggestion dropdown slightly larger than the rest of the modeline text */
 #suggest-dropdown {
-    font-size: 0.9em;
+    font-size: 0.85em;
 }
 
 /* Make the hover pop-up on the modeline (mode suggestions) the same size as the rest of the modeline text */
@@ -165,10 +156,11 @@
     bottom: 0.1em;
 }
 
-/* Ensure mode suggestions open upwards since navbar is at the bottom */
+/* Ensure mode suggestions open upwards without a gap, anchored to the top of the navbar */
 #mode-suggestions {
     top: auto;
-    bottom: 2.2em;
+    bottom: 100%;
+    left: 0;
 }
 
 /* Slide navbar down out of screen when hidden, instead of sliding up */
@@ -203,4 +195,8 @@
 }
 #tabs > span.pinned:hover > span {
     display: inline-block;
+}
+/* Center favicon in pinned tabs when not hovered to keep left/right padding even */
+#tabs > span.pinned:not(:hover) {
+    justify-content: center;
 }
