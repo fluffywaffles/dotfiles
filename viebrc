@@ -1,0 +1,86 @@
+" Vieb configuration (~/.viebrc)
+
+" Always display the tabbar and navigation bar (command line)
+set guitabbar=always
+set guinavbar=always
+
+" Disable minimum tab width so tabs shrink/squish to fit the bar instead of scrolling
+set mintabwidth=0
+
+" Display keybinding hints (mapping suggestions) at the bottom-right corner
+set mapsuggestposition=bottomright
+
+" Apply our custom colorscheme (which places tabs on top, command bar on bottom, and hides the logo)
+colorscheme custom
+
+" Custom key mappings
+" ;t to follow link in the same tab
+nmap ;t <startFollowCurrentTab>
+
+" ;r to follow link in a new tab (multi-select / background tabs)
+" Note: Hold Shift when typing the hint characters to keep opening tabs in the background
+nmap ;r <startFollowNewTab>
+
+" gt to open the command line with ":buffer " for interactive tab selection
+nmap gt <toCommandMode>buffer<Space>
+
+" Unmap default gT mapping (previous tab)
+nunmap gT
+
+" Cmd+Alt+R to trigger Vieb configuration reload (:reload)
+nmap <M-A-r> <:reload>
+
+" Qutebrowser-style bindings for explore (open url/search)
+" Unmap default explore keys e and E
+nunmap e
+nunmap E
+" Map o and O to explore (open url) instead of e and E
+nmap o <toExploreMode>
+nmap O <:tabnew><toExploreMode>
+" Remap "move tab to end" (originally O) to g$
+nmap g$ <moveTabEnd>
+
+" Bindings to move the current tab to specific positions
+nmap g0 <moveTabStart>
+nmap g1 <moveTabStart>1<moveTabForward>
+nmap g2 <moveTabStart>2<moveTabForward>
+nmap g3 <moveTabStart>3<moveTabForward>
+nmap g4 <moveTabStart>4<moveTabForward>
+nmap g5 <moveTabStart>5<moveTabForward>
+nmap g6 <moveTabStart>6<moveTabForward>
+nmap g7 <moveTabStart>7<moveTabForward>
+nmap g8 <moveTabStart>8<moveTabForward>
+nmap g9 <moveTabStart>9<moveTabForward>
+
+
+" gJ and gK to move tab forward/backward
+nmap gJ <moveTabForward>
+nmap gK <moveTabBackward>
+
+" d to close tab and focus right (subsequent tab)
+nmap d <:set tabclosefocus=right><:close>
+
+" D to close tab and focus left (preceding tab)
+nmap D <:set tabclosefocus=left><:close>
+
+" Unmap default 't' and 'T' in Normal mode
+nunmap t
+nunmap T
+
+" Enable native userscripts support
+set userscript
+
+" Toggles prefixed with 't'
+" ta to toggle adblocker
+nmap ta :set adblocker!<CR>
+" ts to toggle smooth scrolling globally (current tab only)
+nmap ts :runjsinpage toggleSmoothScroll()<CR>
+" tj to toggle JavaScript execution
+nmap tj :set javascript!<CR>
+" ti to toggle image loading
+nmap ti :set images!<CR>
+" tb to toggle spellcheck
+nmap tb :set spell!<CR>
+" tu to toggle custom userstyles globally
+nmap tu :set userstyle!<CR>
+
