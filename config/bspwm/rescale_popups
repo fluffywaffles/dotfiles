@@ -1,0 +1,70 @@
+#!/usr/bin/env python3
+import sys
+import subprocess
+import re
+import shutil
+
+# =========================================================================
+# CONFIGURATION: Add application class names that have tiny popups here
+# =========================================================================
+# To add a new application, find its class name (the second string in the
+# output of `xprop | grep WM_CLASS`) and add it to this list in lowercase.
+# =========================================================================
+TARGET_APPS = {
+    "orcaslicer",
+    "snapmaker_orca",
+}
+
+def get_dpi():
+    try:
+        res = subprocess.check_output(["xrdb", "-query"], stderr=subprocess.DEVNULL).decode()
+        match = re.search(r"Xft\.dpi:\s*(\d+)", res)
+        if match:
+            return float(match.group(1))
+    except Exception:
+        pass
+    return 96.0
+
+def main():
+    if not shutil.which("xprop") or not shutil.which("xrdb"):
+        return
+    if len(sys.argv) < 3:
+        return
+    wid = sys.argv[1]
+    class_name = sys.argv[2].lower()
+
+    # Only apply this fix to the targeted application classes
+    if class_name not in TARGET_APPS:
+        return
+
+    # Check if this is a transient (popup/dialog) window
+    try:
+        transient = subprocess.check_output(["xprop", "-id", wid, "WM_TRANSIENT_FOR"], stderr=subprocess.DEVNULL).decode()
+        if not re.search(r"0x[0-9a-fA-F]+", transient):
+            return  # Main window, let bspwm handle it normally
+    except Exception:
+        return
+
+    # Calculate DPI scale factor relative to 96 DPI
+    dpi = get_dpi()
+    scale = dpi / 96.0
+
+    # If no scaling is needed, let the default size hints stand
+    if scale <= 1.05:
+        return
+
+    # Get the window's requested geometry hints (WM_NORMAL_HINTS)
+    try:
+        hints = subprocess.check_output(["xprop", "-id", wid, "WM_NORMAL_HINTS"], stderr=subprocess.DEVNULL).decode()
+        # Look for minimum or specified size (e.g. "minimum size: 820 by 660")
+        match = re.search(r"size:\s*(\d+)\s*by\s*(\d+)", hints)
+        if match:
+            w = int(int(match.group(1)) * scale)
+            h = int(int(match.group(2)) * scale)
+            # Instruct bspwm to override the size using the scaled dimensions
+            print(f"state=floating rectangle={w}x{h}+0+0 center=true")
+    except Exception:
+        pass
+
+if __name__ == "__main__":
+    main()

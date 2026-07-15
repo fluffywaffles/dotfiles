@@ -52,6 +52,10 @@ bspc config click_to_focus          button1 # Button used for focusing a window 
 bspc config center_pseudo_tiled        true # Center pseudo tiled windows into their tiling rectangles.
 bspc config pointer_modifier           mod4 # Super+mouse to perform pointer actions (move, resize).
 
+# Add an external_rules script to auto-scale pop-up windows for hi-dpi
+#-------------------------------------------------------------------------
+bspc config external_rules_command ${HOME}/.config/bspwm/rescale_popups # Custom sizing rules for popups
+
 #=========================================================================
 # References
 #-------------------------------------------------------------------------
