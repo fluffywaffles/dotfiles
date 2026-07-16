@@ -1,8 +1,10 @@
 #!/bin/zsh
 
 if [[ -z ${1} ]]; then
-  >&2 printf "usage: h265 <file>\n"
+  >&2 printf "usage: h265 <file> [<outfile>]\n"
   exit 1
 fi
 
-ffmpeg -i ${1} -c:v libx265 -o ${1}
+# also hevc_nvenc for the nvidia accelerated codec?
+
+ffmpeg -i ${1} -c:v libx265 ${2:-1}
