@@ -227,6 +227,7 @@ function git-worktree-create-if-not-exists {
 
 function git-worktree-remove-for-branch {
   local flags=()
+  local branch
   while true; do
     if [[ ${1} =~ ^-+.+$ ]]; then flags+=(${1}); shift;
     else break
