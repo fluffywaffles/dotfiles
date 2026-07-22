@@ -1,0 +1,10 @@
+#!/bin/sh
+
+# Set DP-1 as primary and disable HDMI-2
+xrandr --output DP-1 --rate 240.00 --mode 3840x2160 --rotate right --primary --output HDMI-2 --off
+
+# Force VSync for OpenGL and Vulkan apps
+export vblank_mode=3
+
+# Start xss-lock to listen on logind idle=lock triggers
+xss-lock -- slock &
