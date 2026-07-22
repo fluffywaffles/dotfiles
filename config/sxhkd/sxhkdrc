@@ -10,12 +10,16 @@
 # Application launch hotkeys
 #
 
-# lock + suspend
+# just lock
 super + shift + l
+	slock
+
+# lock + suspend
+super + ctrl + shift + l
 	slock systemctl suspend --check-inhibitors=no
 
 # lock + hibernate
-super + shift + h
+super + ctrl + shift + h
 	systemctl hibernate
 
 # terminal emulator
