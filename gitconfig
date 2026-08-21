@@ -19,3 +19,6 @@
 	showIncludeUntracked = true
 [alias]
 	sha = rev-parse --short HEAD
+[rerere]
+	enabled = true
+	autoUpdate = false
