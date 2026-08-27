@@ -172,14 +172,6 @@ function git-worktree-paths {
 # worktree per branch at any given time, find the worktree corresponding
 # to the given branch (if any).
 #
-function git-worktree-find-for-branch {
-  local branch=${1}
-  typeset -A worktree_entries=($(git-worktree-entries))
-  local index=${${(v)worktree_entries}[(i)${branch}]}
-  local tree_path=${${(k)worktree_entries}[${index}]}
-  print ${tree_path}
-}
-
 function git-worktree-create-if-not-exists {
   local match mbegin mend
   local branch=${1}

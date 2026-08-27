@@ -1,0 +1,10 @@
+#!/usr/bin/env zsh
+
+# given a branch, print the path of the worktree that has it checked out
+function git-worktree-find-for-branch() {
+  local branch=${1}
+  typeset -A worktree_entries=($(git-worktree-entries))
+  local index=${${(v)worktree_entries}[(i)${branch}]}
+  local tree_path=${${(k)worktree_entries}[${index}]}
+  print ${tree_path}
+}

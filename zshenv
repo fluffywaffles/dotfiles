@@ -265,6 +265,7 @@ fi
 
 # autoload some git worktree magic functions
 autoload git-worktree-root
+autoload git-worktree-find-for-branch
 
 # perform compinit as late as possible, as it may override other settings
 autoload -U compinit && compinit
