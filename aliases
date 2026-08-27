@@ -135,9 +135,9 @@ function git-pull-rebase () {(
   setopt err_exit
   local rebase_opt=true flags=() match mbegin mend
   while true; do
-    if   [[ ${1} =~ ^-+i(nteractive)*$ ]]; then shift; rebase_opt=interactive;
+    if   [[ ${1} =~ ^-+i(nteractive)*$ ]]; then shift; rebase_opt=interactive; flags+=("--autosquash");
     elif [[ ${1} =~ ^-+n(o-rebase)*$   ]]; then shift; rebase_opt=false;
-    elif [[ ${1} =~ ^-+[[:alnum:]]+$   ]]; then shift; flags+=(${match});
+    elif [[ ${1} =~ ^-+[[:alnum:]-]+$  ]]; then shift; flags+=(${match});
     else break;
     fi
   done
@@ -163,9 +163,11 @@ function git-pull-rebase () {(
 function git-pull-rebase-origin-main () {(
   setopt err_exit
   local rebase_opt=true flags=() match mbegin mend
-  while [[ ${1} =~ ^-+[[:alnum:]]+$ ]]; do shift; flags+=(${match}); done
-  local branch=${1:-$(git config init.defaultbranch)}
+  while [[ ${1} =~ ^-+[[:alnum:]-]+$ ]]; do shift; flags+=(${match}); done
   local remote=${remote:-origin}
+  local default_ref=$(git-origin-default-branch ${remote})
+  local default_branch=${default_ref#refs/remotes/${remote}/}
+  local branch=${1:-${default_branch:-$(git config init.defaultbranch)}}
   git-pull-rebase ${flags[@]} ${remote} ${branch}
 )}
 
@@ -231,18 +233,76 @@ function git-pull-rebase-then-force-push-origin-with-lease-includes () {(
   #   -p* and --push-* are flags for git-push; e.g. -pf, --push-force
   #
   local pull_flags=() push_flags=() match mbegin mend
-  while [[ ${1} =~ ^-+(l|pull)-*[[:alnum:]]+$ ]]; do shift; pull_flags+=(${match}); done
-  while [[ ${1} =~ ^-+(p|push)-*[[:alnum:]]+$ ]]; do shift; push_flags+=(${match}); done
+  while true; do
+    if   [[ ${1} =~ ^-+(p|push)-*([[:alnum:]-]+)$ ]]; then shift; push_flags+=("-${match[2]}");
+    elif [[ ${1} =~ ^-+(l|pull)-*([[:alnum:]-]+)$ ]]; then shift; pull_flags+=("-${match[2]}");
+    elif [[ ${1} =~ ^-+[[:alnum:]-]+$             ]]; then shift; pull_flags+=(${match});
+    else break;
+    fi
+  done
   #
   # positional arguments can customize the upstream or downstream branch
   #
   local pull_branch=${1:-${upstream_branch}}
   local push_branch=${2:-${downstream_branch}}
   # pull
-  git-pull-rebase ${flags[@]} ${upstream_remote} ${pull_branch}
+  git-pull-rebase ${pull_flags[@]} ${upstream_remote} ${pull_branch}
   setopt xtrace
   git push --force-with-lease --force-if-includes ${downstream_remote} ${push_branch}
 )}
+
+#
+# git-origin-default-branch
+#
+# returns the default branch for a given remote (default: origin) using
+# symbolic-ref.
+#
+function git-origin-default-branch () {
+  local remote=${1:-origin}
+  local symref=$(git symbolic-ref refs/remotes/${remote}/HEAD 2>/dev/null)
+  if [[ -n "${symref}" ]]; then
+    echo "${symref}"
+    return 0
+  fi
+
+  # Fallback if the remote symbolic-ref isn't set
+  local fallback=$(git config init.defaultbranch || echo main)
+  if git rev-parse --verify --quiet refs/remotes/${remote}/${fallback} >/dev/null; then
+    echo "refs/remotes/${remote}/${fallback}"
+    return 0
+  elif git rev-parse --verify --quiet refs/remotes/${remote}/master >/dev/null; then
+    echo "refs/remotes/${remote}/master"
+    return 0
+  fi
+
+  return 1
+}
+
+#
+# git-ensure-push-extends-base
+#
+# Validates that the branch we are pushing extends beyond the default integration
+# branch of the repository (or @{upstream} as a last resort). Prevents accidentally
+# publishing pure upstream content under a new label.
+#
+function git-ensure-push-extends-base () {
+  local remote=${1:-origin}
+  local branch=${2:-HEAD}
+  local default_branch=${base_branch:-$(git-origin-default-branch ${remote})}
+
+  [[ -z "${default_branch}" ]] && default_branch=$(git rev-parse --abbrev-ref HEAD@{upstream} 2>/dev/null)
+
+  if [[ -z "${default_branch}" ]]; then
+    echo "warning: skipping push safety checks (no default branch found)" >&2
+    return 0
+  fi
+
+  local base=$(git merge-base "${default_branch}" HEAD)
+
+  git merge-base --is-ancestor "${branch}" HEAD || { echo "fatal: not in this branch's history" >&2; return 1; }
+  git merge-base --is-ancestor "${branch}" "${base}" && { echo "fatal: already upstream" >&2; return 1; }
+  return 0
+}
 
 #
 # git-push-current-branch
@@ -268,6 +328,9 @@ function git-push-current-branch () {(
   local branch=$(git rev-parse --abbrev-ref HEAD) # git-branch-current
   # named arguments
   local remote=${remote:-origin}
+
+  git-ensure-push-extends-base "${remote}" "${branch}"
+
   # positional arguments
   local remote_branch=${1:-${branch}}
   setopt xtrace
@@ -321,6 +384,20 @@ function git-cd-toplevel () {
 }
 
 #
+# git-branch-default-verbose
+#
+# runs `git branch -v` when no arguments are provided, otherwise `git branch ${@}`
+#
+function git-branch-default-verbose () {(
+  setopt err_exit
+  if [[ ${#} -eq 0 ]]; then
+    git branch -v
+  else
+    git branch ${@}
+  fi
+)}
+
+#
 # shell aliases for custom git functions
 #
 alias grt='git-cd-toplevel'
@@ -329,6 +406,7 @@ alias gpu='git-push-set-upstream-branch-current'
 alias gpc='git-push-current-branch'
 alias gpf='git-push-current-branch --force-with-lease --force-if-includes'
 alias glom='git-pull-rebase-origin-main'
+alias gob='git-origin-default-branch'
 alias glop='git-pull-rebase-then-force-push-origin-with-lease-includes'
 alias gapf='git-amend-then-force-push --no-edit'
 alias gapfe='git-amend-then-force-push --patch'
@@ -338,7 +416,7 @@ alias gapfe='git-amend-then-force-push --patch'
 #
 alias g='git'
 alias ga='git add'
-alias gb='git branch'
+alias gb='git-branch-default-verbose'
 alias gc='git commit --verbose'
 alias gd='git diff'
 alias gf='git fetch'
@@ -348,6 +426,7 @@ alias gp='git push'
 alias gr='git rebase'
 alias gs='git show'
 alias gco='git checkout'
+alias gds='git diff --staged'
 alias gfa='git fetch --all'
 alias gst='git status'
 alias gsq='git rebase --interactive --autosquash'
