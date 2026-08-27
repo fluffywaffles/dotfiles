@@ -11,6 +11,7 @@
 [rebase]
 	autoStash  = true
 	autoSquash = true
+	updateRefs = true
 [pull]
 	rebase = true
 [init]
@@ -24,3 +25,21 @@
 	autoUpdate = false
 [merge]
 	conflictStyle = zdiff3
+[branch]
+	sort = -committerdate
+[diff]
+	algorithm = histogram
+	colorMoved = zebra
+	colorMovedWS = allow-indentation-change
+	mnemonicPrefix = true
+[fetch]
+	prune = true
+	all = true
+[commit]
+	verbose = true
+[column]
+	ui = auto,row
+[feature]
+	experimental = true
+[grep]
+	patternType = perl
