@@ -1,0 +1,20 @@
+#!/bin/zsh
+
+remote_refs=$(git ls-remote --sort=-committerdate --heads origin 'refs/heads/*' | cut -d'	' -f2)
+
+git remote prune origin
+git fetch
+
+for ref (${=remote_refs}); do
+  pretty=${ref##refs/heads/}
+
+  git show --no-patch --format="[%cd] %d" origin/${pretty}
+  gh pr view --json=title,state --template 'pull request? {{.state}}{{printf "\t"}}{{.title}}{{printf "\n"}}' ${pretty}
+
+  printf '  » prune? [yn] '
+
+  if read -q; then
+    printf '\n'
+    git push origin --delete ${pretty}
+  fi
+done
