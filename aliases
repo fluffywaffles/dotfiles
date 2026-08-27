@@ -453,3 +453,8 @@ alias gwrm='git worktree remove'
 if [[ -s ~/.aliases.${HOST} ]]; then
   source ~/.aliases.${HOST}
 fi
+
+alias claude="claude --model opus"
+alias fable="claude --model fable"
+alias opus="claude --model opus"
+alias sonnet="claude --model sonnet"
