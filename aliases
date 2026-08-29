@@ -212,17 +212,25 @@ function git-pull-rebase-origin-main () {(
 function git-pull-rebase-then-force-push-origin-with-lease-includes () {(
   setopt err_exit
   # parse upstream (pull target)
-  local upstream=${upstream:-$(git rev-parse --abbrev-ref HEAD@{upstream})}
+  local upstream=${upstream:-$(git rev-parse --abbrev-ref HEAD@{upstream} 2>/dev/null)}
+  # default upstream to origin/{current-branch} if not found
+  if [[ -z ${upstream} ]]; then
+    upstream="origin/$(git rev-parse --abbrev-ref HEAD)"
+  fi
   local upstream_remote upstream_branch
-  if [[ ${upstream} =~ [[:alnum:]]+/[[:alnum:]]+ ]]; then
+  if [[ ${upstream} =~ ^[^/]+/.+$ ]]; then
     upstream=(${(s:/:)upstream})
     upstream_remote=${upstream[1]}
     upstream_branch=${(j:/:)upstream[2,-1]}
   fi
   # parse downstream (push target)
-  local downstream=${downstream:-$(git rev-parse --abbrev-ref HEAD@{push})}
+  local downstream=${downstream:-$(git rev-parse --abbrev-ref HEAD@{push} 2>/dev/null)}
+  # default downstream to origin/{current-branch} if not found
+  if [[ -z ${downstream} ]]; then
+    downstream="origin/$(git rev-parse --abbrev-ref HEAD)"
+  fi
   local downstream_remote downstream_branch
-  if [[ ${downstream} =~ [[:alnum:]]+/[[:alnum:]]+ ]]; then
+  if [[ ${downstream} =~ ^[^/]+/.+$ ]]; then
     downstream=(${(s:/:)downstream})
     downstream_remote=${downstream[1]}
     downstream_branch=${(j:/:)downstream[2,-1]}
