@@ -107,8 +107,8 @@ export ERL_AFLAGS="-kernel shell_history enabled -kernel shell_history_file_byte
 export FZF_DEFAULT_COMMAND='ag -g ""'
 export FZF_CTRL_T_COMMAND="${FZF_DEFAULT_COMMAND}"
 
-# give all timings in ms (%m{U,S,E}) with max resident set size (%M)
-export timefmt=(
+typeset -gxT TIMEFMT timefmt ' '
+timefmt=(
   "%J"              # job name
   "%mU user"        # time spent in user-mode in milliseconds
   "%mS system"      # time spent in kernel-mode in milliseconds
@@ -118,7 +118,6 @@ export timefmt=(
   "─"               # spacer between cpu and memory
   "max RSS %Mkb"    # max resident set size in kilobytes
 )
-export TIMEFMT=${(j: :)${timefmt}}
 # zle: shells sometimes need a margin on the RPROMPT, but not in tmux
 export ZLE_RPROMPT_INDENT=$((!${+TMUX}))
 # zle: which characters should be removed during completion? (not pipe)
@@ -160,7 +159,8 @@ export ZLE_REMOVE_SUFFIX_CHARS=$' \t\n;&'
 #
 # TODO(jordan): use more than 16 colors when available
 #
-export ls_colors=(
+typeset -gxT LS_COLORS ls_colors ':'
+ls_colors=(
   "rs=0"        # reset
   "di=01;34"    # directory
   "ln=01;36"    # link
@@ -200,7 +200,6 @@ export ls_colors=(
   "*.lrz=01;31"
   "*.lz=0"
 )
-export LS_COLORS=${(j.:.)ls_colors}
 
 #-------------------------
 # zsh modules, completion
