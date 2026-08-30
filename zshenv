@@ -103,9 +103,13 @@ export XDG_CONFIG_HOME="${HOME}/.config"
 # and bump up the size of the saved history to ~1mb (ordinarly 512kb)
 export ERL_AFLAGS="-kernel shell_history enabled -kernel shell_history_file_bytes 1024000"
 
-# Better FZF (using ag for filtering)
+typeset -gxT FZF_DEFAULT_OPTS fzf_default_opts ' '
 export FZF_DEFAULT_COMMAND='ag -g ""'
 export FZF_CTRL_T_COMMAND="${FZF_DEFAULT_COMMAND}"
+fzf_default_opts=(
+  --scheme=path
+  --tiebreak=chunk,length,begin
+)
 
 typeset -gxT TIMEFMT timefmt ' '
 timefmt=(
