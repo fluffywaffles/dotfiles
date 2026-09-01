@@ -285,6 +285,10 @@ function _zwb-default-command {
 }
 
 function zwb {
+  if [[ ${1} == "-" ]]; then
+    cd -
+    return 0
+  fi
   local match mbegin mend
   # get the root of the current worktree forest, and if none, bail
   local root=$(git-worktree-root)
