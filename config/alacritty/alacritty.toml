@@ -3,8 +3,8 @@
 [colors.primary]
 # Alternate backgrounds to try:
 # background = "#36393f"
-# background = "#343639"
-background = "#323232"
+# background = "#323232"
+background = "#343639"
 foreground = "#ffffff"
 
 [colors.cursor]
