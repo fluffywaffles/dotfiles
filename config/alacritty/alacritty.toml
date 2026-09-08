@@ -27,3 +27,21 @@ blue    = "#5eb7f7"
 magenta = "#ff9dff"
 cyan    = "#dcf4ff"
 white   = "#ffffff"
+
+[font]
+size = 8.0
+
+[[keyboard.bindings]]
+key = "="
+mods = "Control"
+action = "ResetFontSize"
+
+[[keyboard.bindings]]
+key = "+"
+mods = "Control"
+action = "IncreaseFontSize"
+
+[[keyboard.bindings]]
+key = "-"
+mods = "Control"
+action = "DecreaseFontSize"
