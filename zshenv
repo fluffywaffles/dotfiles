@@ -83,6 +83,8 @@ setopt no_beep            # don't fucking beep
 # misc. zsh environment variable parameters
 # man://zshparam(1) (section: PARAMETERS USED BY THE SHELL)
 #
+export LANG="en_US.UTF-8"
+export LC_ALL="en_US.UTF-8"
 export HISTFILE="${HOME}/.zsh_history"
 export DIRSTACKSIZE=100      # keep 100 entries in the directory stack
 export HISTSIZE=50000        # keep 50k lines of internal session history
