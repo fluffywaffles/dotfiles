@@ -1,7 +1,10 @@
 # Alacritty Configuration - idleToes Theme
 
 [colors.primary]
-background = "#36393f"
+# Alternate backgrounds to try:
+# background = "#36393f"
+# background = "#343639"
+background = "#323232"
 foreground = "#ffffff"
 
 [colors.cursor]
