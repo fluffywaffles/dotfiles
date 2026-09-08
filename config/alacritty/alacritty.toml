@@ -1,7 +1,7 @@
 # Alacritty Configuration - idleToes Theme
 
 [colors.primary]
-background = "#323232"
+background = "#36393f"
 foreground = "#ffffff"
 
 [colors.cursor]
@@ -13,15 +13,15 @@ black   = "#323232"
 red     = "#d25252"
 green   = "#7fe173"
 yellow  = "#ffc66d"
-blue    = "#4098ff"
-magenta = "#f57fff"
+blue    = "#4099ff"
+magenta = "#f680ff"
 cyan    = "#bed6ff"
 white   = "#eeeeec"
 
 [colors.bright]
 black   = "#535353"
 red     = "#f07070"
-green   = "#9dff90"
+green   = "#9dff91"
 yellow  = "#ffe48b"
 blue    = "#5eb7f7"
 magenta = "#ff9dff"
