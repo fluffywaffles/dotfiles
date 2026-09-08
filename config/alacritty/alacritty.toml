@@ -45,3 +45,6 @@ action = "IncreaseFontSize"
 key = "-"
 mods = "Control"
 action = "DecreaseFontSize"
+
+[window]
+dynamic_padding = true
