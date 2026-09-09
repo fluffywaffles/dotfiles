@@ -1,0 +1,63 @@
+# Extended Keys (CSI u) configuration for Alacritty
+# Imports this file from your main alacritty.toml
+
+[[keyboard.bindings]]
+key = "Enter"
+mods = "Shift"
+chars = "\x1b[13;2u"
+
+[[keyboard.bindings]]
+key = "Enter"
+mods = "Control"
+chars = "\x1b[13;5u"
+
+[[keyboard.bindings]]
+key = "Enter"
+mods = "Control|Shift"
+chars = "\x1b[13;6u"
+
+[[keyboard.bindings]]
+key = "Back"
+mods = "Shift"
+chars = "\x1b[127;2u"
+
+[[keyboard.bindings]]
+key = "Back"
+mods = "Control"
+chars = "\x1b[127;5u"
+
+[[keyboard.bindings]]
+key = "Back"
+mods = "Control|Shift"
+chars = "\x1b[127;6u"
+
+[[keyboard.bindings]]
+key = "Space"
+mods = "Shift"
+chars = "\x1b[32;2u"
+
+[[keyboard.bindings]]
+key = "Space"
+mods = "Control"
+chars = "\x1b[32;5u"
+
+[[keyboard.bindings]]
+key = "Space"
+mods = "Control|Shift"
+chars = "\x1b[32;6u"
+
+[[keyboard.bindings]]
+key = "Tab"
+mods = "Shift"
+chars = "\x1b[9;2u"
+
+[[keyboard.bindings]]
+key = "Tab"
+mods = "Control"
+chars = "\x1b[9;5u"
+
+[[keyboard.bindings]]
+key = "Tab"
+mods = "Control|Shift"
+chars = "\x1b[9;6u"
+

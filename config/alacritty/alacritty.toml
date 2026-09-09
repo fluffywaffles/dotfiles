@@ -1,3 +1,7 @@
+import = [
+    "~/.dotfiles/config/alacritty/extended-keys.toml"
+]
+
 # Alacritty Configuration - idleToes Theme
 
 [colors.primary]
