@@ -1,6 +1,3 @@
-import = [
-    "~/.dotfiles/config/alacritty/extended-keys.toml"
-]
 
 # Alacritty Configuration - idleToes Theme
 
@@ -58,3 +55,8 @@ action = "DecreaseFontSize"
 
 [window]
 dynamic_padding = true
+
+[general]
+import = [
+    "~/.dotfiles/config/alacritty/extended-keys.toml"
+]
