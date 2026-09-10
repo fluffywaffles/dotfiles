@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 #
 # Run the random crufty xinitrc script stuff that Xorg provides
@@ -15,7 +15,10 @@ fi
 #
 # ~ Do some actually interesting configuration ~
 #
-setxkbmap -option ctrl:nocaps # Fuck shit up: capslock → control
+# setxkbmap -option ctrl:nocaps # Fuck shit up: capslock → control
 ${HOME}/.feh-set-background   # Set random background image
-sxhkd &                       # Start simple X hotkey daemon
+if [[ -f ${HOME}/.config/sxhkd/sxhkdrc.$(uname -n) ]]; then
+  sxhkd_args="${HOME}/.config/sxhkd/sxhkdrc.$(uname -n)"
+fi
+sxhkd ${sxhkd_args:-} &           # Start simple X hotkey daemon
 exec bspwm                    # Run bspwm in foreground (window manager)
