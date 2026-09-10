@@ -133,13 +133,22 @@ function update-rprompt {
 
 # Widget functions (for when zsh redraws the prompt)
 function zle-line-init zle-keymap-select {
+  if [[ ${KEYMAP} == vicmd ]] || [[ ${1} == 'block' ]]; then
+    print -n '\e[2 q'
+  else
+    print -n '\e[0 q'
+  fi
   update-rprompt
   zle reset-prompt
+}
+function zle-line-finish {
+  print -n '\e[0 q'
 }
 
 # Register the widget functions
 zle -N zle-line-init
 zle -N zle-keymap-select
+zle -N zle-line-finish
 
 # set up rprompt on load
 update-rprompt
