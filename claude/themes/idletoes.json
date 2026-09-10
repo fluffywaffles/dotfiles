@@ -10,7 +10,7 @@
     "promptBorderShimmer": "rgb(166, 166, 166)",
 
     "memoryBackgroundColor": "rgb(70, 80, 120)",
-    "userMessageBackground": "rgb(80, 80, 90)",
+    "userMessageBackground": "rgb(65, 65, 75)",
     "userMessageBackgroundHover": "rgb(100, 100, 120)",
     "composerSidebarBackground": "rgb(56, 58, 62)",
     "bashBorder": "rgb(240, 194, 133)",
