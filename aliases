@@ -104,7 +104,9 @@ function git-branch-upstream () {(
 # git-push-set-upstream-branch-current
 #
 # pushes the current HEAD to a remote branch (${1}), setting upsteam to
-# the remote branch (${1}). remote can be configured as a variable, as in:
+# the remote branch (${1}), on the branch's configured remote, or origin
+# when it has none or tracks a local branch. the remote can be overridden
+# as a variable, as in:
 #
 #   remote=xyz gpu
 #
@@ -115,7 +117,8 @@ function git-branch-upstream () {(
 function git-push-set-upstream-branch-current () {(
   setopt err_exit
   local branch=$(git rev-parse --abbrev-ref HEAD) # git-branch-current
-  local remote=${remote:-origin}
+  local configured=$(git config --get branch.${branch}.remote)
+  local remote=${remote:-${${configured:#.}:-origin}}
   local remote_branch=${1:-${branch}}
   setopt xtrace
   git push ${remote} --set-upstream ${remote_branch}
@@ -307,8 +310,9 @@ function git-ensure-push-extends-base () {
 #
 # git-push-current-branch
 #
-# push the currently checked-out HEAD to remote branch (${1}). remote can
-# be configured as a variable, as in:
+# push the currently checked-out HEAD to remote branch (${1}), on the
+# branch's configured remote, or origin when it has none or tracks a local
+# branch. the remote can be overridden as a variable, as in:
 #
 #   remote=xyz gpc
 #
@@ -327,7 +331,8 @@ function git-push-current-branch () {(
   while [[ ${1} =~ ^(-+[-[:alnum:]]+)$ ]]; do shift; flags+=(${match}); done
   local branch=$(git rev-parse --abbrev-ref HEAD) # git-branch-current
   # named arguments
-  local remote=${remote:-origin}
+  local configured=$(git config --get branch.${branch}.remote)
+  local remote=${remote:-${${configured:#.}:-origin}}
 
   git-ensure-push-extends-base "${remote}" "${branch}"
 
@@ -370,7 +375,7 @@ function git-amend-then-force-push () {(
   setopt xtrace
   git commit --amend ${flags[@]}
   unsetopt xtrace
-  git-push-current-branch ${1} --force-if-includes --force-with-lease
+  git-push-current-branch --force-if-includes --force-with-lease ${1}
 )}
 
 #
