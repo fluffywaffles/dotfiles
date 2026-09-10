@@ -16,11 +16,11 @@
     "bashBorder": "rgb(240, 194, 133)",
     "bashMessageBackgroundColor": "rgb(44, 44, 44)",
 
-    "diffAdded": "rgb(26, 78, 52)",
+    "diffAdded": "rgb(23, 70, 46)",
     "diffRemoved": "rgb(100, 40, 40)",
     "diffAddedWord": "rgb(48, 122, 84)",
     "diffRemovedWord": "rgb(160, 76, 76)",
-    "diffAddedDimmed": "rgb(22, 63, 42)",
+    "diffAddedDimmed": "rgb(19, 55, 37)",
     "diffRemovedDimmed": "rgb(73, 32, 32)",
 
     "autoAccept": "rgb(175, 135, 255)",
