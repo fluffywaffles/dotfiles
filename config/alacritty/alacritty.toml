@@ -18,7 +18,7 @@ blinking = "On"
 
 [colors.normal]
 black   = "#191b1d"
-red     = "#db7771"
+red     = "#d05050"
 green   = "#7fd276"
 yellow  = "#ffc252"
 blue    = "#51a2f8"
@@ -28,7 +28,7 @@ white   = "#cfd1d4"
 
 [colors.bright]
 black   = "#6c6f73"
-red     = "#ffaba3"
+red     = "#ee6e6e"
 green   = "#b2fbaa"
 yellow  = "#ffeebb"
 blue    = "#8dc2fe"
