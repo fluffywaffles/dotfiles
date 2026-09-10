@@ -3,6 +3,10 @@ alias ls='ls --color=auto'
 alias grep='grep --color=auto'
 alias tree='tree -C'
 
+# claude code clamps itself to 256 colors whenever ${TMUX} is set; our tmux
+# advertises RGB, so take the 24-bit path instead
+export CLAUDE_CODE_TMUX_TRUECOLOR=1
+
 # Vi keybindings
 bindkey -v
 
