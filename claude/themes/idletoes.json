@@ -1,0 +1,88 @@
+{
+  "name": "idleToes",
+  "base": "dark",
+  "overrides": {
+    "text": "rgb(255, 255, 255)",
+    "inverseText": "rgb(0, 0, 0)",
+    "selectionBg": "rgb(100, 100, 125)",
+
+    "promptBorder": "rgb(136, 136, 136)",
+    "promptBorderShimmer": "rgb(166, 166, 166)",
+
+    "memoryBackgroundColor": "rgb(70, 80, 120)",
+    "userMessageBackground": "rgb(80, 80, 90)",
+    "userMessageBackgroundHover": "rgb(100, 100, 120)",
+    "composerSidebarBackground": "rgb(56, 58, 62)",
+    "bashBorder": "rgb(240, 194, 133)",
+    "bashMessageBackgroundColor": "rgb(44, 44, 44)",
+
+    "diffAdded": "rgb(26, 78, 52)",
+    "diffRemoved": "rgb(100, 40, 40)",
+    "diffAddedWord": "rgb(48, 122, 84)",
+    "diffRemovedWord": "rgb(160, 76, 76)",
+    "diffAddedDimmed": "rgb(22, 63, 42)",
+    "diffRemovedDimmed": "rgb(73, 32, 32)",
+
+    "autoAccept": "rgb(175, 135, 255)",
+    "autoAcceptShimmer": "rgb(208, 180, 255)",
+    "claude": "rgb(215, 119, 87)",
+    "claudeShimmer": "rgb(235, 159, 127)",
+
+    "skill": "rgb(175, 135, 255)",
+    "permission": "rgb(177, 185, 249)",
+    "permissionShimmer": "rgb(207, 215, 255)",
+    "planMode": "rgb(72, 150, 140)",
+    "ide": "rgb(71, 130, 200)",
+
+    "inactive": "rgb(160, 160, 160)",
+    "inactiveShimmer": "rgb(193, 193, 193)",
+
+    "subtle": "rgb(115, 115, 115)",
+    "remember": "rgb(51, 160, 255)",
+    "background": "rgb(0, 204, 204)",
+    "success": "rgb(67, 210, 138)",
+    "error": "rgb(255, 105, 130)",
+    "warning": "rgb(255, 200, 50)",
+    "merged": "rgb(175, 135, 255)",
+    "warningShimmer": "rgb(255, 223, 57)",
+
+    "professionalBlue": "rgb(106, 155, 204)",
+    "chromeYellow": "rgb(251, 188, 4)",
+    "clawd_body": "rgb(215, 119, 87)",
+    "clawd_background": "rgb(0, 0, 0)",
+
+    "rate_limit_fill": "rgb(177, 185, 249)",
+    "rate_limit_empty": "rgb(80, 83, 112)",
+
+    "fastMode": "rgb(255, 120, 20)",
+    "fastModeShimmer": "rgb(255, 165, 70)",
+
+    "effortUltra": "rgb(175, 135, 255)",
+    "briefLabelYou": "rgb(122, 180, 232)",
+    "briefLabelClaude": "rgb(215, 119, 87)",
+
+    "red_FOR_SUBAGENTS_ONLY": "rgb(220, 38, 38)",
+    "blue_FOR_SUBAGENTS_ONLY": "rgb(106, 155, 204)",
+    "green_FOR_SUBAGENTS_ONLY": "rgb(22, 163, 74)",
+    "yellow_FOR_SUBAGENTS_ONLY": "rgb(202, 138, 4)",
+    "purple_FOR_SUBAGENTS_ONLY": "rgb(130, 125, 189)",
+    "orange_FOR_SUBAGENTS_ONLY": "rgb(217, 119, 87)",
+    "pink_FOR_SUBAGENTS_ONLY": "rgb(196, 102, 134)",
+    "cyan_FOR_SUBAGENTS_ONLY": "rgb(8, 145, 178)",
+
+    "rainbow_red": "rgb(235, 95, 87)",
+    "rainbow_orange": "rgb(245, 139, 87)",
+    "rainbow_yellow": "rgb(250, 195, 95)",
+    "rainbow_green": "rgb(145, 200, 130)",
+    "rainbow_blue": "rgb(130, 170, 220)",
+    "rainbow_indigo": "rgb(155, 130, 200)",
+    "rainbow_violet": "rgb(200, 130, 180)",
+    "rainbow_red_shimmer": "rgb(250, 155, 147)",
+    "rainbow_orange_shimmer": "rgb(255, 185, 137)",
+    "rainbow_yellow_shimmer": "rgb(255, 225, 155)",
+    "rainbow_green_shimmer": "rgb(185, 230, 180)",
+    "rainbow_blue_shimmer": "rgb(180, 205, 240)",
+    "rainbow_indigo_shimmer": "rgb(195, 180, 230)",
+    "rainbow_violet_shimmer": "rgb(230, 180, 210)"
+  }
+}
