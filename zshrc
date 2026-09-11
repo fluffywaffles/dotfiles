@@ -208,14 +208,17 @@ function git-worktree-create-if-not-exists {
   # if no worktree exists, select a worktree path for it
   local target_path=${2:-$(git-worktree-default-branch-path ${branch})}
   # find an existing branch, whether local or remote
-  local extant_branches=($(git-branch-list-porcelain --all))
-  local existing=${extant_branches[(r)*${branch}]}
   local remotes=($(git remote))
+  local extant_branches=(
+    $(git-branch-list-porcelain --local)
+    ${(f)"$(git for-each-ref --format='%(refname)' refs/remotes)"}
+  )
+  local existing=${extant_branches[(r)(refs/remotes/(${(j:|:)remotes})/|)${branch}]}
   # build the argument list for 'git-worktree add'
   local -a args
   # if the existing branch points to a remote branch, or none exists...
   if   [[ -z ${existing} ]] \
-    || [[ ${existing} =~ ^(${(j:|:)remotes})/${branch}$ ]]
+    || [[ ${existing} == refs/remotes/* ]]
   then
     # create a new branch tracking the remote branch (if any)
     args=(--track -b ${branch} ${target_path} ${existing})
