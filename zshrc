@@ -364,9 +364,10 @@ function zwb {
           --preview-window hidden,50                     \
     | tr '\n' ' '                                        \
     | read selected
-  # strip remote prefix from selected ref, if any
+  # strip remote prefix from selected ref, if any, unless it names a local branch
   local remotes=($(git remote))
-  if [[ ${selected} =~ ^(${(j:|:)remotes})/(.+)$ ]]
+  if   [[ ${selected} =~ ^(${(j:|:)remotes})/(.+)$ ]] \
+    && ! git show-ref --verify --quiet refs/heads/${selected}
   then branch=${match[2]} # strip the remote name, grab the branch name
   else branch=${selected} # otherwise, the whole thing is the branch name
   fi
