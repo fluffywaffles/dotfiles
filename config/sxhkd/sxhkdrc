@@ -170,3 +170,7 @@ ctrl + Return
 # open notification context menu
 ctrl + shift + grave
 	dunstctl context
+
+# toggle show desktop (hide/unhide all windows)
+super + d
+	/home/fluffywaffles/.dotfiles/local/bin/bspwm-show-desktop

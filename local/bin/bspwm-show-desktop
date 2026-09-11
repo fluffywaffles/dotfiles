@@ -1,0 +1,38 @@
+#!/bin/bash
+
+# Fetch a random quote from our local database
+RANDOM_QUOTE=$(shuf -n 1 ~/.dotfiles/local/share/zen_quotes.txt)
+QUOTE=$(echo "$RANDOM_QUOTE" | cut -d '|' -f1)
+CITATION=$(echo "$RANDOM_QUOTE" | cut -d '|' -f2)
+
+# Calculate how many lines the quote will wrap to (roughly 70 chars per line at 1000px)
+LINES=$(echo "$QUOTE" | fold -w 70 -s | wc -l)
+
+# Calculate dynamic Y offset for the citation to maintain a perfectly static gap
+# Base Y is 1080 (center). We put quote at 960.
+# If 1 line, citation is at 1015. 
+# For every extra line the quote wraps, we push the citation down by 35 pixels.
+QUOTE_Y=960
+CITATION_Y=$(( 1015 + (LINES - 1) * 35 ))
+
+hidden_nodes=$(bspc query -N -d focused.local -n .hidden)
+if [ -n "$hidden_nodes" ]; then
+    # Unhide all hidden windows
+    for node in $hidden_nodes; do
+        bspc node $node -g hidden=off
+    done
+    
+    killall aosd_cat 2>/dev/null
+else
+    # Hide all visible windows
+    visible_nodes=$(bspc query -N -d focused.local -n .window.!hidden)
+    for node in $visible_nodes; do
+        bspc node $node -g hidden=on
+    done
+    
+    killall aosd_cat 2>/dev/null
+    
+    # Run TWO parallel instances of aosd_cat anchored to Top-Center (-p 1)
+    echo "$QUOTE" | aosd_cat -w 1000 -p 1 -y $QUOTE_Y -R white -S black -s 230 -r 230 -e 2 -n "Monospace 20" -u 86400000 >/dev/null 2>&1 &
+    echo "$CITATION" | aosd_cat -w 1000 -p 1 -y $CITATION_Y -R '#bbbbbb' -S black -s 230 -r 230 -e 2 -n "Monospace Italic 16" -u 86400000 >/dev/null 2>&1 &
+fi
