@@ -1,0 +1,3 @@
+#!/bin/zsh
+export PREFER_VULKAN=1
+exec /usr/bin/moonlight "$@"
