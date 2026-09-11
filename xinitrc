@@ -17,6 +17,11 @@ fi
 #
 # setxkbmap -option ctrl:nocaps # Fuck shit up: capslock → control
 ${HOME}/.feh-set-background   # Set random background image
+
+if command -v picom; then
+  picom -b &  # Start the compositor in background (if installed)
+fi
+
 if [[ -f ${HOME}/.config/sxhkd/sxhkdrc.$(uname -n) ]]; then
   sxhkd_args="${HOME}/.config/sxhkd/sxhkdrc.$(uname -n)"
 fi
