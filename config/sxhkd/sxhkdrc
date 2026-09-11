@@ -163,9 +163,6 @@ ctrl + shift + BackSpace
 ctrl + backslash
 	dunstctl history-pop
 
-# perform notification action
-ctrl + Return
-	dunstctl action
 
 # open notification context menu
 ctrl + shift + grave
