@@ -16,26 +16,6 @@ cursor = "#d6d6d6"
 shape = "Beam"
 blinking = "On"
 
-[colors.normal]
-black   = "#191b1d"
-red     = "#d05050"
-green   = "#7fd276"
-yellow  = "#ffc66d"
-blue    = "#51a2f8"
-magenta = "#d082dc"
-cyan    = "#00d7e0"
-white   = "#cfd1d4"
-
-[colors.bright]
-black   = "#6c6f73"
-red     = "#ee6e6e"
-green   = "#b2fbaa"
-yellow  = "#ffe48b"
-blue    = "#8dc2fe"
-magenta = "#f5b8fe"
-cyan    = "#57f5f5"
-white   = "#ffffff"
-
 [font]
 size = 8.0
 
@@ -59,5 +39,6 @@ dynamic_padding = true
 
 [general]
 import = [
-    "~/.dotfiles/config/alacritty/extended-keys.toml"
+    "~/.dotfiles/config/alacritty/extended-keys.toml",
+    "~/.dotfiles/config/alacritty/themes/idleToes-classic.toml",
 ]
