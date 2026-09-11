@@ -34,14 +34,14 @@
     # Respectively the horizontal and vertical offset in pixels from the
     # corner of the screen specified by origin. A negative offset will
     # lead to the notification being off screen.
-    offset = 40x40
+    offset = 15x15
 
     # The origin of the notification window on the screen. It can then be
     # moved with offset. Origin can be one of:
     #   top-left        top-center      top-right
     #   bottom-left     bottom-center   bottom-right
     #   left-center     center          right-center
-    origin = top-center
+    origin = top-left
 
     # The number of notifications that can appear at one time. When this
     # limit is reached any additional notifications will be queued and
@@ -70,16 +70,17 @@
     # notifications.
     # Set to 0 to disable.
     separator_height = 1
+    gap_size = 2
 
     # Padding between text and separator.
-    padding = 8
+    padding = 5
 
     # Horizontal padding.
     horizontal_padding = 8
 
     # Defines width in pixels of frame around the notification window.
     # Set to 0 to disable.
-    frame_width = 0
+    frame_width = 2
 
     # Defines color of the frame around the notification window.
     # frame_color = "#aaaaaa"
@@ -90,7 +91,7 @@
     #  * foreground: use the same color as the foreground;
     #  * frame: use the same color as the frame;
     #  * anything else will be interpreted as a X color.
-    separator_color = auto
+    separator_color = frame
 
     # Sort messages by urgency.
     sort = yes
@@ -103,7 +104,7 @@
     idle_threshold = 1m
 
     ### Text ###
-    font = Monospace 10
+    font = Monospace 8
 
     # The spacing between lines.  If the height is smaller than the
     # font height, it will get raised to the font height.
@@ -175,7 +176,7 @@
     # Show age of message if message is older than show_age_threshold
     # seconds.
     # Set to -1 to disable.
-    show_age_threshold = 60s
+    show_age_threshold = 300s
 
     # Ignore newlines '\n' in notifications.
     ignore_newline = no
@@ -184,7 +185,7 @@
     stack_duplicates = true
 
     # Hide the count of stacked notifications with the same content
-    hide_duplicate_count = false
+    hide_duplicate_count = true
 
     # Display indicators for URLs (U) and actions (A).
     show_indicators = yes
@@ -239,7 +240,7 @@
     # corners.
     # The radius will be automatically lowered if it exceeds half of the
     # notification height to avoid clipping text and/or icons.
-    corner_radius = 1
+    corner_radius = 5
 
     ### Mouse
 
@@ -256,23 +257,25 @@
     mouse_right_click  = close_all
 
 [urgency_low]
-    background  = "#626c80"
-    foreground  = "#abb2bf"
-    highlight   = "#99a6bf"
-    frame_color = "#474e59"
+    background  = "#414650"
+    foreground  = "#eeeeee"
+    highlight   = "#a0a4a8"
+    frame_color = "#575f70"
     timeout     = 10s
 
 [urgency_normal]
-    background  = "#43d08a"
-    foreground  = "#3c614e"
-    highlight   = "#87ffc3"
-    frame_color = "#37ad72"
+    background  = "#2a8a58"
+    foreground  = "#eeeeee"
+    highlight   = "#36ad71"
+    frame_color = "#36ad71"
     timeout     = 10s
 
 [urgency_critical]
-    background = "#ffad00"
-    foreground = "#900000"
-    timeout    = 0s # AKA do not expire
+    background  = "#b24545"
+    foreground  = "#eeeeee"
+    highlight   = "#e06c75"
+    frame_color = "#d25252"
+    timeout     = 0s # AKA do not expire
 
 # Every section that isn't one of the above is interpreted as a rules to
 # override settings for certain messages.
@@ -403,3 +406,7 @@
 #    set_stack_tag = "volume"
 #
 # vim: ft=cfg
+
+[slack-stack]
+    appname = "Slack"
+    set_stack_tag = "slack-tag"
