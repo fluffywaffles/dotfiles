@@ -1,38 +1,76 @@
 #!/bin/bash
 
-# Fetch a random quote from our local database
-RANDOM_QUOTE=$(shuf -n 1 ~/.dotfiles/local/share/zen_quotes.txt)
-QUOTE=$(echo "$RANDOM_QUOTE" | cut -d '|' -f1)
-CITATION=$(echo "$RANDOM_QUOTE" | cut -d '|' -f2)
+ZEN_MONITOR=focused
+QUOTE_FONT_SIZE=20
+CITATION_FONT_SIZE=16
+CITATION_GAP=20
+WRAP_WIDTH=1000
+FOLD_WIDTH=70
 
-# Calculate how many lines the quote will wrap to (roughly 70 chars per line at 1000px)
-LINES=$(echo "$QUOTE" | fold -w 70 -s | wc -l)
+# Everything except node_flag, which is what hiding and unhiding themselves emit.
+DISMISS_EVENTS=(desktop_focus monitor_focus desktop_layout
+                node_add node_remove node_focus
+                node_transfer node_swap node_state node_geometry)
 
-# Calculate dynamic Y offset for the citation to maintain a perfectly static gap
-# Base Y is 1080 (center). We put quote at 960.
-# If 1 line, citation is at 1015. 
-# For every extra line the quote wraps, we push the citation down by 35 pixels.
-QUOTE_Y=960
-CITATION_Y=$(( 1015 + (LINES - 1) * 35 ))
+# Host files may redefine this; it must assign QUOTE_X, QUOTE_Y, CITATION_X and
+# CITATION_Y, as absolute screen coordinates.
+place_quote_block() {
+    QUOTE_X=$(( MONITOR_X + (MONITOR_WIDTH - WRAP_WIDTH) / 2 ))
+    QUOTE_Y=$(( MONITOR_Y + (MONITOR_HEIGHT - BLOCK_HEIGHT) / 2 ))
+    CITATION_X=$QUOTE_X
+    CITATION_Y=$(( QUOTE_Y + QUOTE_HEIGHT + CITATION_GAP ))
+}
 
-hidden_nodes=$(bspc query -N -d focused.local -n .hidden)
-if [ -n "$hidden_nodes" ]; then
-    # Unhide all hidden windows
-    for node in $hidden_nodes; do
-        bspc node $node -g hidden=off
+HOST_PLACEMENT="${HOME}/.config/bspwm-show-desktop/placement.$(uname -n)"
+if [[ -f "$HOST_PLACEMENT" ]]; then
+    source "$HOST_PLACEMENT"
+fi
+
+show_quote() {
+    RANDOM_QUOTE=$(shuf -n 1 ~/.dotfiles/local/share/zen_quotes.txt)
+    QUOTE=$(echo "$RANDOM_QUOTE" | cut -d '|' -f1)
+    CITATION=$(echo "$RANDOM_QUOTE" | cut -d '|' -f2)
+
+    read -r MONITOR_X MONITOR_Y MONITOR_WIDTH MONITOR_HEIGHT < <(bspc query -T -m "$ZEN_MONITOR" | jq -r '.rectangle | "\(.x) \(.y) \(.width) \(.height)"')
+
+    LINES=$(echo "$QUOTE" | fold -w $FOLD_WIDTH -s | wc -l)
+    QUOTE_LINE_HEIGHT=$(( QUOTE_FONT_SIZE * 7 / 4 ))
+    CITATION_LINE_HEIGHT=$(( CITATION_FONT_SIZE * 7 / 4 ))
+    QUOTE_HEIGHT=$(( LINES * QUOTE_LINE_HEIGHT ))
+    BLOCK_HEIGHT=$(( QUOTE_HEIGHT + CITATION_GAP + CITATION_LINE_HEIGHT ))
+
+    place_quote_block
+
+    echo "$QUOTE" | aosd_cat -w $WRAP_WIDTH -p 0 -x $QUOTE_X -y $QUOTE_Y -R white -S black -s 230 -r 230 -e 2 -n "Monospace $QUOTE_FONT_SIZE" -u 86400000 >/dev/null 2>&1 &
+    echo "$CITATION" | aosd_cat -w $WRAP_WIDTH -p 0 -x $CITATION_X -y $CITATION_Y -R '#bbbbbb' -S black -s 230 -r 230 -e 2 -n "Monospace Italic $CITATION_FONT_SIZE" -u 86400000 >/dev/null 2>&1 &
+}
+
+hide_every_monitor() {
+    for node in $(bspc query -N -d .active -n .window.!hidden); do
+        bspc node "$node" -g hidden=on
     done
-    
+}
+
+restore_every_monitor() {
+    for node in $(bspc query -N -n .hidden); do
+        bspc node "$node" -g hidden=off
+    done
     killall aosd_cat 2>/dev/null
+}
+
+# The desktop being switched away from is no longer .active, so this waits on
+# the event and then re-queries for hidden windows wherever they ended up.
+dismiss_on_next_event() {
+    bspc subscribe --count 1 "${DISMISS_EVENTS[@]}" >/dev/null 2>&1
+    if [ -n "$(bspc query -N -n .hidden)" ]; then
+        restore_every_monitor
+    fi
+}
+
+if [ -n "$(bspc query -N -n .hidden)" ]; then
+    restore_every_monitor
 else
-    # Hide all visible windows
-    visible_nodes=$(bspc query -N -d focused.local -n .window.!hidden)
-    for node in $visible_nodes; do
-        bspc node $node -g hidden=on
-    done
-    
-    killall aosd_cat 2>/dev/null
-    
-    # Run TWO parallel instances of aosd_cat anchored to Top-Center (-p 1)
-    echo "$QUOTE" | aosd_cat -w 1000 -p 1 -y $QUOTE_Y -R white -S black -s 230 -r 230 -e 2 -n "Monospace 20" -u 86400000 >/dev/null 2>&1 &
-    echo "$CITATION" | aosd_cat -w 1000 -p 1 -y $CITATION_Y -R '#bbbbbb' -S black -s 230 -r 230 -e 2 -n "Monospace Italic 16" -u 86400000 >/dev/null 2>&1 &
+    hide_every_monitor
+    show_quote
+    dismiss_on_next_event &
 fi
