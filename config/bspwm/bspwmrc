@@ -51,6 +51,7 @@ bspc config pointer_follows_focus      true # When focusing a window, put the po
 bspc config click_to_focus          button1 # Button used for focusing a window (or a monitor).
 bspc config center_pseudo_tiled        true # Center pseudo tiled windows into their tiling rectangles.
 bspc config pointer_modifier           mod4 # Super+mouse to perform pointer actions (move, resize).
+bspc config honor_size_hints          tiled # Size tiled windows in their own increments, e.g. whole terminal cells.
 
 # Add an external_rules script to auto-scale pop-up windows for hi-dpi
 #-------------------------------------------------------------------------
