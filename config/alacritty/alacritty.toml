@@ -35,6 +35,7 @@ mods = "Control"
 action = "DecreaseFontSize"
 
 [window]
+padding = { x = 3, y = 0 }
 dynamic_padding = true
 resize_increments = true
 
