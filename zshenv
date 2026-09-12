@@ -101,6 +101,8 @@ export MANPAGER="nvim +':Man!'"
 # Set configuration home directory for freedesktop user
 export XDG_CONFIG_HOME="${HOME}/.config"
 
+export VIEB_WINDOW_FRAME=true
+
 # turn on shared prompt history for elixir's IEx REPL and erlang
 # and bump up the size of the saved history to ~1mb (ordinarly 512kb)
 export ERL_AFLAGS="-kernel shell_history enabled -kernel shell_history_file_bytes 1024000"
