@@ -36,6 +36,7 @@ action = "DecreaseFontSize"
 
 [window]
 dynamic_padding = true
+resize_increments = true
 
 [general]
 import = [
