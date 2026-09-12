@@ -58,16 +58,22 @@ restore_every_monitor() {
     killall aosd_cat 2>/dev/null
 }
 
+# An empty desktop hides nothing, so the quote itself is the only reliable
+# marker that the desktop is being shown.
+showing_desktop() {
+    [ -n "$(bspc query -N -n .hidden)" ] || pgrep -x aosd_cat >/dev/null
+}
+
 # The desktop being switched away from is no longer .active, so this waits on
-# the event and then re-queries for hidden windows wherever they ended up.
+# the event and then re-queries wherever the hidden windows ended up.
 dismiss_on_next_event() {
     bspc subscribe --count 1 "${DISMISS_EVENTS[@]}" >/dev/null 2>&1
-    if [ -n "$(bspc query -N -n .hidden)" ]; then
+    if showing_desktop; then
         restore_every_monitor
     fi
 }
 
-if [ -n "$(bspc query -N -n .hidden)" ]; then
+if showing_desktop; then
     restore_every_monitor
 else
     hide_every_monitor
