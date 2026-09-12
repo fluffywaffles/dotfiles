@@ -1,0 +1,12 @@
+#!/bin/zsh
+set -euo pipefail
+setopt no_clobber
+
+# Open a window in an already-running Alacritty to skip its startup cost, launching a new one when
+# none is running or when arguments are given.
+
+if (( # == 0 )) && 2>/dev/null /usr/bin/alacritty msg create-window; then
+  exit 0
+fi
+
+exec /usr/bin/alacritty "${@}"

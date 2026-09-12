@@ -28,7 +28,7 @@ super + Return
 
 # program launcher
 super + space
-	dmenu_run
+	dmenu -nf '#dddddd' -sf '#ffffff' < ~/.config/dmenu/apps | ${SHELL:-/bin/sh} &
 
 # make sxhkd reload its configuration files:
 super + shift + Escape
