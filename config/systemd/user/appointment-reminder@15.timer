@@ -1,9 +1,0 @@
-[Unit]
-Description=appointment reminder 15 min before
-
-[Timer]
-OnCalendar=Mon *-*-* 14:15:00
-Persistent=false
-
-[Install]
-WantedBy=timers.target
