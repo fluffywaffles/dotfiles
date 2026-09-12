@@ -24,6 +24,9 @@ set vimcommand="kitty nvim"
 " Apply our custom colorscheme (which places tabs on top, command bar on bottom, and hides the logo)
 colorscheme custom
 
+" Match Vieb's own background (popups, special pages, navbar edge) to the alacritty terminal background
+set bg=#313336
+
 " Custom key mappings
 " Configure follow mode to temporarily filter for inputs when using ;t,
 " and restore default clickable elements when using f, F, or ;r.

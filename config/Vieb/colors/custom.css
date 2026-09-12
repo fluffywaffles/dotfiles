@@ -10,7 +10,7 @@
 /* Reorder main application containers using Flexbox order */
 #tabs {
     order: 1;
-    background: #222222; /* Sleek dark background for tab bar */
+    background: #313336; /* Matches the alacritty terminal background */
     border-bottom: 1px solid #444444; /* Matches active tab background so they blend */
     height: auto; /* Auto height to perfectly fit tabs and top padding without clipping */
     padding-top: 2px; /* Exactly 2px padding above the tabs */
@@ -39,7 +39,7 @@
     order: 3;
     border-top: 1px solid var(--bg); /* Top border blends with page background */
     border-bottom: 2px solid var(--mode-normal-fg); /* Bottom border color-codes the mode */
-    background: #2d2d2d;
+    background: #313336;
     position: relative;
 }
 
@@ -61,7 +61,11 @@
 
 /* Make modeline (mode), command line (url), and tab labels the same uniform size */
 #mode, #url, #tabs > span {
-    font-size: 0.8em;
+    font-size: 0.72em;
+}
+
+#tabs, #navbar {
+    font-family: monospace;
 }
 
 /* Make popup dialogue notifications and context menus slightly larger than the URL text */
@@ -90,7 +94,8 @@
 #url {
     border: none;
     border-left: 1.5px solid var(--mode-normal-fg); /* Narrow default left border (Normal) */
-    padding-left: 0.4em; /* Prevent text from overlapping the left border */
+    margin: 0;
+    padding: 0 0 0 0.4em; /* Prevent text from overlapping the left border */
 }
 
 /* Color-code left border based on current Vieb mode */
@@ -105,7 +110,7 @@
 /* Style tabs to be smaller, clean, with rounded corners, and allow unlimited shrinking */
 #tabs > span {
     height: 1.6em; /* Shorter tab height (default is 2em) */
-    background: #222222; /* Background tabs match tabbar background (#222) */
+    background: #313336; /* Background tabs match tabbar background */
     color: #888888; /* Inactive foreground tab text */
     font-style: italic; /* Italicize background tabs */
     border-radius: 3px 3px 0 0;
@@ -123,7 +128,7 @@
 
 /* Highlight background tabs slightly on hover */
 #tabs > span:not(#current-tab):hover {
-    background: #2a2a2a;
+    background: #3a3c40;
     color: #cccccc;
 }
 
