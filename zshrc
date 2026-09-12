@@ -71,11 +71,6 @@ export path=(${HOME}/.cargo/bin ${path})
 # Add foundry to path
 export path=(${HOME}/.config/.foundry/bin ${path})
 
-# Add select git-contrib binaries to path
-export path=(
-  /usr/share/git/diff-highlight
-  ${path}
-)
 
 #
 # Prompt
