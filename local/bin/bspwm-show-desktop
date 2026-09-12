@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/zsh
 
 ZEN_MONITOR=focused
 QUOTE_FONT_SIZE=20
@@ -27,32 +27,39 @@ if [[ -f "$HOST_PLACEMENT" ]]; then
 fi
 
 show_quote() {
+    local RANDOM_QUOTE QUOTE CITATION
+    local MONITOR_X MONITOR_Y MONITOR_WIDTH MONITOR_HEIGHT
+    local QUOTE_LINES QUOTE_LINE_HEIGHT CITATION_LINE_HEIGHT QUOTE_HEIGHT BLOCK_HEIGHT
+    local QUOTE_X QUOTE_Y CITATION_X CITATION_Y
+
     RANDOM_QUOTE=$(shuf -n 1 ~/.dotfiles/local/share/zen_quotes.txt)
-    QUOTE=$(echo "$RANDOM_QUOTE" | cut -d '|' -f1)
-    CITATION=$(echo "$RANDOM_QUOTE" | cut -d '|' -f2)
+    QUOTE=${RANDOM_QUOTE%%|*}
+    CITATION=${RANDOM_QUOTE#*|}
 
     read -r MONITOR_X MONITOR_Y MONITOR_WIDTH MONITOR_HEIGHT < <(bspc query -T -m "$ZEN_MONITOR" | jq -r '.rectangle | "\(.x) \(.y) \(.width) \(.height)"')
 
-    LINES=$(echo "$QUOTE" | fold -w $FOLD_WIDTH -s | wc -l)
+    QUOTE_LINES=$(printf '%s\n' "$QUOTE" | fold -w $FOLD_WIDTH -s | wc -l)
     QUOTE_LINE_HEIGHT=$(( QUOTE_FONT_SIZE * 7 / 4 ))
     CITATION_LINE_HEIGHT=$(( CITATION_FONT_SIZE * 7 / 4 ))
-    QUOTE_HEIGHT=$(( LINES * QUOTE_LINE_HEIGHT ))
+    QUOTE_HEIGHT=$(( QUOTE_LINES * QUOTE_LINE_HEIGHT ))
     BLOCK_HEIGHT=$(( QUOTE_HEIGHT + CITATION_GAP + CITATION_LINE_HEIGHT ))
 
     place_quote_block
 
-    echo "$QUOTE" | aosd_cat -w $WRAP_WIDTH -p 0 -x $QUOTE_X -y $QUOTE_Y -R white -S black -s 230 -r 230 -e 2 -n "Monospace $QUOTE_FONT_SIZE" -u 86400000 >/dev/null 2>&1 &
-    echo "$CITATION" | aosd_cat -w $WRAP_WIDTH -p 0 -x $CITATION_X -y $CITATION_Y -R '#bbbbbb' -S black -s 230 -r 230 -e 2 -n "Monospace Italic $CITATION_FONT_SIZE" -u 86400000 >/dev/null 2>&1 &
+    printf '%s\n' "$QUOTE" | aosd_cat -w $WRAP_WIDTH -p 0 -x $QUOTE_X -y $QUOTE_Y -R white -S black -s 230 -r 230 -e 2 -n "Monospace $QUOTE_FONT_SIZE" -u 86400000 >/dev/null 2>&1 &
+    printf '%s\n' "$CITATION" | aosd_cat -w $WRAP_WIDTH -p 0 -x $CITATION_X -y $CITATION_Y -R '#bbbbbb' -S black -s 230 -r 230 -e 2 -n "Monospace Italic $CITATION_FONT_SIZE" -u 86400000 >/dev/null 2>&1 &
 }
 
 hide_every_monitor() {
-    for node in $(bspc query -N -d .active -n .window.!hidden); do
+    local node
+    for node in ${(f)"$(bspc query -N -d .active -n .window.!hidden)"}; do
         bspc node "$node" -g hidden=on
     done
 }
 
 restore_every_monitor() {
-    for node in $(bspc query -N -n .hidden); do
+    local node
+    for node in ${(f)"$(bspc query -N -n .hidden)"}; do
         bspc node "$node" -g hidden=off
     done
     killall aosd_cat 2>/dev/null

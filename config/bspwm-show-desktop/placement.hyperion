@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/zsh
 
 LEFT_MARGIN=100
 BOTTOM_MARGIN=200
