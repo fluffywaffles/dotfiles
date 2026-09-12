@@ -8,11 +8,13 @@ personal dotfiles managed by [rcm](https://github.com/thoughtbot/rcm).
 .
 ├── aliases              shell aliases
 ├── config/
+│   ├── alacritty/       terminal emulator, bound to super+Return
 │   ├── bspwm/           window manager
 │   ├── conky/           system monitor
 │   ├── dunst/           notification daemon
 │   ├── fontconfig/      font configuration
 │   ├── kitty/           terminal emulator
+│   ├── picom.conf       compositor
 │   ├── qutebrowser/     web browser
 │   ├── sxhkd/           hotkey daemon
 │   ├── systemd/user/    user systemd units
@@ -24,7 +26,6 @@ personal dotfiles managed by [rcm](https://github.com/thoughtbot/rcm).
 ├── xinitrc              X11 startup
 ├── zshenv               environment setup and PATH
 ├── zshrc                interactive shell config
-├── zshrc.local          machine-local shell config
 └── zshrc.Darwin         macOS-specific shell config
 ```
 
@@ -32,5 +33,6 @@ personal dotfiles managed by [rcm](https://github.com/thoughtbot/rcm).
 
 - scripts use `#!/bin/zsh` and `>&2 printf` for error messages
 - `config/` maps to `~/.config/` (symlinked by rcm)
+- host-specific variants are `<name>.$(uname -n)`, sourced if present
 - `local/bin/` maps to `~/.local/bin/` (on PATH via zshenv)
 - `rcrc` with `UNDOTTED="@ LG5k"` controls rcm symlinking
