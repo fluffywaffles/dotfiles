@@ -24,7 +24,7 @@ super + ctrl + shift + h
 
 # terminal emulator
 super + Return
-	kitty
+	alacritty
 
 # program launcher
 super + space
