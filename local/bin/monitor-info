@@ -1,2 +1,0 @@
-#!/bin/zsh
-xrandr --query | sed --silent --regexp-extended "/${1} connected/ p"

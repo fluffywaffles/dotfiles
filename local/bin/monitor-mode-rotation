@@ -1,9 +1,0 @@
-#!/bin/zsh --extendedglob
-# Parse rotations from monitor modestrings
-
-while read monitor_mode; do
-  unset match
-  # select the rotation into ${match}
-  _=${monitor_mode/(#b)rotate:(*)}
-  printf '%s\n' ${match}
-done
