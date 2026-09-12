@@ -1,9 +1,5 @@
 # vim: set comments=b\:##,fb\:- foldmethod=marker textwidth=100:
 
-##
-## unused configuration options and defaults.
-##
-
 ## Additional arguments to pass to Qt, without leading `--`. {{{
 ## With QtWebEngine, some Chromium arguments (see
 ## https://peter.sh/experiments/chromium-command-line-switches/ for a
@@ -11,7 +7,7 @@
 ##
 ## Type: List of String
 ## }}}
-# c.qt.args = []
+c.qt.args = ['enable-features=AcceleratedVideoDecodeLinuxGL']
 
 ## Enables Web Platform features that are in development. {{{
 ## This passes the `--enable-experimental-web-platform-features` flag to
