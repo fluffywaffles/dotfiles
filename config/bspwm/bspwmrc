@@ -54,8 +54,9 @@ bspc config pointer_modifier           mod4 # Super+mouse to perform pointer act
 bspc config honor_size_hints          tiled # Size tiled windows in their own increments, e.g. whole terminal cells.
 
 # Add an external_rules script to auto-scale pop-up windows for hi-dpi
+# and tag new tiled windows with their split side for picom's slide-in
 #-------------------------------------------------------------------------
-bspc config external_rules_command ${HOME}/.config/bspwm/rescale_popups # Custom sizing rules for popups
+bspc config external_rules_command ${HOME}/.config/bspwm/external_rules # Popup sizing, slide-in direction
 
 #=========================================================================
 # References

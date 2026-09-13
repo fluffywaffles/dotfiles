@@ -1,0 +1,42 @@
+#!/bin/zsh
+set -euo pipefail
+setopt no_clobber
+
+# bspwm external rules: scales popups via rescale_popups, then tags a window about to tile with the
+# side of the split it will take as _BSPWM_SPLIT_DIR, which picom uses to slide it in.
+# Depends on jq and xprop.
+
+function split_dir() {
+  local node="$(bspc query -T -n focused.tiled)"
+  if [[ -z ${node} ]]; then
+    return 1
+  fi
+
+  local presel=$(jq --raw-output '.presel.splitDir // empty' <<< ${node})
+  if [[ -n ${presel} ]]; then
+    printf '%s\n' ${presel}
+    return 0
+  fi
+
+  local width=$(jq --raw-output '.rectangle.width' <<< ${node})
+  local height=$(jq --raw-output '.rectangle.height' <<< ${node})
+  if (( width > height )); then
+    printf 'east\n'
+  else
+    printf 'south\n'
+  fi
+}
+
+consequences="$(${0:h}/rescale_popups ${@})"
+if [[ -n ${consequences} ]]; then
+  printf '%s\n' ${consequences}
+fi
+
+if [[ ${consequences} == *state=* || ${4:-} == *state=floating* ]]; then
+  exit 0
+fi
+
+dir="$(split_dir || true)"
+if [[ -n ${dir} ]]; then
+  xprop -id ${1} -format _BSPWM_SPLIT_DIR 8s -set _BSPWM_SPLIT_DIR ${dir}
+fi
