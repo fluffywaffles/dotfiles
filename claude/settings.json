@@ -160,7 +160,7 @@
     }
   },
   "effortLevel": "high",
-  "tui": "default",
+  "tui": "fullscreen",
   "voice": {
     "enabled": true,
     "mode": "hold"
