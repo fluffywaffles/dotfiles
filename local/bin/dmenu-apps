@@ -1,0 +1,14 @@
+#!/bin/zsh
+set -euo pipefail
+setopt no_clobber
+
+# dmenu_run, but reading ~/.config/dmenu/apps.$HOST instead of dmenu_path when that exists.
+
+apps=${HOME}/.config/dmenu/apps.${HOST}
+colors=(-nf '#dddddd' -sf '#ffffff')
+
+if [[ -f ${apps} ]]; then
+  dmenu ${colors} ${@} < ${apps} | ${SHELL} &
+else
+  dmenu_path | dmenu ${colors} ${@} | ${SHELL} &
+fi
