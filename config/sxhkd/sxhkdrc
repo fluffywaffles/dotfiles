@@ -67,6 +67,18 @@ super + g
 super + {t,shift + t,s,f}
 	bspc node -t '~{tiled,pseudo_tiled,floating,fullscreen}'
 
+# make the focused window a travelling scratchpad, or put it back
+super + shift + f
+	bspc node -t '~floating' -g sticky
+
+# summon a scratchpad application, focusing it if already open
+super + shift + s
+	scratchpad slack
+
+# linear's window class is not the name of its binary, so both are named
+super + shift + n
+	scratchpad linear linear-bin
+
 # set the node flags
 super + ctrl + {x,y,z}
 	bspc node -g {locked,sticky,private}
@@ -168,9 +180,13 @@ super + apostrophe
 	dunstctl history-pop
 
 
-# jump to the pane of the most recent claude notification, then dismiss it
+# invoke the displayed notification's action, whichever application it belongs to
 super + a
-	claude-jump && dunstctl close
+	dunstctl action
+
+# jump to the claude session that notified most recently, whatever is on screen
+super + j
+	claude-jump
 
 # open notification context menu
 super + shift + a
