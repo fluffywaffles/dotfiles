@@ -171,3 +171,7 @@ ctrl + shift + grave
 # toggle show desktop (hide/unhide all windows)
 super + d
 	/home/fluffywaffles/.dotfiles/local/bin/bspwm-show-desktop
+
+# refresh the background image
+super + shift + d
+	$HOME/.feh-set-background
