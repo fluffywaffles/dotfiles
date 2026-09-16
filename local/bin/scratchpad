@@ -1,0 +1,59 @@
+#!/bin/zsh
+set -euo pipefail
+setopt no_clobber
+
+# Toggle a scratchpad application by window class, in three states:
+#
+#   no window        launch it
+#   window unfocused unhide and focus it
+#   window focused   hide it
+#
+# Hiding is bspwm's own hidden flag rather than the application's close accelerator, so the
+# window survives being put away and comes back instantly. Applications that quit on ctrl+w
+# (linear) therefore need putting away with this binding rather than with ctrl+w.
+#
+# Usage: scratchpad <window-class> [command]   command defaults to the class.
+# Depends on bspc and jq.
+
+function errf { >&2 printf ${@} }
+
+function node_for_class() {
+  local wanted=${1:-}
+  local node class
+
+  if [[ -z ${wanted} ]]; then
+    return 1
+  fi
+
+  for node in ${(f)"$(2>/dev/null bspc query -N -n .window)"}; do
+    class="$(2>/dev/null bspc query -T -n ${node} | jq --raw-output '.client.className // empty')"
+
+    if [[ ${class:l} == "${wanted:l}" ]]; then
+      printf '%s\n' ${node}
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+typeset class=${1:-}
+
+if [[ -z ${class} ]]; then
+  errf 'scratchpad: no window class given\n'
+  exit 1
+fi
+
+typeset command=${2:-${class}}
+typeset node
+
+if ! node="$(node_for_class ${class})"; then
+  exec ${command}
+fi
+
+if [[ ${node} == "$(bspc query -N -n focused)" ]]; then
+  bspc node ${node} -g hidden=on
+  exit 0
+fi
+
+bspc node ${node} -g hidden=off -f

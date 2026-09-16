@@ -27,6 +27,16 @@ function split_dir() {
   fi
 }
 
+# Scratchpad applications: floating so they never disturb the tiling, sticky so they follow
+# across desktops while open, and above so they stay over whatever they were summoned onto.
+# They hide themselves on ctrl+w, and re-summoning re-maps them onto the focused desktop.
+case ${${2:-}:l} in
+  slack|linear|linear-bin)
+    printf 'state=floating sticky=on layer=above center=on\n'
+    exit 0
+    ;;
+esac
+
 consequences="$(${0:h}/rescale_popups ${@})"
 if [[ -n ${consequences} ]]; then
   printf '%s\n' ${consequences}
