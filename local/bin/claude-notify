@@ -22,7 +22,6 @@ typeset event="$(jq --raw-output '.hook_event_name // empty' <<< ${payload})"
 typeset title="$(jq --raw-output '.title // empty' <<< ${payload})"
 typeset message="$(jq --raw-output '.message // empty' <<< ${payload})"
 typeset kind="$(jq --raw-output '.notification_type // empty' <<< ${payload})"
-typeset cwd="$(jq --raw-output '.cwd // empty' <<< ${payload})"
 
 # Default to the category that persists: a type not named here is more likely to be Claude
 # waiting than a status report, and an unrecognised one should not expire unseen.
@@ -91,10 +90,6 @@ fi
 
 if [[ -z ${header} ]]; then
   header='Claude Code'
-fi
-
-if [[ -n ${cwd} ]]; then
-  header="${header} — ${cwd:t}"
 fi
 
 header="${label} · ${header}"
