@@ -101,6 +101,10 @@ super + bracket{left,right}
 super + {grave,Tab}
 	bspc {node,desktop} -f last
 
+# focus the last desktop. Alongside super + Tab, for the backslash chord habit.
+super + backslash
+	bspc desktop -f last
+
 # focus the older or newer node in the focus history
 super + {o,i}
 	bspc wm -h off; \
@@ -152,20 +156,24 @@ super + alt + ctrl + {h,j,k,l}
 #
 
 # close current notification
-ctrl + BackSpace
+super + BackSpace
 	dunstctl close
 
 # close all notifications
-ctrl + shift + BackSpace
+super + shift + BackSpace
 	dunstctl close-all
 
 # pop history
-ctrl + backslash
+super + apostrophe
 	dunstctl history-pop
 
 
+# jump to the pane of the most recent claude notification, then dismiss it
+super + a
+	claude-jump && dunstctl close
+
 # open notification context menu
-ctrl + shift + grave
+super + shift + a
 	dunstctl context
 
 # toggle show desktop (hide/unhide all windows)

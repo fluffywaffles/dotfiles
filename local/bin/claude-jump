@@ -1,0 +1,56 @@
+#!/bin/zsh
+set -euo pipefail
+setopt no_clobber
+
+# Focus the tmux pane given as an argument, or the one the most recent Claude Code notification
+# came from. dunstctl can only ever action its oldest displayed notification, so the keyboard
+# path records the pane itself rather than asking dunst which notification is meant.
+# Depends on tmux, bspc and jq.
+
+function errf { >&2 printf ${@} }
+
+typeset state=${XDG_RUNTIME_DIR:-/tmp}/claude-notify.pane
+
+# The bspwm node of the terminal hosting tmux. bspwm exposes no pid on a client, so this
+# matches on class; one terminal running one tmux client leaves nothing to disambiguate.
+function terminal_node() {
+  local node class
+
+  for node in ${(f)"$(2>/dev/null bspc query -N -n .window)"}; do
+    class="$(2>/dev/null bspc query -T -n ${node} | jq --raw-output '.client.className // empty')"
+
+    case ${class} in
+      Alacritty|kitty)
+        printf '%s\n' ${node}
+        return 0
+        ;;
+    esac
+  done
+
+  return 1
+}
+
+typeset pane=${1:-}
+
+if [[ -z ${pane} && -r ${state} ]]; then
+  pane="$(< ${state})"
+fi
+
+if [[ -z ${pane} ]]; then
+  errf 'claude-jump: no pane given and none recorded in %s\n' ${state}
+  exit 1
+fi
+
+if ! >/dev/null 2>&1 tmux has-session -t ${pane}; then
+  errf 'claude-jump: pane is gone: %s\n' ${pane}
+  exit 1
+fi
+
+tmux select-window -t ${pane}
+tmux select-pane -t ${pane}
+
+typeset node
+
+node="$(terminal_node)" || exit 0
+
+bspc node ${node} -f
