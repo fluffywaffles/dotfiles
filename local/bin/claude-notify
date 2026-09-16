@@ -1,0 +1,108 @@
+#!/bin/zsh
+set -euo pipefail
+setopt no_clobber
+
+# Raise a libnotify notification from a Claude Code Notification hook payload on stdin,
+# titled with the tmux window the session runs in. Inside tmux the notification carries a
+# default action that focuses that window.
+# Depends on jq, notify-send, tmux and bspc.
+
+function errf { >&2 printf ${@} }
+
+# The bspwm node of the terminal hosting tmux. bspwm exposes no pid on a client, so this
+# matches on class; one terminal running one tmux client leaves nothing to disambiguate.
+function terminal_node() {
+  local node class
+
+  for node in ${(f)"$(2>/dev/null bspc query -N -n .window)"}; do
+    class="$(2>/dev/null bspc query -T -n ${node} | jq --raw-output '.client.className // empty')"
+
+    case ${class} in
+      Alacritty|kitty)
+        printf '%s\n' ${node}
+        return 0
+        ;;
+    esac
+  done
+
+  return 1
+}
+
+# Select the pane, then focus its terminal. Focusing the bspwm node also switches to the
+# desktop holding it, so a jump from another desktop arrives somewhere visible.
+function focus_pane() {
+  local pane=${1:-}
+  local node
+
+  if [[ -z ${pane} ]]; then
+    return 1
+  fi
+
+  tmux select-window -t ${pane}
+  tmux select-pane -t ${pane}
+
+  node="$(terminal_node)" || return 0
+
+  bspc node ${node} -f
+}
+
+typeset payload="$(cat)"
+
+if [[ -z ${payload} ]]; then
+  errf 'claude-notify: empty payload on stdin\n'
+  exit 1
+fi
+
+typeset title="$(jq --raw-output '.title // empty' <<< ${payload})"
+typeset message="$(jq --raw-output '.message // empty' <<< ${payload})"
+typeset kind="$(jq --raw-output '.notification_type // empty' <<< ${payload})"
+typeset cwd="$(jq --raw-output '.cwd // empty' <<< ${payload})"
+
+# Default to the category that persists: a type not named here is more likely to be Claude
+# waiting than a status report, and an unrecognised one should not expire unseen.
+typeset category=claude.waiting
+
+case ${kind} in
+  auth_success|computer_use_enter|computer_use_exit|elicitation_complete|elicitation_response)
+    category=claude.info
+    ;;
+  quota_auto_resume_fired|quota_auto_resume_stale|quota_auto_resume_disabled)
+    category=claude.info
+    ;;
+esac
+
+typeset location
+
+if [[ -n ${TMUX_PANE:-} ]]; then
+  location="$(2>/dev/null tmux display-message -p -t ${TMUX_PANE} \
+    '#{window_name} [#{session_name}:#{window_index}.#{pane_index}]')"
+fi
+
+typeset header=${location}
+
+if [[ -z ${header} ]]; then
+  header=${title}
+fi
+
+if [[ -z ${header} ]]; then
+  header='Claude Code'
+fi
+
+if [[ -n ${cwd} ]]; then
+  header="${header} — ${cwd:t}"
+fi
+
+if [[ -z ${location} ]]; then
+  notify-send --app-name=claude-code --urgency=normal --category=${category} ${header} ${message}
+  exit 0
+fi
+
+# One live notification per pane: a newer one replaces it, so unanswered prompts from a
+# single session cannot pile up and their notify-send processes exit.
+typeset action="$(notify-send --action=default=Jump \
+  --app-name=claude-code --urgency=normal --category=${category} \
+  --hint=string:x-dunst-stack-tag:claude-${TMUX_PANE} ${header} ${message})"
+
+if [[ ${action} == default ]]; then
+  focus_pane ${TMUX_PANE}
+fi
