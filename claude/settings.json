@@ -185,6 +185,17 @@
           }
         ]
       }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.local/bin/claude-notify",
+            "async": true
+          }
+        ]
+      }
     ]
   },
   "autoMode": {

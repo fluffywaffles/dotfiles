@@ -18,6 +18,7 @@ if [[ -z ${payload} ]]; then
   exit 1
 fi
 
+typeset event="$(jq --raw-output '.hook_event_name // empty' <<< ${payload})"
 typeset title="$(jq --raw-output '.title // empty' <<< ${payload})"
 typeset message="$(jq --raw-output '.message // empty' <<< ${payload})"
 typeset kind="$(jq --raw-output '.notification_type // empty' <<< ${payload})"
@@ -27,14 +28,53 @@ typeset cwd="$(jq --raw-output '.cwd // empty' <<< ${payload})"
 # waiting than a status report, and an unrecognised one should not expire unseen.
 typeset category=claude.waiting
 
-case ${kind} in
-  auth_success|computer_use_enter|computer_use_exit|elicitation_complete|elicitation_response)
-    category=claude.info
-    ;;
-  quota_auto_resume_fired|quota_auto_resume_stale|quota_auto_resume_disabled)
-    category=claude.info
-    ;;
-esac
+if [[ ${event} == Stop ]]; then
+  category=claude.done
+  message="$(jq --raw-output '.last_assistant_message // empty' <<< ${payload})"
+  message="${message//$'\n'/ }"
+
+  if (( ${#message} > 140 )); then
+    message="${message[1,140]}…"
+  fi
+
+  if [[ -z ${message} ]]; then
+    message='finished responding'
+  fi
+else
+  case ${kind} in
+    auth_success|computer_use_enter|computer_use_exit|elicitation_complete|elicitation_response)
+      category=claude.info
+      ;;
+    quota_auto_resume_fired|quota_auto_resume_stale|quota_auto_resume_disabled)
+      category=claude.info
+      ;;
+  esac
+fi
+
+# The title is the only part reliably read at a glance, so it leads with what happened rather
+# than only where.
+typeset label
+
+if [[ ${event} == Stop ]]; then
+  label=done
+else
+  case ${kind} in
+    permission_prompt|worker_permission_prompt) label='needs permission' ;;
+    agent_needs_input)                          label='needs input' ;;
+    elicitation_dialog|elicitation_url_dialog)  label='needs input' ;;
+    idle_prompt)                                label='waiting' ;;
+    agent_completed)                            label='agent done' ;;
+    *)                                          label='notice' ;;
+  esac
+fi
+
+# Only something actually waiting on an answer earns normal urgency; a finished turn and the
+# status reports stay out of the way at low.
+typeset urgency=low
+
+if [[ ${category} == claude.waiting ]]; then
+  urgency=normal
+fi
 
 typeset location
 
@@ -57,8 +97,10 @@ if [[ -n ${cwd} ]]; then
   header="${header} — ${cwd:t}"
 fi
 
+header="${label} · ${header}"
+
 if [[ -z ${location} ]]; then
-  notify-send --app-name=claude-code --urgency=normal --category=${category} ${header} ${message}
+  notify-send --app-name=claude-code --urgency=${urgency} --category=${category} ${header} ${message}
   exit 0
 fi
 
@@ -67,7 +109,7 @@ printf '%s\n' ${TMUX_PANE} >! ${state}
 # One live notification per pane: a newer one replaces it, so unanswered prompts from a
 # single session cannot pile up and their notify-send processes exit.
 typeset action="$(notify-send --action=default=Jump \
-  --app-name=claude-code --urgency=normal --category=${category} \
+  --app-name=claude-code --urgency=${urgency} --category=${category} \
   --hint=string:x-dunst-stack-tag:claude-${TMUX_PANE} ${header} ${message})"
 
 if [[ ${action} == default ]]; then
