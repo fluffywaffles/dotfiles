@@ -1,0 +1,60 @@
+#!/bin/zsh
+set -euo pipefail
+setopt no_clobber
+
+# Raise the notification claude-notify spooled for a tmux pane and serve its Jump action until
+# the notification is closed. Runs as claude-notify-listen@<pane>.service, because the action is
+# delivered to this process's D-Bus connection and dies with it: a listener inside the Claude Code
+# hook's process tree leaves a pinned notification nothing can action.
+# Depends on jq, notify-send and claude-jump.
+
+function errf { >&2 printf ${@} }
+function logf { printf ${@} }
+
+typeset pane=${1:-}
+
+if [[ -z ${pane} ]]; then
+  errf 'claude-notify-listen: no pane given\n'
+  exit 1
+fi
+
+typeset spool=${XDG_RUNTIME_DIR:-/tmp}/claude-notify/${pane}.json
+
+if [[ ! -r ${spool} ]]; then
+  errf 'claude-notify-listen: nothing spooled for %s\n' ${pane}
+  exit 1
+fi
+
+typeset urgency="$(jq --raw-output '.urgency // empty' ${spool})"
+typeset category="$(jq --raw-output '.category // empty' ${spool})"
+typeset header="$(jq --raw-output '.header // empty' ${spool})"
+typeset message="$(jq --raw-output '.message // empty' ${spool})"
+
+# Re-raise the signal after logging so systemd sees a death by signal, which is what
+# RestartForceExitStatus matches on.
+function die_by_signal() {
+  logf 'killed by SIG%s holding %s\n' ${1} ${pane}
+  trap - ${1}
+  kill -${1} ${$}
+}
+
+trap 'die_by_signal TERM' TERM
+trap 'die_by_signal HUP'  HUP
+trap 'die_by_signal INT'  INT
+
+logf 'holding %s as %s, pid %s\n' ${pane} ${category} ${$}
+
+typeset action="$(notify-send --action=default=Jump \
+  --app-name=claude-code --urgency=${urgency} --category=${category} \
+  --hint=string:x-dunst-stack-tag:claude-${pane} ${header} ${message})"
+
+if [[ ${action} != default ]]; then
+  logf 'closed without action: %s\n' ${pane}
+  exit 0
+fi
+
+logf 'jumping to %s\n' ${pane}
+
+if ! ${0:h}/claude-jump ${pane}; then
+  errf 'claude-notify-listen: jump failed for %s\n' ${pane}
+fi

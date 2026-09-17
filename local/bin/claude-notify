@@ -3,9 +3,9 @@ set -euo pipefail
 setopt no_clobber
 
 # Raise a libnotify notification from a Claude Code Notification hook payload on stdin,
-# titled with the tmux window the session runs in. Inside tmux the notification carries a
-# default action that focuses that window.
-# Depends on jq, notify-send, tmux and bspc.
+# titled with the tmux window the session runs in. Inside tmux the notification is spooled and
+# raised by claude-notify-listen instead, so its Jump action outlives this hook process.
+# Depends on jq, notify-send, tmux and systemctl.
 
 function errf { >&2 printf ${@} }
 
@@ -101,12 +101,17 @@ fi
 
 printf '%s\n' ${TMUX_PANE} >! ${state}
 
-# One live notification per pane: a newer one replaces it, so unanswered prompts from a
-# single session cannot pile up and their notify-send processes exit.
-typeset action="$(notify-send --action=default=Jump \
-  --app-name=claude-code --urgency=${urgency} --category=${category} \
-  --hint=string:x-dunst-stack-tag:claude-${TMUX_PANE} ${header} ${message})"
+typeset spool=${XDG_RUNTIME_DIR:-/tmp}/claude-notify
 
-if [[ ${action} == default ]]; then
-  claude-jump ${TMUX_PANE}
-fi
+mkdir --parents ${spool}
+
+jq --null-input \
+  --arg urgency ${urgency} \
+  --arg category ${category} \
+  --arg header ${header} \
+  --arg message ${message} \
+  '{urgency: $urgency, category: $category, header: $header, message: $message}' \
+  >! ${spool}/${TMUX_PANE}.json
+
+systemctl --user restart \
+  "$(systemd-escape --template=claude-notify-listen@.service ${TMUX_PANE})"

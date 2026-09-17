@@ -1,0 +1,8 @@
+[Unit]
+Description=Claude Code notification listener for tmux pane %I
+
+[Service]
+ExecStart=%h/.local/bin/claude-notify-listen %I
+SyslogIdentifier=claude-notify
+Restart=on-failure
+RestartForceExitStatus=SIGTERM SIGHUP SIGINT SIGKILL
