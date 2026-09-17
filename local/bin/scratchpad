@@ -12,6 +12,11 @@ setopt no_clobber
 # window survives being put away and comes back instantly. Applications that quit on ctrl+w
 # (linear) therefore need putting away with this binding rather than with ctrl+w.
 #
+# Summoning focuses the window, then away, then back. Chromium ignores focus handed to it as
+# the window maps and takes the keyboard only on a later transition, so without that bounce
+# slack and linear come up visible, focused as far as X and the compositor are concerned, and
+# inert until they are clicked. A focus that merely arrives late is not enough; it has to move.
+#
 # Usage: scratchpad <window-class> [command]   command defaults to the class.
 # Depends on bspc and jq.
 
@@ -56,4 +61,11 @@ if [[ ${node} == "$(bspc query -N -n focused)" ]]; then
   exit 0
 fi
 
+typeset previous="$(bspc query -N -n focused)"
+
 bspc node ${node} -g hidden=off -f
+
+if [[ -n ${previous} && ${previous} != ${node} ]]; then
+  bspc node ${previous} -f
+  bspc node ${node} -f
+fi
