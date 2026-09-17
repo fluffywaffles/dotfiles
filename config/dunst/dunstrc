@@ -93,8 +93,10 @@
     #  * anything else will be interpreted as a X color.
     separator_color = frame
 
-    # Sort messages by urgency.
-    sort = yes
+    # Keep arrival order. Sorting by urgency moves the top of the stack without moving what
+    # dunstctl action reaches, which is always the oldest displayed, so the action and close
+    # keys stop agreeing on which notification is meant.
+    sort = no
 
     # Don't remove messages, if the user is idle (no mouse or keyboard input)
     # for longer than idle_threshold seconds.
