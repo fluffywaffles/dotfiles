@@ -179,7 +179,7 @@ super + BackSpace
 super + shift + BackSpace
 	dunstctl close-all
 
-# summon whoever sent the oldest displayed notification, then dismiss it
+# summon whoever sent the newest displayed notification, then dismiss it
 super + Tab
 	notify-act
 

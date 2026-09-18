@@ -2,9 +2,10 @@
 set -euo pipefail
 setopt no_clobber
 
-# Act on the oldest displayed notification: summon whoever sent it, or fall back to dunst's own
-# action. dunstctl can only ever address its oldest displayed notification, and dunst ids are
-# monotonic, so the lowest recorded id that has not reached the history is the one on screen.
+# Act on the newest displayed notification: summon whoever sent it, then dismiss that one by id.
+# Newest rather than oldest because nothing expires once pinned, so the oldest is the stalest.
+# A record whose notification has left the screen is in the history, and a recent departure is
+# always still in it, so the newest record absent from the history is reliably the live one.
 # Depends on dunstctl, jq, claude-jump and scratchpad.
 
 function errf { >&2 printf ${@} }
@@ -25,12 +26,20 @@ function action_or_close() {
   exit 0
 }
 
+typeset displayed="$(dunstctl count displayed)"
+
+# Nothing on screen means every record is stale, whatever the history still remembers.
+if (( displayed == 0 )); then
+  rm --recursive --force ${dir}
+  exit 0
+fi
+
 if [[ ! -d ${dir} ]]; then
   action_or_close
 fi
 
 typeset -a records
-records=(${dir}/*(N.on:t))
+records=(${dir}/*(N.On:t))
 
 if (( ${#records} == 0 )); then
   action_or_close
@@ -71,4 +80,4 @@ esac
 
 rm --force ${dir}/${id}
 
-dunstctl close
+dunstctl close ${id}
