@@ -403,3 +403,5 @@
 [slack-stack]
     appname = "Slack"
     set_stack_tag = "slack-tag"
+    timeout = 0
+    script = ~/.local/bin/notify-record

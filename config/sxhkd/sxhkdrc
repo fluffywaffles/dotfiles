@@ -179,9 +179,9 @@ super + BackSpace
 super + shift + BackSpace
 	dunstctl close-all
 
-# invoke the displayed notification's action, whichever application it belongs to
+# summon whoever sent the oldest displayed notification, then dismiss it
 super + Tab
-	dunstctl action
+	notify-act
 
 # jump to the claude session that notified most recently, whatever is on screen
 super + j
