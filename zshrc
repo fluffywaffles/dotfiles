@@ -182,9 +182,23 @@ function git-worktree-paths {
 #
 function git-worktree-create-if-not-exists {
   local match mbegin mend
+  # --from {ref} forks a new branch from {ref} instead of the default branch
+  local from
+  while true; do
+    if   [[ ${1} =~ ^-+from$ ]]; then shift; from=${1}; shift
+    elif [[ ${1} =~ ^-+      ]]; then
+      >&2 print "ERROR: ${0}: unrecognized flag: ${1}"
+      return 1
+    else break
+    fi
+  done
   local branch=${1}
   if [[ -z ${branch} ]]; then
-    print -nf '━ !! %s' 'cannot create branch with no name'
+    print -nf '━ !! %s\n' 'cannot create branch with no name'
+    return 1
+  fi
+  if [[ -n ${from} ]] && ! git rev-parse --verify --quiet ${from} >/dev/null; then
+    print -nf '━ !! %s\n' "cannot fork ${branch} from ${from}: no such ref"
     return 1
   fi
   # get the worktree root, bail early if it does not exist
@@ -211,20 +225,36 @@ function git-worktree-create-if-not-exists {
   local existing=${extant_branches[(r)(refs/remotes/(${(j:|:)remotes})/|)${branch}]}
   # build the argument list for 'git-worktree add'
   local -a args
-  # if the existing branch points to a remote branch, or none exists...
-  if   [[ -z ${existing} ]] \
-    || [[ ${existing} == refs/remotes/* ]]
-  then
-    # create a new branch tracking the remote branch (if any)
+  local base
+  # if no branch exists, fork a new one from --from or the default branch
+  if   [[ -z ${existing}                ]]; then
+    base=${from}
+    if [[ -z ${base} ]]; then
+      local default_ref=$(git-origin-default-branch)
+      if [[ -z ${default_ref} ]]; then
+        print -nf '━ !! %s\n' "no default branch to fork ${branch} from; pass --from"
+        return 1
+      fi
+      base=${default_ref#refs/remotes/}
+      git fetch --quiet ${base%%/*} ${base#*/}
+    fi
+    # --no-track, so the new branch does not inherit ${base}'s upstream
+    args=(--no-track -b ${branch} ${target_path} ${base})
+  elif [[ ${existing} == refs/remotes/* ]]; then
+    # the branch exists only at a remote; create a new branch tracking it
+    base=${existing#refs/remotes/}
     args=(--track -b ${branch} ${target_path} ${existing})
-  else # otherwise, the branch exists locally
-    # however no worktree exists, so check it out to ${target_path}
+  else
+    # the branch exists locally, but no worktree has it checked out
     args=(${target_path} ${branch})
   fi
   # finally, add the new worktree
-  print -nf '┯ New worktree\n├ %s\n└ %s\n' \
-    "Branch: ${branch}"                    \
-    "Path:   ./${target_path##$(git-worktree-root)/}"
+  local -a summary=("Branch: ${branch}")
+  if [[ -n ${base} ]]; then summary+=("Base:   ${base}"); fi
+  summary+=("Path:   ./${target_path##${root}/}")
+  print -nf '┯ New worktree\n'
+  print -nf '├ %s\n' ${summary[1,-2]}
+  print -nf '└ %s\n' ${summary[-1]}
   git worktree add ${args[@]}
 }
 
