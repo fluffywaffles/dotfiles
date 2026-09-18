@@ -43,3 +43,6 @@
 	experimental = true
 [grep]
 	patternType = perl
+[hook "brain-duplicate-check"]
+	event = pre-rebase
+	command = ~/.local/share/brain/stem/tools/pre-rebase-duplicate-check
