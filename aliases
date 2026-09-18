@@ -269,14 +269,13 @@ function git-origin-default-branch () {
   fi
 
   # Fallback if the remote symbolic-ref isn't set
-  local fallback=$(git config init.defaultbranch || echo main)
-  if git rev-parse --verify --quiet refs/remotes/${remote}/${fallback} >/dev/null; then
-    echo "refs/remotes/${remote}/${fallback}"
-    return 0
-  elif git rev-parse --verify --quiet refs/remotes/${remote}/master >/dev/null; then
-    echo "refs/remotes/${remote}/master"
-    return 0
-  fi
+  local candidate
+  for candidate ($(git config init.defaultbranch) main); do
+    if git rev-parse --verify --quiet refs/remotes/${remote}/${candidate} >/dev/null; then
+      echo "refs/remotes/${remote}/${candidate}"
+      return 0
+    fi
+  done
 
   return 1
 }
