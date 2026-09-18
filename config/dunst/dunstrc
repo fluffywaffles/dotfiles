@@ -259,22 +259,22 @@
     mouse_right_click  = close_all
 
 [urgency_low]
-    background  = "#414650"
-    foreground  = "#eeeeee"
-    highlight   = "#a0a4a8"
-    frame_color = "#575f70"
+    background  = "#4a5878"
+    foreground  = "#ffffff"
+    highlight   = "#aab6d8"
+    frame_color = "#7385b5"
     timeout     = 10s
 
 [urgency_normal]
     background  = "#2a8a58"
-    foreground  = "#eeeeee"
+    foreground  = "#ffffff"
     highlight   = "#36ad71"
     frame_color = "#36ad71"
     timeout     = 10s
 
 [urgency_critical]
     background  = "#b24545"
-    foreground  = "#eeeeee"
+    foreground  = "#ffffff"
     highlight   = "#e06c75"
     frame_color = "#d25252"
     timeout     = 0s # AKA do not expire
