@@ -2,11 +2,19 @@
 set -euo pipefail
 setopt no_clobber
 
-# Act on the newest displayed notification: summon whoever sent it, then dismiss that one by id.
+# Act on the newest displayed notification: summon whoever sent it, then dismiss everything that
+# source has on screen, since summoning it answers all of them at once.
 # Newest rather than oldest because nothing expires once pinned, so the oldest is the stalest.
-# A record whose notification has left the screen is in the history, and a recent departure is
-# always still in it, so the newest record absent from the history is reliably the live one.
-# Depends on dunstctl, jq, claude-jump and scratchpad.
+# A record only claims that a notification once existed. The history is one way to tell the dead
+# ones apart, but it holds the last hundred and never receives a notification its own stack tag
+# replaced, so a candidate that survives it is closed and the displayed count read back: a close
+# that changes nothing names a record to sweep and walk past. The whole dead pile therefore goes
+# in one keypress rather than costing a keypress each.
+# Records are ordered by write time rather than by id, since dunst numbers from one again after a
+# restart and an id says nothing about when it was handed out across two instances.
+# The dismissal comes before the summons: scratchpad execs the application when it is not already
+# running, which would hold this script open for as long as that application lives.
+# Depends on dunstctl, jq, notify-dismiss, claude-jump and scratchpad.
 
 function errf { >&2 printf ${@} }
 
@@ -39,7 +47,7 @@ if [[ ! -d ${dir} ]]; then
 fi
 
 typeset -a records
-records=(${dir}/*(N.On:t))
+records=(${dir}/*(N.om:t))
 
 if (( ${#records} == 0 )); then
   action_or_close
@@ -48,7 +56,7 @@ fi
 typeset -a gone
 gone=(${(f)"$(dunstctl history | jq --raw-output '.data[0][].id.data')"})
 
-typeset id source=''
+typeset id source='' before
 
 for id in ${records}; do
   if (( ${gone[(Ie)${id}]} )); then
@@ -56,28 +64,38 @@ for id in ${records}; do
     continue
   fi
 
+  before="$(dunstctl count displayed)"
   source="$(< ${dir}/${id})"
-  break
+
+  dunstctl close ${id}
+  rm --force ${dir}/${id}
+
+  if [[ "$(dunstctl count displayed)" != ${before} ]]; then
+    break
+  fi
+
+  source=''
 done
 
 if [[ -z ${source} ]]; then
   action_or_close
 fi
 
+typeset -a summon
+
 case ${source} in
   slack)
-    scratchpad slack
+    summon=(scratchpad slack)
     ;;
   claude\ ?*)
-    claude-jump ${source#claude }
+    summon=(claude-jump ${source#claude })
     ;;
   *)
     errf 'notify-act: unrecognised source %s for id %s\n' ${source} ${id}
-    rm --force ${dir}/${id}
     action_or_close
     ;;
 esac
 
-rm --force ${dir}/${id}
+notify-dismiss ${source}
 
-dunstctl close ${id}
+exec ${summon}

@@ -1,0 +1,46 @@
+#!/bin/zsh
+set -euo pipefail
+setopt no_clobber
+
+# Close every notification from one source, named as notify-record names it, so summoning a
+# source clears its whole stack rather than only the notification that was acted on.
+# Ids already in the history are skipped rather than closed: dunst numbers from one again after
+# a restart, so a record left behind by an earlier instance can name someone else's notification.
+# Depends on dunstctl and jq.
+
+function errf { >&2 printf ${@} }
+
+typeset source=${1:-}
+
+if [[ -z ${source} ]]; then
+  errf 'notify-dismiss: no source given\n'
+  exit 1
+fi
+
+typeset dir=${XDG_RUNTIME_DIR:-/tmp}/notify-act
+
+typeset -a records
+records=(${dir}/*(N.))
+
+if (( ${#records} == 0 )); then
+  exit 0
+fi
+
+typeset -a gone
+gone=(${(f)"$(dunstctl history | jq --raw-output '.data[0][].id.data')"})
+
+typeset record id
+
+for record in ${records}; do
+  if [[ "$(< ${record})" != "${source}" ]]; then
+    continue
+  fi
+
+  id=${record:t}
+
+  if (( ! ${gone[(Ie)${id}]} )); then
+    dunstctl close ${id}
+  fi
+
+  rm --force ${record}
+done

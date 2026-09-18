@@ -4,6 +4,9 @@ setopt no_clobber
 
 # Record which source owns a dunst notification id, so notify-act can summon it later. Run from a
 # dunstrc rule's script option, which supplies the DUNST_* environment.
+# Every source recorded here is stack-tagged, one live notification at a time, so a record it
+# already holds names one this notification has just replaced — and dunst neither displays a
+# replaced notification nor puts it in the history, which leaves nothing else to recognise it by.
 
 typeset dir=${XDG_RUNTIME_DIR:-/tmp}/notify-act
 
@@ -16,5 +19,13 @@ case ${DUNST_APP_NAME:-} in
   Slack)       source=slack ;;
   *)           exit 0 ;;
 esac
+
+typeset record
+
+for record in ${dir}/*(N.); do
+  if [[ "$(< ${record})" == "${source}" ]]; then
+    rm --force ${record}
+  fi
+done
 
 printf '%s\n' ${source} >! ${dir}/${DUNST_ID}
