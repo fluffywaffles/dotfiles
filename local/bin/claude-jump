@@ -5,6 +5,9 @@ setopt no_clobber
 # Focus the tmux pane given as an argument, or the one the most recent Claude Code notification
 # came from. dunstctl can only ever action its oldest displayed notification, so the keyboard
 # path records the pane itself rather than asking dunst which notification is meant.
+# A pane id resolves session, window and pane together, so switch-client shows a pane in another
+# session; select-window would set that session's own current window and leave the client where
+# it was, jumping to nothing.
 # Depends on tmux, bspc and jq.
 
 function errf { >&2 printf ${@} }
@@ -46,8 +49,10 @@ if ! >/dev/null 2>&1 tmux has-session -t ${pane}; then
   exit 1
 fi
 
-tmux select-window -t ${pane}
-tmux select-pane -t ${pane}
+if ! >/dev/null 2>&1 tmux switch-client -t ${pane}; then
+  errf 'claude-jump: no attached client to show %s\n' ${pane}
+  exit 1
+fi
 
 typeset node
 
