@@ -1,0 +1,80 @@
+#!/bin/zsh
+#
+# git pre-rebase hook: refuse a rebase that would replay commits already upstream.
+#
+# Git drops duplicate commits by patch-id, but computes those patch-ids WITHOUT rename
+# detection. A rename-only commit therefore reads as "delete N files + add N files", a diff
+# whose content follows whatever base it sits on. Rebase the upstream branch onto a newer
+# main and that base changes, the two copies stop matching, and the move gets replayed onto a
+# tree that already has it -- every file conflicting AA, both sides "adding" what is already
+# there. Resolving those by hand yields a tree where the move half-applied twice.
+#
+# This hook computes patch-ids both ways and refuses only for a commit that matches upstream WITH
+# rename detection but not without: precisely what git misses.
+#
+# The fix is never to resolve the conflicts. When the missed commits all sit below the branch's
+# own, rebase from the old upstream tip, which the hook names:
+#
+#   git rebase --onto <new-upstream-tip> <old-upstream-tip>
+#
+# Otherwise drop them in `git rebase --interactive --no-verify`.
+#
+# Skip with `git rebase --no-verify` if a replay is genuinely intended.
+
+set -euo pipefail
+
+upstream=${1:-}
+[[ -n ${upstream} ]] || exit 0
+
+branch=${2:-HEAD}
+base=$(git merge-base "${upstream}" "${branch}" 2>/dev/null) || exit 0
+
+typeset -A upstream_ids plain_ids
+while read -r sha; do
+    [[ -n ${sha} ]] || continue
+    id=$(git show "${sha}" | git patch-id --stable | cut -d' ' -f1)
+    [[ -n ${id} ]] && upstream_ids[${id}]=${sha}
+    id=$(git show --no-renames "${sha}" | git patch-id --stable | cut -d' ' -f1)
+    [[ -n ${id} ]] && plain_ids[${id}]=${sha}
+done < <(git rev-list "${base}..${upstream}")
+
+duplicates=()
+typeset bottom=yes interleaved tip
+while read -r sha; do
+    [[ -n ${sha} ]] || continue
+    id=$(git show "${sha}" | git patch-id --stable | cut -d' ' -f1)
+    plain=$(git show --no-renames "${sha}" | git patch-id --stable | cut -d' ' -f1)
+    if [[ -n ${plain} && -n ${plain_ids[${plain}]:-} ]]; then
+        continue
+    elif [[ -n ${id} && -n ${upstream_ids[${id}]:-} ]]; then
+        duplicates+=("${sha} ${upstream_ids[${id}]}")
+        if [[ -n ${bottom} ]]; then
+            tip=${sha}
+        else
+            interleaved=yes
+        fi
+    else
+        bottom=
+    fi
+done < <(git rev-list --reverse "${base}..${branch}")
+
+(( ${#duplicates} )) || exit 0
+
+print -ru2 -- "pre-rebase: ${#duplicates} commit(s) to replay are already upstream under a different sha:"
+for pair in "${duplicates[@]}"; do
+    print -ru2 -- "  $(git log -1 --format='%h %s' "${pair%% *}")"
+    print -ru2 -- "    already upstream as $(git log -1 --format='%h' "${pair##* }")"
+done
+print -ru2 --
+if [[ -z ${interleaved} ]]; then
+    print -ru2 -- "They all sit below this branch's own commits, so rebase from the old upstream tip:"
+    print -ru2 -- "  git rebase --onto ${upstream} $(git rev-parse --short "${tip}")"
+else
+    print -ru2 -- "They are interleaved with this branch's own commits, so no --onto range skips them."
+    print -ru2 -- "Drop each one instead: git rebase --interactive --no-verify ${upstream}"
+fi
+print -ru2 --
+print -ru2 -- "Git will not drop these itself: its dedup ignores renames, so a rename-only"
+print -ru2 -- "commit changes patch-id when its base moves. Replaying one conflicts AA on every"
+print -ru2 -- "file. Do not resolve those by hand. Override with --no-verify if intended."
+exit 1
