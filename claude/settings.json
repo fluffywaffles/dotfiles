@@ -216,6 +216,11 @@
             "type": "command",
             "command": "$HOME/.claude/scripts/pr-inform-hook",
             "timeout": 15
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.claude/scripts/brain-scope-hook",
+            "timeout": 15
           }
         ]
       }
