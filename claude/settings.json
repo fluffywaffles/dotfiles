@@ -141,7 +141,8 @@
       "Bash(actionlint:*)",
       "Bash(command -v:*)",
       "Bash(systemctl is-active:*)"
-    ]
+    ],
+    "defaultMode": "auto"
   },
   "hooks": {
     "Notification": [
@@ -200,6 +201,9 @@
       }
     ]
   },
+  "enableArtifact": false,
+  "enableWorkflows": false,
+  "workflowKeywordTriggerEnabled": false,
   "enabledPlugins": {
     "linear@claude-plugins-official": true,
     "datadog@claude-plugins-official": true,
@@ -218,6 +222,7 @@
   },
   "feedbackDrafts": "off",
   "effortLevel": "high",
+  "askUserQuestionTimeout": "never",
   "tui": "fullscreen",
   "voice": {
     "enabled": true,
