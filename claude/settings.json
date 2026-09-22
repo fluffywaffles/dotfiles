@@ -163,6 +163,11 @@
             "type": "command",
             "command": "$HOME/.local/bin/claude-notify",
             "async": true
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.claude/scripts/correspondence-draft-hook",
+            "timeout": 10
           }
         ]
       }
