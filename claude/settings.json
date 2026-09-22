@@ -191,6 +191,31 @@
             "type": "command",
             "command": "$HOME/.claude/scripts/shared-memory-hook",
             "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.claude/scripts/writing-rules-hook",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/scripts/writing-rules-hook",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__plugin_linear_linear__save_(comment|issue)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/scripts/writing-rules-hook",
+            "timeout": 10
           }
         ]
       }
