@@ -168,6 +168,11 @@
             "type": "command",
             "command": "$HOME/.claude/scripts/correspondence-draft-hook",
             "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.claude/scripts/identifier-ref-hook",
+            "timeout": 30
           }
         ]
       }
