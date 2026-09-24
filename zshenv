@@ -457,3 +457,8 @@ function _zwb-toggle-list {
   _zwb_current_list=${next_key}
   print ${_zwb_current_list} >! ${_zwb_current_list_file}
 }
+
+# hostname-specific overrides (i.e. verdure vs. hyperion vs. w/e)
+if [[ -f ${HOME}/.zshenv.${HOST} ]]; then
+  source ${HOME}/.zshenv.${HOST}
+fi

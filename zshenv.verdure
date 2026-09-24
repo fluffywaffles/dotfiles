@@ -1,0 +1,3 @@
+# the console key for the brain's identifier-ref-check, which calls the api
+# directly and fails open without one
+export ANTHROPIC_API_KEY="$(< ${HOME}/documents/anthropic-console-verdure-key.txt)"
