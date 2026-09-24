@@ -1,0 +1,60 @@
+#!/usr/bin/env zsh
+# cripple
+# Run a command directly inside a resource-limited systemd user scope.
+
+set -euo pipefail
+
+# memory and cpu limits
+memory="2G" # at most 2Gb of memory
+cpu="100"   # at most 100% of cpu time (i.e. 1.0 cpu; vs. 20 is 0.2cpu)
+
+# flag parsing
+#   memory         -m -memory         --memory        {N}{unit}
+#   c(pu|ompute)   -c -c(pu|ompute)   --c(pu|ompute)  {float}
+#
+# {N} a whole number >= 1
+# {unit}
+while true; do
+  if   [[ ${1} =~ ^-*m(emory)*$     ]]; then memory=${1}; shift
+  elif [[ ${1} =~ ^-*c(pu|ompute)*$ ]]; then cpu=${1};    shift
+  elif [[ ${1} =~ ^-+               ]]; then
+    >&2 printf 'ERR: unexpected flag: %s\n' ${1}
+    exit 1
+  else
+    break
+  fi
+done
+
+#
+# systemd.resource-control properties we care about:
+#
+#   CPUQuota={N}%               at most N% of cpu time; 20% == 0.2cpu; 200% == 2.0cpu
+#   MemoryHigh={N}[{K,M,G,T}]   throttle memory when it exceeds N{unit}
+#
+#   when a {unit} is not given, it defaults to bytes.
+#
+# CPUQuota enforced when scheduling cpu within a unit interval of compute.
+#
+# MemoryHigh allows the application to overallocate memory, but:
+#
+#   > [...] Memory usage may go above the limit if unavoidable, but the
+#   >  processes are heavily slowed down and memory is taken away
+#   >  aggressively in such cases. [...]
+#
+
+if [[ -z ${1} ]]; then
+  >&2 printf 'ERR: no command provided to %s\n' ${0}
+  exit 1
+fi
+
+# resolve the path to the command binary
+binary=$(command -v ${1})
+shift 1
+
+# Using exec to replace the script process directly for clean job control
+exec systemd-run                 \
+  --user                         \
+  --scope                        \
+  --property CPUQuota=${cpu}%    \
+  --property MemoryMax=${memory} \
+  -- ${binary} ${@}
