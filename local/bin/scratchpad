@@ -17,7 +17,14 @@ setopt no_clobber
 # slack and linear come up visible, focused as far as X and the compositor are concerned, and
 # inert until they are clicked. A focus that merely arrives late is not enough; it has to move.
 #
-# Usage: scratchpad <window-class> [command]   command defaults to the class.
+# --summon drops the hiding state and always runs the command, which is what a caller carrying
+# something to deliver wants: a url handler has to clear the hidden flag before the application
+# acts on the argument, since a stashed window is unmapped and the show() that follows a deeplink
+# lands on nothing. The command reaching an application that is already up is harmless only
+# because slack and linear both hold a single-instance lock and forward their argv to the running
+# copy; an application without one would open a second window.
+#
+# Usage: scratchpad [--summon] <window-class> [command [arg...]]   command defaults to the class.
 # Depends on bspc and jq.
 
 function errf { >&2 printf ${@} }
@@ -42,6 +49,18 @@ function node_for_class() {
   return 1
 }
 
+typeset summon=
+
+while (( ${#} > 0 )); do
+  if   [[ ${1} =~ ^-*summon$ ]]; then summon=yes; shift
+  elif [[ ${1} =~ ^-+        ]]; then
+    errf 'scratchpad: unexpected flag: %s\n' ${1}
+    exit 1
+  else
+    break
+  fi
+done
+
 typeset class=${1:-}
 
 if [[ -z ${class} ]]; then
@@ -49,14 +68,22 @@ if [[ -z ${class} ]]; then
   exit 1
 fi
 
-typeset command=${2:-${class}}
+shift
+
+typeset -a command
+command=(${@})
+
+if (( ${#command} == 0 )); then
+  command=(${class})
+fi
+
 typeset node
 
 if ! node="$(node_for_class ${class})"; then
   exec ${command}
 fi
 
-if [[ ${node} == "$(bspc query -N -n focused)" ]]; then
+if [[ -z ${summon} && ${node} == "$(bspc query -N -n focused)" ]]; then
   bspc node ${node} -g hidden=on
   exit 0
 fi
@@ -68,4 +95,8 @@ bspc node ${node} -g hidden=off -f
 if [[ -n ${previous} && ${previous} != ${node} ]]; then
   bspc node ${previous} -f
   bspc node ${node} -f
+fi
+
+if [[ -n ${summon} ]]; then
+  exec ${command}
 fi

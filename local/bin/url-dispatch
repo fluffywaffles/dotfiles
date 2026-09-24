@@ -13,6 +13,10 @@ setopt no_clobber
 # resolveDeeplink strips linear:// along with an optional linear.app/ and resolves the rest against
 # https://linear.app, so handing it the bare path round-trips to the url we were given.
 #
+# It goes through scratchpad --summon because linear is put away with bspwm's hidden flag: an
+# already-running copy takes the deeplink, navigates to it and calls show() on a window bspwm has
+# unmapped, so the link lands silently and ambushes the next summons.
+#
 # Usage: url-dispatch <url>
 
 function errf { >&2 printf ${@} }
@@ -26,7 +30,7 @@ fi
 
 case ${url} in
   http://linear.app/*|https://linear.app/*)
-    exec linear-bin linear://${url#*://linear.app/}
+    exec scratchpad --summon linear linear-bin linear://${url#*://linear.app/}
     ;;
 esac
 
