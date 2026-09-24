@@ -1,6 +1,6 @@
 [Default Applications]
-x-scheme-handler/http=vieb.desktop;org.qutebrowser.qutebrowser.desktop
-x-scheme-handler/https=vieb.desktop;org.qutebrowser.qutebrowser.desktop
+x-scheme-handler/http=url-dispatch.desktop;vieb.desktop;org.qutebrowser.qutebrowser.desktop
+x-scheme-handler/https=url-dispatch.desktop;vieb.desktop;org.qutebrowser.qutebrowser.desktop
 x-scheme-handler/mailto=vieb.desktop;org.qutebrowser.qutebrowser.desktop
 x-scheme-handler/about=vieb.desktop;org.qutebrowser.qutebrowser.desktop
 x-scheme-handler/webcal=vieb.desktop;org.qutebrowser.qutebrowser.desktop

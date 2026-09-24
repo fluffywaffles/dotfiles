@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=URL dispatch
+Comment=Route a url to the application that owns it
+Exec=url-dispatch %u
+Terminal=false
+NoDisplay=true
+MimeType=x-scheme-handler/http;x-scheme-handler/https;

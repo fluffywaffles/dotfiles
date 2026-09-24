@@ -1,0 +1,33 @@
+#!/bin/zsh
+
+set -euo pipefail
+setopt no_clobber
+
+# Open a url in the application that owns it, falling back to the browser.
+#
+# Registered on x-scheme-handler/http and x-scheme-handler/https, so a link opened anywhere —
+# slack, a notification, xdg-open in a terminal — reaches this before a browser does.
+#
+# linear-bin takes a deeplink only from its last argument and only when that argument starts with
+# linear://, so an https://linear.app/ url handed to it is discarded without a word. Its own
+# resolveDeeplink strips linear:// along with an optional linear.app/ and resolves the rest against
+# https://linear.app, so handing it the bare path round-trips to the url we were given.
+#
+# Usage: url-dispatch <url>
+
+function errf { >&2 printf ${@} }
+
+typeset url=${1:-}
+
+if [[ -z ${url} ]]; then
+  errf 'url-dispatch: no url given\n'
+  exit 1
+fi
+
+case ${url} in
+  http://linear.app/*|https://linear.app/*)
+    exec linear-bin linear://${url#*://linear.app/}
+    ;;
+esac
+
+exec vieb ${url}
