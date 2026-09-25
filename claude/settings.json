@@ -206,6 +206,11 @@
             "type": "command",
             "command": "$HOME/.claude/scripts/writing-rules-hook",
             "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.claude/scripts/lang-inform-hook",
+            "timeout": 10
           }
         ]
       },
