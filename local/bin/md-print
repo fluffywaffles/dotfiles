@@ -1,0 +1,59 @@
+#!/bin/zsh
+set -euo pipefail
+setopt no_clobber
+
+# Render markdown to PDF at a chosen point size and send it to the default printer.
+
+self=${0:t}
+size=9
+stylesheet=${XDG_CONFIG_HOME:-${HOME}/.config}/md-print/print.css
+
+function usage() {
+  printf 'usage: %s [--size pointsize] file.md...\n\n' ${self}
+  printf '  -s, --size   body point size (default %s)\n' ${size}
+  printf '  -h, --help   this message\n'
+}
+
+typeset -a opt_size opt_help
+zparseopts -D -F -- {s,-size}:=opt_size {h,-help}=opt_help || { >&2 usage; exit 2 }
+
+if (( ${#opt_help} )); then
+  usage
+  exit 0
+fi
+
+if (( ${#opt_size} )); then
+  size=${opt_size[-1]}
+fi
+
+if [[ -z ${1:-} ]]; then
+  >&2 usage
+  exit 2
+fi
+
+typeset -a css
+if [[ -r ${stylesheet} ]]; then
+  css=(-U ${stylesheet})
+fi
+
+work=$(mktemp --directory)
+trap 'rm --recursive --force ${work}' EXIT INT TERM
+
+for md; do
+  if [[ ! -r ${md} ]]; then
+    >&2 printf '%s: cannot read %s\n' ${self} ${md}
+    exit 1
+  fi
+  html=${work}/${md:t:r}.html
+  pdf=${work}/${md:t:r}.pdf
+  {
+    printf '<!DOCTYPE html><html><head><meta charset="utf-8"></head><body>\n'
+    awk 'NR == 1 && /^---[[:space:]]*$/ { fm = 1; next }
+         fm && /^---[[:space:]]*$/       { fm = 0; next }
+         !fm' ${md} \
+      | cmark-gfm --extension table --extension strikethrough --extension autolink
+    printf '\n</body></html>\n'
+  } >! ${html}
+  mutool draw -q -F pdf -o ${pdf} -W 612 -H 792 -S ${size} ${css} ${html}
+  lp ${pdf}
+done

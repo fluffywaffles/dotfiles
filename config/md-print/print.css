@@ -1,0 +1,35 @@
+/* mutool resolves no font by family name, so every face is loaded by path. A path that
+   does not resolve warns on stderr and falls through to the generic family beside it. */
+
+@font-face { font-family: "body"; src: url("/usr/share/fonts/noto/NotoSerif-Regular.ttf"); }
+@font-face { font-family: "body"; font-weight: bold; src: url("/usr/share/fonts/noto/NotoSerif-Bold.ttf"); }
+@font-face { font-family: "body"; font-style: italic; src: url("/usr/share/fonts/noto/NotoSerif-Italic.ttf"); }
+@font-face { font-family: "body"; font-weight: bold; font-style: italic; src: url("/usr/share/fonts/noto/NotoSerif-BoldItalic.ttf"); }
+
+@font-face { font-family: "head"; src: url("/usr/share/fonts/TTF/FiraSans-Regular.ttf"); }
+@font-face { font-family: "head"; font-weight: bold; src: url("/usr/share/fonts/TTF/FiraSans-Bold.ttf"); }
+
+@font-face { font-family: "mono"; src: url("/usr/share/fonts/ttf-mononoki/mononoki-Regular.ttf"); }
+@font-face { font-family: "mono"; font-weight: bold; src: url("/usr/share/fonts/ttf-mononoki/mononoki-Bold.ttf"); }
+
+html { margin: 0; }
+body { margin: 26pt; font-family: "body", serif; line-height: 1.35; }
+
+h1, h2, h3, h4 { font-family: "head", sans-serif; margin: 0.8em 0 0.3em; page-break-after: avoid; }
+h1 { font-size: 1.6em; }
+h2 { font-size: 1.3em; }
+h3 { font-size: 1.1em; }
+
+p { margin: 0.4em 0; }
+ul, ol { margin: 0.4em 0; padding-left: 1.4em; }
+li { margin: 0.1em 0; }
+
+table { border-collapse: collapse; margin: 0.6em 0; }
+th, td { border: 0.5pt solid #666; padding: 2pt 5pt; text-align: left; }
+th { background: #eee; font-family: "head", sans-serif; }
+
+pre { background: #f2f2f2; border: 0.5pt solid #ccc; padding: 4pt 6pt; margin: 0.5em 0; }
+pre, code { font-family: "mono", monospace; font-size: 0.92em; }
+
+blockquote { margin: 0.5em 0 0.5em 1em; padding-left: 0.8em; border-left: 2pt solid #bbb; }
+a { color: #004080; }
