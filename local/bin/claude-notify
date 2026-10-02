@@ -4,10 +4,37 @@ setopt no_clobber
 
 # Raise a libnotify notification from a Claude Code Notification hook payload on stdin,
 # titled with the tmux window the session runs in. Inside tmux the notification is spooled and
-# raised by claude-notify-listen instead, so its Jump action outlives this hook process.
+# raised by claude-notify-listen instead, so its Jump action outlives this hook process. A session
+# forked into the background borrows the pane it was spawned from, and raises nothing on Stop.
 # Depends on jq, notify-send, tmux and systemctl.
 
 function errf { >&2 printf ${@} }
+
+# The pane a session was started in, from the nearest ancestor that holds one. A background
+# session — a --fork-session resume under the daemon's bg-pty-host — inherits no TMUX_PANE of its
+# own, while the daemon that spawned it still carries the pane it was started in.
+function ancestor_pane() {
+  local pid=${$} pane
+
+  while [[ -n ${pid} && ${pid} != 0 ]]; do
+    if [[ -r /proc/${pid}/environ ]]; then
+      pane="$(2>/dev/null tr '\0' '\n' < /proc/${pid}/environ | sed --quiet 's/^TMUX_PANE=//p')"
+
+      if [[ -n ${pane} ]]; then
+        printf '%s\n' ${pane}
+        return 0
+      fi
+    fi
+
+    if [[ ! -r /proc/${pid}/status ]]; then
+      return 1
+    fi
+
+    pid="$(sed --quiet 's/^PPid:[[:space:]]*//p' /proc/${pid}/status)"
+  done
+
+  return 1
+}
 
 typeset state=${XDG_RUNTIME_DIR:-/tmp}/claude-notify.pane
 
@@ -22,6 +49,13 @@ typeset event="$(jq --raw-output '.hook_event_name // empty' <<< ${payload})"
 typeset title="$(jq --raw-output '.title // empty' <<< ${payload})"
 typeset message="$(jq --raw-output '.message // empty' <<< ${payload})"
 typeset kind="$(jq --raw-output '.notification_type // empty' <<< ${payload})"
+
+# A session with no pane of its own was forked into the background, where it answers whoever drove
+# it rather than this screen. Its finished turns are not news — a watch re-arming every half hour
+# raises one per tick — so only something waiting on an answer is worth pinning.
+if [[ -z ${TMUX_PANE:-} && ${event} == Stop ]]; then
+  exit 0
+fi
 
 # Default to the category that persists: a type not named here is more likely to be Claude
 # waiting than a status report, and an unrecognised one should not expire unseen.
@@ -75,10 +109,16 @@ if [[ ${category} == claude.waiting ]]; then
   urgency=normal
 fi
 
+typeset pane=${TMUX_PANE:-}
+
+if [[ -z ${pane} ]]; then
+  pane="$(ancestor_pane)" || true
+fi
+
 typeset location
 
-if [[ -n ${TMUX_PANE:-} ]]; then
-  location="$(2>/dev/null tmux display-message -p -t ${TMUX_PANE} \
+if [[ -n ${pane} ]]; then
+  location="$(2>/dev/null tmux display-message -p -t ${pane} \
     '#{window_name} [#{session_name}:#{window_index}.#{pane_index}]')"
 fi
 
@@ -99,7 +139,7 @@ if [[ -z ${location} ]]; then
   exit 0
 fi
 
-printf '%s\n' ${TMUX_PANE} >! ${state}
+printf '%s\n' ${pane} >! ${state}
 
 typeset spool=${XDG_RUNTIME_DIR:-/tmp}/claude-notify
 
@@ -111,7 +151,7 @@ jq --null-input \
   --arg header ${header} \
   --arg message ${message} \
   '{urgency: $urgency, category: $category, header: $header, message: $message}' \
-  >! ${spool}/${TMUX_PANE}.json
+  >! ${spool}/${pane}.json
 
 systemctl --user restart \
-  "$(systemd-escape --template=claude-notify-listen@.service ${TMUX_PANE})"
+  "$(systemd-escape --template=claude-notify-listen@.service ${pane})"
