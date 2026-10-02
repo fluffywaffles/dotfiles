@@ -29,12 +29,12 @@
     width  = 500
 
     # The maximum height of a single notification.
-    height = 200
+    height = (0, 200)
 
     # Respectively the horizontal and vertical offset in pixels from the
     # corner of the screen specified by origin. A negative offset will
     # lead to the notification being off screen.
-    offset = 15x15
+    offset = (15, 15)
 
     # The origin of the notification window on the screen. It can then be
     # moved with offset. Origin can be one of:
