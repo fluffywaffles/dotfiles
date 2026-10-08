@@ -193,6 +193,17 @@
         ]
       }
     ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/scripts/writing-rules-hook",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
     "PreToolUse": [
       {
         "matcher": "Edit|Write",
@@ -225,7 +236,7 @@
         ]
       },
       {
-        "matcher": "mcp__plugin_linear_linear__save_(comment|issue)",
+        "matcher": "mcp__plugin_linear_linear__save_(comment|issue)$",
         "hooks": [
           {
             "type": "command",
@@ -286,6 +297,7 @@
     ";;": "<Esc>"
   },
   "preferredNotifChannel": "notifications_disabled",
+  "remoteControlAtStartup": true,
   "inputNeededNotifEnabled": true,
   "agentPushNotifEnabled": true,
   "autoMode": {
@@ -327,5 +339,5 @@
     ]
   },
   "voiceEnabled": true,
-  "remoteControlAtStartup": true
+  "model": "claude-fable-5-1[1m]"
 }
