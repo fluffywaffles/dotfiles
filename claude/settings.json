@@ -166,6 +166,11 @@
           },
           {
             "type": "command",
+            "command": "$HOME/.claude/scripts/writing-draft-hook",
+            "timeout": 30
+          },
+          {
+            "type": "command",
             "command": "$HOME/.claude/scripts/correspondence-draft-hook",
             "timeout": 10
           },
