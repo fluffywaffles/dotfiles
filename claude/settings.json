@@ -188,7 +188,7 @@
           {
             "type": "command",
             "command": "$HOME/.claude/scripts/pr-inform-hook",
-            "timeout": 15
+            "timeout": 30
           },
           {
             "type": "command",
@@ -204,7 +204,7 @@
           {
             "type": "command",
             "command": "$HOME/.claude/scripts/writing-rules-hook",
-            "timeout": 10
+            "timeout": 30
           }
         ]
       }
@@ -258,7 +258,7 @@
           {
             "type": "command",
             "command": "$HOME/.claude/scripts/pr-inform-hook",
-            "timeout": 15
+            "timeout": 30
           },
           {
             "type": "command",
