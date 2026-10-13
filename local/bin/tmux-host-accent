@@ -1,0 +1,36 @@
+#!/bin/zsh
+set -euo pipefail
+
+# Print an accent colour for a host, this host by default. The first six hex digits of the
+# hostname's sha256, taken modulo 360, are the hue. Saturation and lightness are fixed at #43d08a's,
+# so no host's colour lands near black or white.
+# Depends on sha256sum (coreutils).
+
+zmodload zsh/mathfunc
+
+typeset -F saturation=0.6
+typeset -F lightness=0.5392
+
+typeset name=${1:-${HOST}}
+typeset digest="$(printf '%s' ${name} | sha256sum)"
+typeset -i hue=$(( 16#${digest[1,6]} % 360 ))
+
+typeset -F chroma=$(( (1 - abs(2 * lightness - 1)) * saturation ))
+typeset -F second=$(( chroma * (1 - abs(fmod(hue / 60.0, 2) - 1)) ))
+typeset -F base=$(( lightness - chroma / 2 ))
+
+typeset -F red green blue
+
+case $(( hue / 60 )) in
+  0) red=${chroma} green=${second} blue=0         ;;
+  1) red=${second} green=${chroma} blue=0         ;;
+  2) red=0         green=${chroma} blue=${second} ;;
+  3) red=0         green=${second} blue=${chroma} ;;
+  4) red=${second} green=0         blue=${chroma} ;;
+  *) red=${chroma} green=0         blue=${second} ;;
+esac
+
+printf '#%02x%02x%02x\n' \
+  $(( int(rint((red   + base) * 255)) )) \
+  $(( int(rint((green + base) * 255)) )) \
+  $(( int(rint((blue  + base) * 255)) ))
