@@ -6,7 +6,7 @@ setopt no_clobber
 # titled with the tmux window the session runs in. Inside tmux the notification is spooled and
 # raised by claude-notify-listen instead, so its Jump action outlives this hook process. A session
 # forked into the background borrows the pane it was spawned from, and raises nothing on Stop.
-# Depends on jq, notify-send, tmux and systemctl.
+# Depends on claude, jq, notify-send, tmux and systemctl.
 
 function errf { >&2 printf ${@} }
 
@@ -49,6 +49,7 @@ typeset event="$(jq --raw-output '.hook_event_name // empty' <<< ${payload})"
 typeset title="$(jq --raw-output '.title // empty' <<< ${payload})"
 typeset message="$(jq --raw-output '.message // empty' <<< ${payload})"
 typeset kind="$(jq --raw-output '.notification_type // empty' <<< ${payload})"
+typeset session="$(jq --raw-output '.session_id // empty' <<< ${payload})"
 
 # A session with no pane of its own was forked into the background, where it answers whoever drove
 # it rather than this screen. Its finished turns are not news — a watch re-arming every half hour
@@ -115,6 +116,20 @@ if [[ -z ${pane} ]]; then
   pane="$(ancestor_pane)" || true
 fi
 
+typeset live
+
+if [[ -n ${pane} ]]; then
+  live="$(2>/dev/null tmux display-message -p -t ${pane} '#{pane_id}')"
+fi
+
+# A pane id that outlived its pane is not an error to tmux: display-message leaves every pane field
+# empty and exits 0, so a dead pane — the daemon's, inherited by a background session and closed
+# since — yields a location that reads as real and a Jump that goes nowhere. An empty -t resolves
+# to the current pane instead, so only a pane that names itself back is the pane asked for.
+if [[ ${live} != "${pane}" ]]; then
+  pane=''
+fi
+
 typeset location
 
 if [[ -n ${pane} ]]; then
@@ -126,6 +141,13 @@ typeset header=${location}
 
 if [[ -z ${header} ]]; then
   header=${title}
+fi
+
+# With no pane there is nothing to say about where, so the session's own name is what tells one
+# background session's notification from another's.
+if [[ -z ${header} && -n ${session} ]]; then
+  header="$(2>/dev/null claude agents --json \
+    | jq --raw-output --arg id ${session} 'map(select(.sessionId == $id))[0].name // empty')" || true
 fi
 
 if [[ -z ${header} ]]; then
