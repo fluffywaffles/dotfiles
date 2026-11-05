@@ -1,0 +1,40 @@
+#!/bin/zsh
+set -euo pipefail
+setopt no_clobber
+
+# Open a brain-consolidate pass as a pane in the tmux window named `brain`, unless a pane already
+# carries the marker.
+# The pane carries the user option @brain-consolidate as its marker, since Claude Code rewrites
+# pane titles.
+# Depends on tmux, whose flags have no long forms.
+
+if ! 2>/dev/null tmux has-session; then
+  >&2 printf 'brain-consolidate-pane: skipped: no tmux server\n'
+  exit 0
+fi
+
+typeset pending
+pending="$(tmux list-panes -a -f '#{@brain-consolidate}' -F '#{pane_id}')"
+
+if [[ -n ${pending} ]]; then
+  >&2 printf 'brain-consolidate-pane: skipped: marker on %s\n' ${pending//$'\n'/ }
+  exit 0
+fi
+
+typeset -a brain_windows
+brain_windows=(${(f)"$(tmux list-windows -a -f '#{==:#{window_name},brain}' -F '#{session_name}:#{window_index}')"})
+
+typeset target
+
+if [[ -z ${brain_windows} ]]; then
+  target="$(tmux new-window -d -t misc: -n brain -P -F '#{session_name}:#{window_index}')"
+else
+  target=${brain_windows[1]}
+fi
+
+typeset pane
+pane="$(tmux split-window -d -t ${target} -c ${HOME}/.local/share/brain/stem -P -F '#{pane_id}' 'claude /brain-consolidate')"
+
+tmux set-option -p -t ${pane} @brain-consolidate 1
+
+>&2 printf 'brain-consolidate-pane: opened: %s in %s\n' ${pane} ${target}
