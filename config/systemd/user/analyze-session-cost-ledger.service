@@ -1,0 +1,7 @@
+[Unit]
+Description=Save the Claude Code session cost ledger
+
+[Service]
+Type=oneshot
+StateDirectory=analyze-session-cost
+ExecStart=/usr/bin/zsh -c '%h/.local/share/brain/stem/tools/analyze-session-cost --ledger >! "$${STATE_DIRECTORY}/ledger-$$(date +%%FT%%H%%M).jsonl"'
