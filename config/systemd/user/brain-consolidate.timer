@@ -1,0 +1,8 @@
+[Unit]
+Description=Open a brain-consolidate pass every evening
+
+[Timer]
+OnCalendar=*-*-* 17:30
+
+[Install]
+WantedBy=timers.target

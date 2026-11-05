@@ -1,0 +1,6 @@
+[Unit]
+Description=Open a brain-consolidate pass in tmux unless the last one is still open
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/brain-consolidate-pane
