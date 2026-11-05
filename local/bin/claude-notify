@@ -6,7 +6,9 @@ setopt no_clobber
 # titled with the tmux window the session runs in. Inside tmux the notification is spooled and
 # raised by claude-notify-listen instead, so its Jump action outlives this hook process. A session
 # forked into the background borrows the pane it was spawned from, and raises nothing on Stop.
-# Depends on claude, jq, notify-send, tmux and systemctl.
+# Each host a tmux client is attached from over ssh also gets the notification, through the socket
+# that host's ssh session forwards back to claude-notify-relay there.
+# Depends on claude, jq, notify-send, tmux, systemctl and tailscale.
 
 function errf { >&2 printf ${@} }
 
@@ -34,6 +36,47 @@ function ancestor_pane() {
   done
 
   return 1
+}
+
+# Write one JSON notification to the relay socket of every host a tmux client is attached from over
+# ssh. A socket missing or refusing drops the relay without a report.
+function relay() {
+  local relayed=${1}
+  local client address host socket REPLY
+  local -U hosts
+
+  zmodload zsh/net/socket
+
+  local clients="$(2>/dev/null tmux list-clients -F '#{client_pid}')" || true
+
+  for client in ${(f)clients}; do
+    address="$(2>/dev/null tr '\0' '\n' < /proc/${client}/environ \
+      | sed --quiet 's/^SSH_CONNECTION=\([^ ]*\) .*/\1/p')" || true
+
+    if [[ -z ${address} ]]; then
+      continue
+    fi
+
+    host="$(2>/dev/null tailscale whois --json ${address} \
+      | jq --raw-output '.Node.Hostinfo.Hostname // empty')" || true
+
+    if [[ -n ${host} ]]; then
+      hosts+=(${host})
+    fi
+  done
+
+  for host in ${hosts}; do
+    socket=${XDG_RUNTIME_DIR:-/tmp}/claude-notify-relay.${host}.sock
+
+    if [[ ! -S ${socket} ]]; then
+      continue
+    elif ! 2>/dev/null zsocket ${socket}; then
+      continue
+    fi
+
+    printf '%s\n' ${relayed} >&${REPLY}
+    exec {REPLY}>&-
+  done
 }
 
 typeset state=${XDG_RUNTIME_DIR:-/tmp}/claude-notify.pane
@@ -155,6 +198,14 @@ if [[ -z ${header} ]]; then
 fi
 
 header="${label} · ${header}"
+
+relay "$(jq --null-input \
+  --arg urgency ${urgency} \
+  --arg category ${category} \
+  --arg header ${header} \
+  --arg message ${message} \
+  --arg pane ${pane} \
+  '{urgency: $urgency, category: $category, header: $header, message: $message, pane: $pane}')"
 
 if [[ -z ${location} ]]; then
   notify-send --app-name=claude-code --urgency=${urgency} --category=${category} ${header} ${message}
