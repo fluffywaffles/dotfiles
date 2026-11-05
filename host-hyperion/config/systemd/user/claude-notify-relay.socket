@@ -1,0 +1,10 @@
+[Unit]
+Description=Claude Code notifications relayed from verdure
+
+[Socket]
+ListenStream=%t/claude-notify-relay.sock
+SocketMode=0600
+Accept=yes
+
+[Install]
+WantedBy=sockets.target

@@ -1,0 +1,8 @@
+[Unit]
+Description=Claude Code notification relayed from verdure
+
+[Service]
+ExecStart=%h/.local/bin/claude-notify-relay
+StandardInput=socket
+StandardOutput=journal
+SyslogIdentifier=claude-notify-relay
