@@ -87,6 +87,9 @@ case ${source} in
   slack)
     summon=(scratchpad slack)
     ;;
+  claude\ relay-*)
+    summon=(true)
+    ;;
   claude\ ?*)
     summon=(claude-jump ${source#claude })
     ;;
