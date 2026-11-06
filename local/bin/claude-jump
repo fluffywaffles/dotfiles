@@ -2,18 +2,14 @@
 set -euo pipefail
 setopt no_clobber
 
-# Focus the tmux pane given as an argument, or the one the most recent Claude Code notification
-# came from. dunstctl can only ever action its oldest displayed notification, so the keyboard
-# path records the pane itself rather than asking dunst which notification is meant.
-# A pane id resolves session, window and pane together, so switch-client shows a pane in another
-# session; select-window would set that session's own current window and leave the client where
-# it was, jumping to nothing.
-# --host names the machine whose tmux holds the pane: claude-jump runs there over the ssh master
-# connection this machine's ssh config keeps to it, then focuses this machine's terminal. Without
-# a master it exits with an error rather than connecting afresh, since under Tailscale SSH's check
-# mode a fresh connection can wait on a browser check whose prompt nobody sees.
-# The client switched is the most recently active one attached from this machine, or from the
-# machine --client-from names, which leaves the focus to that machine.
+# Focus a tmux pane: the one given, or the one the latest Claude Code notification recorded, since
+# dunstctl can action only its oldest notification. switch-client to a pane id crosses sessions,
+# where select-window would leave the client where it was.
+# --host runs the jump on the machine holding the pane, over this machine's ssh master to it, then
+# focuses this machine's terminal. It never connects afresh: Tailscale SSH's check mode can stall
+# a fresh connection on a browser prompt nobody sees.
+# The client switched is this machine's most recently active one, or that of the machine
+# --client-from names, which keeps the focus.
 # Depends on tmux, bspc, jq, ssh and tmux-client-hosts.
 
 function errf { >&2 printf ${@} }
@@ -25,8 +21,7 @@ function usage {
 typeset bin=${0:A:h}
 typeset state=${XDG_RUNTIME_DIR:-/tmp}/claude-notify.pane
 
-# The bspwm node of the terminal hosting tmux. bspwm exposes no pid on a client, so this
-# matches on class; one terminal running one tmux client leaves nothing to disambiguate.
+# The bspwm node of the terminal running tmux, matched by class, since bspwm exposes no pid.
 function terminal_node() {
   local node class
 
@@ -44,19 +39,16 @@ function terminal_node() {
   return 1
 }
 
-# The tty of the most recently active tmux client attached from a host.
+# The tty of a host's most recently active tmux client.
 function attached_tty() {
-  local host=${1} line
-  local -a fields
+  local wanted=${1} client_host tty
 
-  for line in ${(f)"$(${bin}/tmux-client-hosts)"}; do
-    fields=(${(s: :)line})
-
-    if [[ ${fields[1]} == "${host}" ]]; then
-      printf '%s\n' ${fields[2]}
+  while read -r client_host tty; do
+    if [[ ${client_host} == "${wanted}" ]]; then
+      printf '%s\n' ${tty}
       return 0
     fi
-  done
+  done < <(${bin}/tmux-client-hosts)
 
   return 1
 }
