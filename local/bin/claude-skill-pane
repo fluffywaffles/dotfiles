@@ -1,0 +1,77 @@
+#!/bin/zsh
+set -euo pipefail
+setopt no_clobber
+
+# Open `claude /{skill}` as a pane in the tmux window --window names, started in --dir, unless a pane
+# already carries the skill's marker, the pane user option @{skill}. Claude Code rewrites pane
+# titles, so the marker is a user option. A window missing is created in the session `misc`.
+# Depends on tmux, whose flags have no long forms.
+
+function errf { >&2 printf ${@} }
+
+function usage {
+  >&2 printf 'usage: claude-skill-pane --window <name> --dir <dir> <skill>\n'
+}
+
+typeset window dir
+typeset -a args=()
+
+while (( # > 0 )); do
+  if   [[ ${1} =~ ^-+w(indow)*$ && -n ${2:-} ]]; then window=${2}; shift 2
+  elif [[ ${1} =~ ^-+d(ir)*$    && -n ${2:-} ]]; then dir=${2};    shift 2
+  elif [[ ${1} == -*                          ]]; then
+    errf 'claude-skill-pane: unknown option or missing value: %s\n' ${1}
+    usage
+    exit 1
+  else
+    args+=(${1})
+    shift 1
+  fi
+done
+
+if [[ -z ${window:-} || -z ${dir:-} ]]; then
+  errf 'claude-skill-pane: --window and --dir are both needed\n'
+  usage
+  exit 1
+elif (( ${#args} < 1 )); then
+  errf 'claude-skill-pane: missing skill\n'
+  usage
+  exit 1
+elif (( ${#args} > 1 )); then
+  errf 'claude-skill-pane: unexpected argument: %s\n' ${args[2]}
+  usage
+  exit 1
+fi
+
+typeset skill=${args[1]}
+
+if ! 2>/dev/null tmux has-session; then
+  errf 'claude-skill-pane: skipped %s: no tmux server\n' ${skill}
+  exit 0
+fi
+
+typeset pending
+pending="$(tmux list-panes -a -f "#{@${skill}}" -F '#{pane_id}')"
+
+if [[ -n ${pending} ]]; then
+  errf 'claude-skill-pane: skipped %s: marker on %s\n' ${skill} ${pending//$'\n'/ }
+  exit 0
+fi
+
+typeset -a windows
+windows=(${(f)"$(tmux list-windows -a -f "#{==:#{window_name},${window}}" -F '#{session_name}:#{window_index}')"})
+
+typeset target
+
+if [[ -z ${windows} ]]; then
+  target="$(tmux new-window -d -t misc: -n ${window} -P -F '#{session_name}:#{window_index}')"
+else
+  target=${windows[1]}
+fi
+
+typeset pane
+pane="$(tmux split-window -d -t ${target} -c ${dir} -P -F '#{pane_id}' "claude /${skill}")"
+
+tmux set-option -p -t ${pane} @${skill} 1
+
+errf 'claude-skill-pane: opened %s: %s in %s\n' ${skill} ${pane} ${target}

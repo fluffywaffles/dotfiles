@@ -3,4 +3,4 @@ Description=Open a brain-consolidate pass in tmux unless the last one is still o
 
 [Service]
 Type=oneshot
-ExecStart=%h/.local/bin/brain-consolidate-pane
+ExecStart=%h/.local/bin/claude-skill-pane --window brain --dir %h/.local/share/brain/stem brain-consolidate
