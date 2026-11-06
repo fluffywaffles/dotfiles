@@ -14,6 +14,9 @@ setopt no_clobber
 # restart and an id says nothing about when it was handed out across two instances.
 # The dismissal comes before the summons: scratchpad execs the application when it is not already
 # running, which would hold this script open for as long as that application lives.
+# A relayed notification's stack tag names a pane and no host, and verdure is the only machine
+# relaying, so the jump to that pane runs on verdure. A relayed notification naming no pane is
+# only dismissed, since every such notification shares one stack tag.
 # Depends on dunstctl, jq, notify-dismiss, claude-jump and scratchpad.
 
 function errf { >&2 printf ${@} }
@@ -87,8 +90,11 @@ case ${source} in
   slack)
     summon=(scratchpad slack)
     ;;
-  claude\ relay-*)
+  claude\ relay-)
     summon=(true)
+    ;;
+  claude\ relay-*)
+    summon=(claude-jump --host verdure ${source#claude relay-})
     ;;
   claude\ ?*)
     summon=(claude-jump ${source#claude })
