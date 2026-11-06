@@ -1,4 +1,6 @@
 #!/bin/zsh
+set -euo pipefail
+setopt no_clobber
 
 ZEN_MONITOR=focused
 QUOTE_FONT_SIZE=20
@@ -93,7 +95,7 @@ restore_every_monitor() {
         fi
         bspc desktop "$ZEN" -r
     done
-    killall aosd_cat 2>/dev/null
+    killall aosd_cat 2>/dev/null || true
 }
 
 showing_desktop() {
