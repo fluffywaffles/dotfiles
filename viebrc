@@ -18,8 +18,8 @@ set dialogconfirm=show
 set dialogalert=show
 set dialogprompt=show
 
-" Configure external editor to use kitty terminal with neovim
-set vimcommand="kitty nvim"
+" Configure external editor to use alacritty terminal with neovim
+set vimcommand="alacritty -e nvim"
 
 " Apply our custom colorscheme (which places tabs on top, command bar on bottom, and hides the logo)
 colorscheme custom

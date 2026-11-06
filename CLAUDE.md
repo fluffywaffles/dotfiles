@@ -12,7 +12,6 @@ personal dotfiles managed by [rcm](https://github.com/thoughtbot/rcm).
 │   ├── bspwm/           window manager
 │   ├── dunst/           notification daemon
 │   ├── fontconfig/      font configuration
-│   ├── kitty/           terminal emulator
 │   ├── picom.conf       compositor
 │   ├── qutebrowser/     web browser
 │   ├── sxhkd/           hotkey daemon
