@@ -1,0 +1,6 @@
+[Unit]
+Description=Open a dotfiles-review pass in tmux unless the last one is still open
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/claude-skill-pane --window dotfiles --dir %h/.dotfiles dotfiles-review

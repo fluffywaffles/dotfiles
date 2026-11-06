@@ -1,0 +1,8 @@
+[Unit]
+Description=Open a dotfiles-review pass on the first Monday of each month
+
+[Timer]
+OnCalendar=Mon *-*-01..07 10:00
+
+[Install]
+WantedBy=timers.target
