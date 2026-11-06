@@ -1,3 +1,4 @@
-# the console key for the brain's identifier-ref-check, which calls the api
-# directly and fails open without one
-export ANTHROPIC_API_KEY="$(< ${HOME}/documents/anthropic-console-verdure-key.txt)"
+# the console key file for the brain's identifier-ref-check and
+# writing-target-classify, which call the api directly and fail open without
+# one; a file rather than ANTHROPIC_API_KEY, which would bill claude -p to the key
+export ANTHROPIC_API_KEY_FILE="${ANTHROPIC_API_KEY_FILE:-${HOME}/documents/anthropic-console-verdure-key.txt}"
