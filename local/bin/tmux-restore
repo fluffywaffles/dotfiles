@@ -1,0 +1,101 @@
+#!/bin/zsh
+set -euo pipefail
+setopt no_clobber extended_glob
+
+# Rebuild the sessions in a tmux-save snapshot, by default the newest one taken before this boot,
+# and resume the Claude Code conversation each pane was running. A session whose name is already in
+# use is skipped.
+
+typeset state=${XDG_STATE_HOME:-${HOME}/.local/state}/tmux-save
+typeset boot="$(</proc/sys/kernel/random/boot_id)"
+
+function errf() {
+  local format=${1}; shift
+  >&2 printf "tmux-restore: ${format}" ${@}
+}
+
+function usage() {
+  >&2 printf 'usage: tmux-restore [snapshot]\n'
+}
+
+typeset snapshot
+if [[ -n ${1:-} ]]; then
+  snapshot=${1}
+else
+  candidates=(${state}/*~*/${boot}(N.om))
+  snapshot=${candidates[1]:-}
+fi
+
+if [[ -z ${snapshot} ]]; then
+  errf 'no snapshot from an earlier boot in %s\n' ${state}
+  usage
+  exit 1
+elif [[ ! -f ${snapshot} ]]; then
+  errf 'no such snapshot: %s\n' ${snapshot}
+  usage
+  exit 1
+fi
+
+existing=(${(f)"$(2>/dev/null tmux list-sessions -F '#{session_name}' || true)"})
+created=()
+skipped=()
+typeset -A layouts zoomed
+typeset previous window pane active_window
+active_panes=()
+
+while IFS=$'\t' read -r session index name automatic window_active window_zoomed width height \
+    layout pane_active directory cmd; do
+  if (( ${existing[(Ie)${session}]} )); then
+    if (( ! ${skipped[(Ie)${session}]} )); then
+      skipped+=(${session})
+    fi
+    continue
+  fi
+
+  if [[ ${session}:${index} != ${previous} ]]; then
+    if (( ! ${created[(Ie)${session}]} )); then
+      window=$(tmux new-session -d -P -F '#{window_id}' -s ${session} -c ${directory} \
+        -x ${width} -y ${height})
+      created+=(${session})
+    else
+      window=$(tmux new-window -d -P -F '#{window_id}' -t "=${session}:" -c ${directory})
+    fi
+    pane=$(tmux display-message -p -t ${window} '#{pane_id}')
+    if [[ ${automatic} == 0 ]]; then
+      tmux rename-window -t ${window} ${name}
+    fi
+    layouts[${window}]=${layout}
+    if [[ ${window_zoomed} == 1 ]]; then
+      zoomed[${window}]=yes
+    fi
+    if [[ ${window_active} == 1 ]]; then
+      tmux select-window -t ${window}
+    fi
+    previous=${session}:${index}
+  else
+    pane=$(tmux split-window -d -P -F '#{pane_id}' -t ${pane} -c ${directory})
+    tmux select-layout -t ${window} tiled
+  fi
+
+  if [[ ${pane_active} == 1 ]]; then
+    active_panes+=(${pane})
+  fi
+  if [[ -n ${cmd} ]]; then
+    tmux send-keys -t ${pane} -l -- ${cmd}
+    tmux send-keys -t ${pane} Enter
+  fi
+done < ${snapshot}
+
+for window in ${(k)layouts}; do
+  tmux select-layout -t ${window} ${layouts[${window}]}
+done
+for pane in ${active_panes}; do
+  tmux select-pane -t ${pane}
+done
+for window in ${(k)zoomed}; do
+  tmux resize-pane -Z -t ${window}
+done
+
+if [[ -n ${skipped} ]]; then
+  errf 'skipped sessions already running: %s\n' ${(j:, :)skipped}
+fi

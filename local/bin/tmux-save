@@ -1,0 +1,61 @@
+#!/bin/zsh
+set -euo pipefail
+setopt no_clobber
+
+# Snapshot the tmux server's sessions, windows, layouts and pane directories, and the Claude Code
+# conversation running in each pane, for tmux-restore. Each boot writes its own snapshot, so a fresh
+# server saved after a reboot never overwrites the one taken before it.
+# Depends on jq and pgrep.
+
+typeset state=${XDG_STATE_HOME:-${HOME}/.local/state}/tmux-save
+typeset boot="$(</proc/sys/kernel/random/boot_id)"
+
+function claude_command() {
+  local pane_pid=${1}
+  local child registry session word skip
+  for child in ${(f)"$(pgrep --parent ${pane_pid} || true)"}; do
+    registry=${HOME}/.claude/sessions/${child}.json
+    if [[ ! -f ${registry} ]]; then
+      continue
+    fi
+    session=$(jq --raw-output '.sessionId // empty' ${registry})
+    if [[ -z ${session} ]]; then
+      continue
+    fi
+    local cmd=(${(0)"$(</proc/${child}/cmdline)"})
+    local kept=(${cmd[1]})
+    for word in ${cmd[2,-1]}; do
+      if [[ -n ${skip} ]]; then
+        skip=
+        if [[ ${word} != -* ]]; then
+          continue
+        fi
+      fi
+      case ${word} in
+        --resume|-r)                 skip=yes ;;
+        --resume=*|--continue|-c)    ;;
+        *)                           kept+=(${word}) ;;
+      esac
+    done
+    printf '%s --resume %s' ${(j: :)${(q)kept}} ${session}
+    return
+  done
+}
+
+if ! 2>/dev/null tmux has-session; then
+  exit 0
+fi
+
+mkdir --parents ${state}
+typeset snapshot=${state}/${boot}
+typeset partial=${state}/.${boot}
+
+typeset fields=('#{session_name}' '#{window_index}' '#{window_name}' '#{automatic-rename}'
+  '#{window_active}' '#{window_zoomed_flag}' '#{window_width}' '#{window_height}'
+  '#{window_layout}' '#{pane_active}' '#{pane_current_path}' '#{pane_pid}')
+
+tmux list-panes -a -F ${(pj:\t:)fields} \
+  | while IFS=$'\t' read -r line; do
+      printf '%s\t%s\n' ${line%$'\t'*} "$(claude_command ${line##*$'\t'})"
+    done >! ${partial}
+mv ${partial} ${snapshot}
