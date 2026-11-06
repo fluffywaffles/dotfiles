@@ -8,10 +8,21 @@ setopt no_clobber
 # A pane id resolves session, window and pane together, so switch-client shows a pane in another
 # session; select-window would set that session's own current window and leave the client where
 # it was, jumping to nothing.
-# Depends on tmux, bspc and jq.
+# --host names the machine whose tmux holds the pane: claude-jump runs there over the ssh master
+# connection this machine's ssh config keeps to it, then focuses this machine's terminal. Without
+# a master it exits with an error rather than connecting afresh, since under Tailscale SSH's check
+# mode a fresh connection can wait on a browser check whose prompt nobody sees.
+# --client-from names the machine whose ssh-attached client to switch, the most recently active
+# one, and leaves the focus to that machine.
+# Depends on tmux, bspc, jq, ssh and tmux-client-hosts.
 
 function errf { >&2 printf ${@} }
 
+function usage {
+  >&2 printf 'usage: claude-jump [--host <host> | --client-from <host>] [<pane>]\n'
+}
+
+typeset bin=${0:A:h}
 typeset state=${XDG_RUNTIME_DIR:-/tmp}/claude-notify.pane
 
 # The bspwm node of the terminal hosting tmux. bspwm exposes no pid on a client, so this
@@ -33,9 +44,94 @@ function terminal_node() {
   return 1
 }
 
-typeset pane=${1:-}
+# The tty of the most recently active tmux client attached over ssh from a host.
+function attached_tty() {
+  local host=${1} line
+  local -a fields
 
-if [[ -z ${pane} && -r ${state} ]]; then
+  for line in ${(f)"$(${bin}/tmux-client-hosts)"}; do
+    fields=(${(s: :)line})
+
+    if [[ ${fields[1]} == "${host}" ]]; then
+      printf '%s\n' ${fields[2]}
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+function switch_there() {
+  if ! >/dev/null 2>&1 ssh -O check ${host}; then
+    errf 'claude-jump: no ssh master connection to %s\n' ${host}
+    return 1
+  fi
+
+  ssh -o ControlMaster=no -o ClearAllForwardings=yes ${host} \
+    claude-jump --client-from ${(q)HOST} ${(q)pane}
+}
+
+function switch_here() {
+  local tty_path
+  local -a client=()
+
+  if ! >/dev/null 2>&1 tmux has-session -t ${pane}; then
+    errf 'claude-jump: pane is gone: %s\n' ${pane}
+    return 1
+  fi
+
+  if [[ -n ${from} ]]; then
+    if ! tty_path="$(attached_tty ${from})"; then
+      errf 'claude-jump: no client attached from %s\n' ${from}
+      return 1
+    fi
+
+    client=(-c ${tty_path})
+  fi
+
+  if ! >/dev/null 2>&1 tmux switch-client ${client} -t ${pane}; then
+    errf 'claude-jump: no attached client to show %s\n' ${pane}
+    return 1
+  fi
+}
+
+typeset host from
+typeset -a args=()
+
+while (( # > 0 )); do
+  if [[ ${1} =~ ^-+host$ && -n ${2:-} ]]; then
+    host=${2}
+    shift 2
+  elif [[ ${1} =~ ^-+client-from$ && -n ${2:-} ]]; then
+    from=${2}
+    shift 2
+  elif [[ ${1} == -* ]]; then
+    errf 'claude-jump: unknown option or missing value: %s\n' ${1}
+    usage
+    exit 1
+  else
+    args+=(${1})
+    shift 1
+  fi
+done
+
+if (( ${#args} > 1 )); then
+  errf 'claude-jump: unexpected argument: %s\n' ${args[2]}
+  usage
+  exit 1
+elif [[ -n ${host} && -n ${from} ]]; then
+  errf 'claude-jump: --host and --client-from exclude each other\n'
+  usage
+  exit 1
+fi
+
+typeset pane=${args[1]:-}
+
+if [[ -z ${pane} && -n ${host} ]]; then
+  errf 'claude-jump: --host needs a pane\n'
+  usage
+  exit 1
+elif [[ -z ${pane} && -r ${state} ]]; then
   pane="$(< ${state})"
 fi
 
@@ -44,14 +140,14 @@ if [[ -z ${pane} ]]; then
   exit 1
 fi
 
-if ! >/dev/null 2>&1 tmux has-session -t ${pane}; then
-  errf 'claude-jump: pane is gone: %s\n' ${pane}
+if [[ -n ${host} ]]; then
+  if ! switch_there; then
+    exit 1
+  fi
+elif ! switch_here; then
   exit 1
-fi
-
-if ! >/dev/null 2>&1 tmux switch-client -t ${pane}; then
-  errf 'claude-jump: no attached client to show %s\n' ${pane}
-  exit 1
+elif [[ -n ${from} ]]; then
+  exit 0
 fi
 
 typeset node
