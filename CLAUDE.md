@@ -10,7 +10,6 @@ personal dotfiles managed by [rcm](https://github.com/thoughtbot/rcm).
 ├── config/
 │   ├── alacritty/       terminal emulator, bound to super+Return
 │   ├── bspwm/           window manager
-│   ├── conky/           system monitor
 │   ├── dunst/           notification daemon
 │   ├── fontconfig/      font configuration
 │   ├── kitty/           terminal emulator
@@ -25,8 +24,7 @@ personal dotfiles managed by [rcm](https://github.com/thoughtbot/rcm).
 ├── tmux.conf            tmux configuration
 ├── xinitrc              X11 startup
 ├── zshenv               environment setup and PATH
-├── zshrc                interactive shell config
-└── zshrc.Darwin         macOS-specific shell config
+└── zshrc                interactive shell config
 ```
 
 ## conventions
