@@ -47,7 +47,7 @@ function relay() {
   local host socket REPLY
   local clients="$(${bin}/tmux-client-hosts)"
   local -U hosts
-  hosts=(${${(f)clients}%% *})
+  hosts=(${${${(f)clients}%% *}:#${HOST}})
 
   zmodload zsh/net/socket
 

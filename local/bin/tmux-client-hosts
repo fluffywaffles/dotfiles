@@ -2,9 +2,9 @@
 set -euo pipefail
 setopt no_clobber
 
-# Print the host and tty of each tmux client attached over ssh from a tailnet address, one client
-# per line. The host is the name tailscale whois gives that address. The most recently active
-# client comes first, which is tmux's own preference when switch-client is given no client.
+# Print the host and tty of each tmux client, one client per line. A client attached over ssh from a
+# tailnet address is named by what tailscale whois gives that address, and a client with no
+# SSH_CONNECTION by this machine's own hostname. The most recently active client comes first.
 # Depends on tmux, tailscale and jq.
 
 typeset clients="$(2>/dev/null tmux list-clients -F '#{client_activity} #{client_pid} #{client_tty}' \
@@ -16,10 +16,15 @@ typeset -a fields
 for line in ${(f)clients}; do
   fields=(${(s: :)line})
 
+  if [[ ! -r /proc/${fields[2]}/environ ]]; then
+    continue
+  fi
+
   address="$(2>/dev/null tr '\0' '\n' < /proc/${fields[2]}/environ \
     | sed --quiet 's/^SSH_CONNECTION=\([^ ]*\) .*/\1/p')" || true
 
   if [[ -z ${address} ]]; then
+    printf '%s %s\n' ${HOST} ${fields[3]}
     continue
   fi
 

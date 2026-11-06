@@ -12,8 +12,8 @@ setopt no_clobber
 # connection this machine's ssh config keeps to it, then focuses this machine's terminal. Without
 # a master it exits with an error rather than connecting afresh, since under Tailscale SSH's check
 # mode a fresh connection can wait on a browser check whose prompt nobody sees.
-# --client-from names the machine whose ssh-attached client to switch, the most recently active
-# one, and leaves the focus to that machine.
+# The client switched is the most recently active one attached from this machine, or from the
+# machine --client-from names, which leaves the focus to that machine.
 # Depends on tmux, bspc, jq, ssh and tmux-client-hosts.
 
 function errf { >&2 printf ${@} }
@@ -44,7 +44,7 @@ function terminal_node() {
   return 1
 }
 
-# The tty of the most recently active tmux client attached over ssh from a host.
+# The tty of the most recently active tmux client attached from a host.
 function attached_tty() {
   local host=${1} line
   local -a fields
@@ -72,24 +72,19 @@ function switch_there() {
 }
 
 function switch_here() {
-  local tty_path
-  local -a client=()
+  local client_host=${from:-${HOST}} tty_path
 
   if ! >/dev/null 2>&1 tmux has-session -t ${pane}; then
     errf 'claude-jump: pane is gone: %s\n' ${pane}
     return 1
   fi
 
-  if [[ -n ${from} ]]; then
-    if ! tty_path="$(attached_tty ${from})"; then
-      errf 'claude-jump: no client attached from %s\n' ${from}
-      return 1
-    fi
-
-    client=(-c ${tty_path})
+  if ! tty_path="$(attached_tty ${client_host})"; then
+    errf 'claude-jump: no client attached from %s\n' ${client_host}
+    return 1
   fi
 
-  if ! >/dev/null 2>&1 tmux switch-client ${client} -t ${pane}; then
+  if ! >/dev/null 2>&1 tmux switch-client -c ${tty_path} -t ${pane}; then
     errf 'claude-jump: no attached client to show %s\n' ${pane}
     return 1
   fi
