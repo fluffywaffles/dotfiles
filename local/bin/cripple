@@ -15,10 +15,17 @@ cpu="100"   # at most 100% of cpu time (i.e. 1.0 cpu; vs. 20 is 0.2cpu)
 #
 # {N} a whole number >= 1
 # {unit}
-while true; do
-  if   [[ ${1} =~ ^-*m(emory)*$     ]]; then memory=${1}; shift
-  elif [[ ${1} =~ ^-*c(pu|ompute)*$ ]]; then cpu=${1};    shift
-  elif [[ ${1} =~ ^-+               ]]; then
+while (( # > 0 )); do
+  if [[ ${1} =~ ^-+(m|memory|c|cpu|compute)$ && -z ${2:-} ]]; then
+    >&2 printf 'ERR: %s needs a value\n' ${1}
+    exit 1
+  elif [[ ${1} =~ ^-+m(emory)?$ ]]; then
+    memory=${2}
+    shift 2
+  elif [[ ${1} =~ ^-+c(pu|ompute)?$ ]]; then
+    cpu=${2}
+    shift 2
+  elif [[ ${1} =~ ^-+ ]]; then
     >&2 printf 'ERR: unexpected flag: %s\n' ${1}
     exit 1
   else
@@ -30,20 +37,14 @@ done
 # systemd.resource-control properties we care about:
 #
 #   CPUQuota={N}%               at most N% of cpu time; 20% == 0.2cpu; 200% == 2.0cpu
-#   MemoryHigh={N}[{K,M,G,T}]   throttle memory when it exceeds N{unit}
+#   MemoryMax={N}[{K,M,G,T}]    a hard limit: past it the kernel reclaims, then OOM-kills
 #
 #   when a {unit} is not given, it defaults to bytes.
 #
 # CPUQuota enforced when scheduling cpu within a unit interval of compute.
 #
-# MemoryHigh allows the application to overallocate memory, but:
-#
-#   > [...] Memory usage may go above the limit if unavoidable, but the
-#   >  processes are heavily slowed down and memory is taken away
-#   >  aggressively in such cases. [...]
-#
 
-if [[ -z ${1} ]]; then
+if [[ -z ${1:-} ]]; then
   >&2 printf 'ERR: no command provided to %s\n' ${0}
   exit 1
 fi
