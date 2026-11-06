@@ -26,4 +26,4 @@ typeset pane="$(jq --raw-output '.pane // empty' <<< ${payload})"
 
 notify-send --app-name=claude-code --urgency=${urgency:-normal} \
   --category=${category:-claude.waiting} \
-  --hint=string:x-dunst-stack-tag:claude-relay-${pane} ${header:-Claude Code} ${message}
+  --hint=string:x-dunst-stack-tag:claude-relay-${pane} -- ${header:-Claude Code} ${message}
