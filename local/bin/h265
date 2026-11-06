@@ -9,4 +9,4 @@ fi
 
 # also hevc_nvenc for the nvidia accelerated codec?
 
-ffmpeg -i ${1} -c:v libx265 ${2:-1}
+ffmpeg -i ${1} -c:v libx265 ${2:-${1:r}.h265.mkv}
