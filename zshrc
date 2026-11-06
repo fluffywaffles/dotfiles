@@ -418,8 +418,7 @@ zmodload zsh/complete
 compdef _gitbranches                \
   zwb                               \
   git-worktree-create-if-not-exists \
-  git-worktree-find-for-branch      \
-  gwa
+  git-worktree-find-for-branch
 
 function _gitbranches {
   branches=($(git-branch-list-porcelain))

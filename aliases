@@ -1,10 +1,8 @@
 # vim: ft=zsh
 alias ta='tmux attach'
-alias pdf='mupdf'
 alias open='xdg-open'
 alias clip='xclip -sel clip'
 #alias clip='pbcopy' # OS X
-alias red="redshift"
 alias vim='nvim'
 alias svim='sudo -EP nvim'
 alias clock="date +'%A %r'"
@@ -13,13 +11,10 @@ alias super='sudo -EPS' # upgrades current shell + env to superuser
 alias l='ls -1'
 alias ll='ls -lh'
 alias la='ls -1A' # use -A not -a so that . and .. are omitted
-alias lla='ls -lAh'
 
 alias dd='dd status=progress'
 
-alias mkpw="head -c512 /dev/urandom | sha512sum | cut -d' ' -f1"
 
-alias ncgrep='grep --color=never'
 
 #
 # scanpdf
@@ -413,7 +408,6 @@ alias glom='git-pull-rebase-origin-main'
 alias gob='git-origin-default-branch'
 alias glop='git-pull-rebase-then-force-push-origin-with-lease-includes'
 alias gapf='git-amend-then-force-push --no-edit'
-alias gapfe='git-amend-then-force-push --patch'
 
 #
 # shell aliases for common git commands
@@ -425,20 +419,15 @@ alias gc='git commit --verbose'
 alias gd='git diff'
 alias gf='git fetch'
 alias gl='git-pull-rebase'
-alias gm='git merge --ff-only'
 alias gp='git push'
-alias gr='git rebase'
 alias gs='git show'
 alias gco='git checkout'
 alias gds='git diff --staged'
 alias gfa='git fetch --all'
 alias gst='git status'
 alias gsq='git rebase --interactive --autosquash'
-alias gdc='git diff --word-diff=color'
 alias glog='git log --oneline --decorate --graph --no-merges'
-alias glogm='git log --oneline --decorate --graph'
 alias gloga='git log --oneline --decorate --graph --all --no-merges'
-alias glogam='git log --oneline --decorate --graph --all'
 
 alias gam='git commit --amend --no-edit'
 alias game='git commit --amend --patch'
@@ -446,10 +435,7 @@ alias game='git commit --amend --patch'
 #
 # worktree setup aliases
 #
-alias gwa='git worktree add'
 alias gwl='git worktree list'
-alias gwm='git worktree move'
-alias gwrm='git worktree remove'
 
 #
 # HOST-specific aliases [if any]
@@ -461,5 +447,5 @@ fi
 alias claude="claude --model opus"
 alias fable="claude --model fable"
 alias opus="claude --model opus"
-alias sonnet="claude --model sonnet"
 alias agy="agy --add-dir ~/.local/share/brain"
+alias haiq='ANTHROPIC_API_KEY="$(< ${ANTHROPIC_API_KEY_FILE})" claude --bare --model haiku --print'
