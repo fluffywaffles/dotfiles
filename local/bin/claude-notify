@@ -8,9 +8,11 @@ setopt no_clobber
 # forked into the background borrows the pane it was spawned from, and raises nothing on Stop.
 # Each host a tmux client is attached from over ssh also gets the notification, through the socket
 # that host's ssh session forwards back to claude-notify-relay there.
-# Depends on claude, jq, notify-send, tmux, systemctl and tailscale.
+# Depends on claude, jq, notify-send, tmux, systemctl and tmux-client-hosts.
 
 function errf { >&2 printf ${@} }
+
+typeset bin=${0:A:h}
 
 # The pane a session was started in, from the nearest ancestor that holds one. A background
 # session — a --fork-session resume under the daemon's bg-pty-host — inherits no TMUX_PANE of its
@@ -42,28 +44,12 @@ function ancestor_pane() {
 # ssh. A socket missing or refusing drops the relay without a report.
 function relay() {
   local relayed=${1}
-  local client address host socket REPLY
+  local host socket REPLY
+  local clients="$(${bin}/tmux-client-hosts)"
   local -U hosts
+  hosts=(${${(f)clients}%% *})
 
   zmodload zsh/net/socket
-
-  local clients="$(2>/dev/null tmux list-clients -F '#{client_pid}')" || true
-
-  for client in ${(f)clients}; do
-    address="$(2>/dev/null tr '\0' '\n' < /proc/${client}/environ \
-      | sed --quiet 's/^SSH_CONNECTION=\([^ ]*\) .*/\1/p')" || true
-
-    if [[ -z ${address} ]]; then
-      continue
-    fi
-
-    host="$(2>/dev/null tailscale whois --json ${address} \
-      | jq --raw-output '.Node.Hostinfo.Hostname // empty')" || true
-
-    if [[ -n ${host} ]]; then
-      hosts+=(${host})
-    fi
-  done
 
   for host in ${hosts}; do
     socket=${XDG_RUNTIME_DIR:-/tmp}/claude-notify-relay.${host}.sock

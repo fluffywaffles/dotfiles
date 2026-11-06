@@ -1,0 +1,32 @@
+#!/bin/zsh
+set -euo pipefail
+setopt no_clobber
+
+# Print the host and tty of each tmux client attached over ssh from a tailnet address, one client
+# per line. The host is the name tailscale whois gives that address. The most recently active
+# client comes first, which is tmux's own preference when switch-client is given no client.
+# Depends on tmux, tailscale and jq.
+
+typeset clients="$(2>/dev/null tmux list-clients -F '#{client_activity} #{client_pid} #{client_tty}' \
+  | sort --numeric-sort --reverse)" || true
+
+typeset line address host
+typeset -a fields
+
+for line in ${(f)clients}; do
+  fields=(${(s: :)line})
+
+  address="$(2>/dev/null tr '\0' '\n' < /proc/${fields[2]}/environ \
+    | sed --quiet 's/^SSH_CONNECTION=\([^ ]*\) .*/\1/p')" || true
+
+  if [[ -z ${address} ]]; then
+    continue
+  fi
+
+  host="$(2>/dev/null tailscale whois --json ${address} \
+    | jq --raw-output '.Node.Hostinfo.Hostname // empty')" || true
+
+  if [[ -n ${host} ]]; then
+    printf '%s %s\n' ${host} ${fields[3]}
+  fi
+done
