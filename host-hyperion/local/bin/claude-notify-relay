@@ -4,9 +4,9 @@ setopt no_clobber
 
 # Raise a Claude Code notification relayed from verdure, read as one JSON object on stdin. Runs as
 # claude-notify-relay@.service, one instance per connection to the socket this machine's ssh
-# session to verdure forwards back here. The stack tag keeps one notification per verdure pane, plus one shared by
-# every relay naming no pane, and its relay- prefix keeps notify-act from looking that pane up in
-# this machine's tmux.
+# session to verdure forwards back here. The stack tag keeps one notification per verdure pane,
+# plus one shared by every relay naming no pane, and its relay- prefix keeps notify-act from looking
+# that pane up in this machine's tmux.
 # Depends on jq and notify-send.
 
 function errf { >&2 printf ${@} }
