@@ -325,6 +325,7 @@
       "effortLevel": "high"
     }
   },
+  "autoCompactWindow": 200000,
   "askUserQuestionTimeout": "never",
   "tui": "fullscreen",
   "voice": {
