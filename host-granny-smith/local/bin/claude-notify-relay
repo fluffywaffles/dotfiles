@@ -1,0 +1,32 @@
+#!/bin/zsh
+set -euo pipefail
+setopt no_clobber
+
+# Raise a Claude Code notification relayed from verdure, read as one JSON object on stdin. Runs
+# under the com.fluffywaffles.claude-notify-relay launchd agent, once per connection to the socket
+# this machine's ssh session to verdure forwards back here. The group keeps one notification per
+# verdure pane, plus one shared by every relay naming no pane. Clicking a notification that names a
+# pane jumps to it on verdure and brings Alacritty forward.
+# Depends on jq and terminal-notifier.
+
+function errf { >&2 printf ${@} }
+
+typeset payload="$(cat)"
+
+if [[ -z ${payload} ]]; then
+  errf 'claude-notify-relay: empty payload on stdin\n'
+  exit 1
+fi
+
+typeset header="$(jq --raw-output '.header // empty' <<< ${payload})"
+typeset message="$(jq --raw-output '.message // empty' <<< ${payload})"
+typeset pane="$(jq --raw-output '.pane // empty' <<< ${payload})"
+
+typeset -a jump=()
+
+if [[ -n ${pane} ]]; then
+  jump=(-execute "${HOME}/.local/bin/claude-jump --host verdure ${(q)pane}")
+fi
+
+terminal-notifier -title ${header:-Claude Code} -message "${message}" \
+  -group claude-relay-${pane} -activate org.alacritty ${jump}
