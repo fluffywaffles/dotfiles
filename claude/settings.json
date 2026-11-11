@@ -220,6 +220,11 @@
             "type": "command",
             "command": "$HOME/.claude/scripts/writing-rules-hook",
             "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.claude/scripts/threads-inform-hook",
+            "timeout": 10
           }
         ]
       }
