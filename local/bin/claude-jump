@@ -29,7 +29,7 @@ function terminal_node() {
     class="$(2>/dev/null bspc query -T -n ${node} | jq --raw-output '.client.className // empty')"
 
     case ${class} in
-      Alacritty|kitty)
+      Alacritty)
         printf '%s\n' ${node}
         return 0
         ;;
