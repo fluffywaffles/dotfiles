@@ -211,6 +211,11 @@
             "type": "command",
             "command": "$HOME/.claude/scripts/shared-index-hook",
             "timeout": 15
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.claude/scripts/duplicate-session-hook",
+            "timeout": 15
           }
         ]
       },
