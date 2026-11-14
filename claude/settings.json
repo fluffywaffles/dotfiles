@@ -105,6 +105,7 @@
       "Bash(uv run poe types:*)",
       "Bash(uv pip list:*)",
       "Bash(uv tree:*)",
+      "Bash(mix deps.get)",
       "Bash(./.venv/bin/poe style:*)",
       "Bash(./.venv/bin/poe tests:*)",
       "Bash(./.venv/bin/poe types:*)",
