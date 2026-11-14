@@ -60,7 +60,7 @@ function switch_there() {
   fi
 
   ssh -o ControlMaster=no -o ClearAllForwardings=yes ${host} \
-    claude-jump --client-from ${(q)HOST} ${(q)pane}
+    claude-jump --client-from ${(q)HOST%%.*} ${(q)pane}
 }
 
 function switch_here() {
