@@ -1,0 +1,32 @@
+set adblocker=update
+set searchengine=https://duckduckgo.com/?q=%s
+set notificationforpermissions=ask
+set tabclosefocus=right
+
+nmap H <action.backInHistory>
+nmap L <action.forwardInHistory>
+nmap J <action.nextTab>
+nmap K <action.previousTab>
+
+nmap gt <action.nextTab>
+nmap gT <action.previousTab>
+
+nmap ;t <action.startFollowNewTab>
+nmap ;r <action.startFollowNewSplit>
+
+nmap gm <action.moveTabForward>
+
+nmap g0 :buffer 0<CR>
+nmap g1 :buffer 0<CR>
+nmap g2 :buffer 1<CR>
+nmap g3 :buffer 2<CR>
+nmap g4 :buffer 3<CR>
+nmap g5 :buffer 4<CR>
+nmap g6 :buffer 5<CR>
+nmap g7 :buffer 6<CR>
+nmap g8 :buffer 7<CR>
+nmap g9 :buffer 8<CR>
+nmap g$ :buffer -1<CR>
+
+nmap \\ :buffer #<CR>
+nmap tcb :set adblocker!<CR>
