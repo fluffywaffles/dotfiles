@@ -345,7 +345,6 @@
     ]
   },
   "enableArtifact": false,
-  "enableWorkflows": false,
   "workflowKeywordTriggerEnabled": false,
   "enabledPlugins": {
     "linear@claude-plugins-official": true,
