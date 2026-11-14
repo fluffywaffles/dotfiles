@@ -1,0 +1,65 @@
+#!/bin/zsh
+set -euo pipefail
+setopt no_clobber extended_glob
+
+# Run a browser login on a remote host and finish it in the local browser. The command runs over
+# ssh with its output passed to the terminal unchanged. The first https URL in that output carrying
+# a localhost port or a port= parameter gets that port forwarded from the local machine to the
+# remote host, then goes to xdg-open, so the login's callback reaches the command's listener.
+# ssh takes only short flags.
+# Depends on ssh, tee and xdg-open.
+
+function errf() { >&2 printf "login-via-tunnel: ${1}" ${@:2} }
+
+function usage() {
+  >&2 printf 'usage: login-via-tunnel <host> <command...>\n'
+}
+
+function callback_port() {
+  local url=${1}
+  local match mbegin mend
+  if [[ ${url} =~ '(localhost|127\.0\.0\.1)(:|%3[Aa])([0-9]+)' ]]; then
+    printf '%s\n' ${match[3]}
+  elif [[ ${url} =~ '[?&]port=([0-9]+)' ]]; then
+    printf '%s\n' ${match[1]}
+  fi
+}
+
+function forward_and_open() {
+  local host=${1} socket=${2}
+  local line url port MATCH MBEGIN MEND
+  while IFS= read -r line; do
+    line=${line//$'\e'\[[0-9;]#[a-zA-Z]/}
+    if ! [[ ${line} =~ 'https://[^[:space:]]+' ]]; then
+      continue
+    fi
+    url=${MATCH}
+    port="$(callback_port ${url})"
+    if [[ -z ${port} ]]; then
+      continue
+    fi
+    if ! 2>/dev/null ssh -S ${socket} -O forward -L ${port}:localhost:${port} ${host}; then
+      errf 'could not forward port %s to %s\r\n' ${port} ${host}
+      continue
+    fi
+    &>/dev/null xdg-open ${url} &!
+    errf 'forwarded port %s and handed the login URL to xdg-open\r\n' ${port}
+    >/dev/null cat
+    return
+  done
+}
+
+if [[ -z ${2:-} ]]; then
+  errf 'missing command to run on %s\n' ${1:-the host}
+  usage
+  exit 1
+fi
+
+typeset host=${1}
+shift
+typeset socket=${XDG_RUNTIME_DIR:-/tmp}/login-via-tunnel.${$}.sock
+
+ssh -f -N -M -S ${socket} ${host}
+trap '2>/dev/null ssh -S ${socket} -O exit ${host} || true' EXIT
+
+ssh -tt -S ${socket} ${host} -- ${(j: :)${(q)@}} | tee /dev/tty | forward_and_open ${host} ${socket}
