@@ -32,6 +32,7 @@ function claude_command() {
         fi
       fi
       case ${word} in
+        --)                          break ;;
         --resume|-r)                 skip=yes ;;
         --resume=*|--continue|-c)    ;;
         *)                           kept+=(${word}) ;;
