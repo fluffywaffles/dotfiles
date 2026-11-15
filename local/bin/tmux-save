@@ -10,9 +10,13 @@ setopt no_clobber
 typeset state=${XDG_STATE_HOME:-${HOME}/.local/state}/tmux-save
 typeset boot="$(</proc/sys/kernel/random/boot_id)"
 
+# Print the command resuming the pane's Claude session without its prompt. Learns which flags take a
+# value from the --help of the binary the session runs; where that lists none, keeps the prompt too.
 function claude_command() {
   local pane_pid=${1}
-  local child registry session word skip
+  local child registry session line signature spec flag value word taking drop keep_bare
+  local -A takes
+  local -a cmd kept
   for child in ${(f)"$(pgrep --parent ${pane_pid} || true)"}; do
     registry=${HOME}/.claude/sessions/${child}.json
     if [[ ! -f ${registry} ]]; then
@@ -22,21 +26,53 @@ function claude_command() {
     if [[ -z ${session} ]]; then
       continue
     fi
-    local cmd=(${(0)"$(</proc/${child}/cmdline)"})
-    local kept=(${cmd[1]})
+    cmd=(${(0)"$(</proc/${child}/cmdline)"})
+    takes=()
+    for line in ${(f)"$(/proc/${child}/exe --help)"}; do
+      if [[ ${line} != '  -'* ]]; then
+        continue
+      fi
+      signature=${${line#  }%%  *}
+      spec=${signature##* }
+      case ${spec} in
+        '<'*'...>'|'['*'...]')  value=variadic ;;
+        '<'*)                   value=required ;;
+        '['*)                   value=optional ;;
+        *)                      continue ;;
+      esac
+      for flag in ${(s:, :)${signature% *}}; do
+        takes[${flag}]=${value}
+      done
+    done
+    keep_bare=
+    if [[ -z ${takes} ]]; then
+      takes=(--resume optional -r optional)
+      keep_bare=yes
+    fi
+    kept=(${cmd[1]})
     for word in ${cmd[2,-1]}; do
-      if [[ -n ${skip} ]]; then
-        skip=
-        if [[ ${word} != -* ]]; then
-          continue
+      if [[ ${word} == -- ]]; then
+        break
+      elif [[ ${taking} == required || ( -n ${taking} && ${word} != -* ) ]]; then
+        if [[ -z ${drop} ]]; then
+          kept+=(${word})
         fi
+        if [[ ${taking} != variadic ]]; then
+          taking=
+        fi
+        continue
+      fi
+      taking=
+      if [[ ${word} != -* && -z ${keep_bare} ]]; then
+        continue
       fi
       case ${word} in
-        --)                          break ;;
-        --resume|-r)                 skip=yes ;;
-        --resume=*|--continue|-c)    ;;
-        *)                           kept+=(${word}) ;;
+        --resume|-r|--resume=*|--continue|-c)  drop=yes ;;
+        *)                                     drop=; kept+=(${word}) ;;
       esac
+      if [[ ${word} != *=* ]] && (( ${+takes[${word}]} )); then
+        taking=${takes[${word}]}
+      fi
     done
     printf '%s --resume %s' ${(j: :)${(q)kept}} ${session}
     return
