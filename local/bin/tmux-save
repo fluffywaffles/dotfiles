@@ -87,9 +87,10 @@ mkdir --parents ${state}
 typeset snapshot=${state}/${boot}
 typeset partial=${state}/.${boot}
 
-typeset fields=('#{session_name}' '#{window_index}' '#{window_name}' '#{automatic-rename}'
-  '#{window_active}' '#{window_zoomed_flag}' '#{window_width}' '#{window_height}'
-  '#{window_layout}' '#{pane_active}' '#{pane_current_path}' '#{pane_pid}')
+typeset fields=('#{session_name}' '#{window_index}' '#{window_name}'
+  '#{?#{==:#{window_name},#{@title-name}},1,#{automatic-rename}}' '#{window_active}'
+  '#{window_zoomed_flag}' '#{window_width}' '#{window_height}' '#{window_layout}'
+  '#{pane_active}' '#{pane_current_path}' '#{pane_pid}')
 
 tmux list-panes -a -F ${(pj:\t:)fields} \
   | while IFS=$'\t' read -r line; do
