@@ -194,6 +194,11 @@
             "type": "command",
             "command": "$HOME/.claude/scripts/shown-change-hook",
             "timeout": 15
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.claude/scripts/done-state-box-hook",
+            "timeout": 15
           }
         ]
       }
