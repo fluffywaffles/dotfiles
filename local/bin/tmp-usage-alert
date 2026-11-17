@@ -1,0 +1,20 @@
+#!/bin/zsh
+set -euo pipefail
+setopt no_clobber
+
+# Sends one desktop notification once /tmp's usage reaches 50% of the
+# filesystem, and none again until usage has fallen back under 50%.
+
+typeset -r threshold=50
+typeset -r alerted=${XDG_STATE_HOME:-${HOME}/.local/state}/tmp-usage-alert/alerted
+typeset used="$(df --output=pcent /tmp | tail --lines 1)"
+used=${used//[^0-9]/}
+
+if (( used < threshold )); then
+  rm --force ${alerted}
+elif [[ ! -e ${alerted} ]]; then
+  notify-send --urgency critical "/tmp is ${used}% full" \
+    "$(df --human-readable --output=used,size /tmp | tail --lines 1)"
+  mkdir --parents ${alerted:h}
+  touch ${alerted}
+fi
