@@ -6,6 +6,9 @@ setopt no_clobber
 # the notification is closed. Runs as claude-notify-listen@<pane>.service, because the action is
 # delivered to this process's D-Bus connection and dies with it: a listener inside the Claude Code
 # hook's process tree leaves a pinned notification nothing can action.
+# While the notification is up, ${XDG_RUNTIME_DIR}/claude-notify/{pane}.pin holds its dunst id,
+# session, kind and the Unix time it was raised; dial-a-waffle closes it with `dunstctl close`, and
+# the listener removes the pin on exit while the pin still holds its id.
 # Depends on jq, notify-send and claude-jump.
 
 function errf { >&2 printf ${@} }
@@ -29,24 +32,67 @@ typeset urgency="$(jq --raw-output '.urgency // empty' ${spool})"
 typeset category="$(jq --raw-output '.category // empty' ${spool})"
 typeset header="$(jq --raw-output '.header // empty' ${spool})"
 typeset message="$(jq --raw-output '.message // empty' ${spool})"
+typeset session="$(jq --raw-output '.session // empty' ${spool})"
+typeset kind="$(jq --raw-output '.kind // empty' ${spool})"
+
+zmodload zsh/datetime
+
+typeset pin=${spool:r}.pin
+typeset id action line
+
+function write_pin() {
+  local tmp=${pin}.${$}.tmp
+
+  jq --null-input \
+    --argjson id ${id} \
+    --arg session ${session} \
+    --arg kind ${kind} \
+    --argjson at ${EPOCHSECONDS} \
+    '{id: $id, session: $session, kind: $kind, at: $at}' \
+    >! ${tmp}
+  mv --force ${tmp} ${pin}
+}
+
+# A restarted listener's successor may already hold the pin under its own id.
+function remove_pin() {
+  if [[ -z ${id} || ! -r ${pin} ]]; then
+    return 0
+  fi
+
+  local held="$(jq --raw-output '.id // empty' ${pin})"
+
+  if [[ ${held} == "${id}" ]]; then
+    rm --force ${pin}
+  fi
+}
 
 # Re-raise the signal after logging so systemd sees a death by signal, which is what
 # RestartForceExitStatus matches on.
 function die_by_signal() {
   logf 'killed by SIG%s holding %s\n' ${1} ${pane}
+  remove_pin
   trap - ${1}
   kill -${1} ${$}
 }
 
+trap remove_pin EXIT
 trap 'die_by_signal TERM' TERM
 trap 'die_by_signal HUP'  HUP
 trap 'die_by_signal INT'  INT
 
 logf 'holding %s as %s, pid %s\n' ${pane} ${category} ${$}
 
-typeset action="$(notify-send --action=default=Jump \
+notify-send --print-id --action=default=Jump \
   --app-name=claude-code --urgency=${urgency} --category=${category} \
-  --hint=string:x-dunst-stack-tag:claude-${pane} ${header} ${message})"
+  --hint=string:x-dunst-stack-tag:claude-${pane} ${header} ${message} \
+  | while IFS= read -r line; do
+      if [[ -z ${id} ]]; then
+        id=${line}
+        write_pin
+      else
+        action=${line}
+      fi
+    done
 
 if [[ ${action} != default ]]; then
   logf 'closed without action: %s\n' ${pane}

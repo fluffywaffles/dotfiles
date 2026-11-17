@@ -8,6 +8,8 @@ setopt no_clobber
 # forked into the background borrows the pane it was spawned from, and raises nothing on Stop.
 # Each host a tmux client is attached from over ssh also gets the notification, through the socket
 # that host's ssh session forwards back to claude-notify-relay there.
+# The listener records each pinned notification in ${XDG_RUNTIME_DIR}/claude-notify/{pane}.pin,
+# from the session and kind spooled here, and dial-a-waffle closes a pin with `dunstctl close`.
 # Depends on claude, jq, notify-send, tmux, systemctl and tmux-client-hosts.
 
 function errf { >&2 printf ${@} }
@@ -139,6 +141,16 @@ if [[ ${category} == claude.waiting ]]; then
   urgency=normal
 fi
 
+typeset pin_kind=turn
+
+if [[ ${event} != Stop ]]; then
+  case ${kind} in
+    permission_prompt|worker_permission_prompt) pin_kind=request ;;
+    agent_needs_input)                          pin_kind=request ;;
+    elicitation_dialog|elicitation_url_dialog)  pin_kind=request ;;
+  esac
+fi
+
 typeset pane=${TMUX_PANE:-}
 
 if [[ -z ${pane} ]]; then
@@ -209,7 +221,10 @@ jq --null-input \
   --arg category ${category} \
   --arg header ${header} \
   --arg message ${message} \
-  '{urgency: $urgency, category: $category, header: $header, message: $message}' \
+  --arg session ${session} \
+  --arg kind ${pin_kind} \
+  '{urgency: $urgency, category: $category, header: $header, message: $message,
+    session: $session, kind: $kind}' \
   >! ${spool}/${pane}.json
 
 systemctl --user restart \
