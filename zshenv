@@ -107,6 +107,9 @@ export VIEB_WINDOW_FRAME=true
 # and bump up the size of the saved history to ~1mb (ordinarly 512kb)
 export ERL_AFLAGS="-kernel shell_history enabled -kernel shell_history_file_bytes 1024000"
 
+# stop idle schedulers busy-waiting, which costs CPU with many BEAMs running
+export ELIXIR_ERL_OPTIONS="${ELIXIR_ERL_OPTIONS:-+sbwt none +sbwtdcpu none +sbwtdio none}"
+
 typeset -gxT FZF_DEFAULT_OPTS fzf_default_opts ' '
 export FZF_DEFAULT_COMMAND='ag -g ""'
 export FZF_CTRL_T_COMMAND="${FZF_DEFAULT_COMMAND}"
