@@ -146,6 +146,7 @@
       "Bash(~/.local/share/brain/stem/tools/rebase-drop-check:*)",
       "Bash(~/.local/share/brain/stem/tools/repin-scope-links:*)",
       "Bash(/home/fluffywaffles/.local/share/brain/stem/tools/repin-scope-links:*)",
+      "Bash(~/.local/share/brain/stem/tools/cleanup:*)",
       "Bash(actionlint:*)",
       "Bash(command -v:*)",
       "Bash(systemctl is-active:*)"
