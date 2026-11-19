@@ -5,7 +5,7 @@ setopt no_clobber
 # Open `claude /{skill}` as a pane in the tmux window --window names, started in --dir and named
 # `automations:{skill}`, unless a pane already carries the skill's marker, the pane user option
 # @{skill}. Claude Code rewrites pane titles, so the marker is a user option. A window missing is
-# created in the session `misc`.
+# created in the session `misc`, and `misc` missing is created with it.
 # Depends on tmux, whose flags have no long forms.
 
 function errf { >&2 printf ${@} }
@@ -64,10 +64,12 @@ windows=(${(f)"$(tmux list-windows -a -f "#{==:#{window_name},${window}}" -F '#{
 
 typeset target
 
-if [[ -z ${windows} ]]; then
+if [[ -n ${windows} ]]; then
+  target=${windows[1]}
+elif 2>/dev/null tmux has-session -t '=misc'; then
   target="$(tmux new-window -d -t misc: -n ${window} -P -F '#{session_name}:#{window_index}')"
 else
-  target=${windows[1]}
+  target="$(tmux new-session -d -s misc -n ${window} -P -F '#{session_name}:#{window_index}')"
 fi
 
 typeset cmd="claude --name automations:${skill} /${skill}"
