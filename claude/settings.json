@@ -200,6 +200,11 @@
             "type": "command",
             "command": "$HOME/.claude/scripts/done-state-box-hook",
             "timeout": 15
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.claude/scripts/loose-threads-hook",
+            "timeout": 15
           }
         ]
       }
