@@ -65,6 +65,12 @@ setopt warn_create_global # warn on creating globals except `typeset -g`
 setopt append_create      # >> creates new files despite no_clobber
 # • zsh line editor (zle)
 setopt no_beep            # don't fucking beep
+# • claude code's bash tool, never a script it runs: an unmatched glob stays a
+#   word, and `| head` cutting a pipe short does not fail the command
+if [[ -n ${CLAUDECODE} && -n ${ZSH_EXECUTION_STRING} ]]; then
+  setopt no_nomatch
+  unsetopt pipe_fail
+fi
 # options notes
 #
 # [1] no_list_ambiguous
