@@ -2,9 +2,10 @@
 set -euo pipefail
 setopt no_clobber
 
-# Open `claude /{skill}` as a pane in the tmux window --window names, started in --dir, unless a pane
-# already carries the skill's marker, the pane user option @{skill}. Claude Code rewrites pane
-# titles, so the marker is a user option. A window missing is created in the session `misc`.
+# Open `claude /{skill}` as a pane in the tmux window --window names, started in --dir and named
+# `automations:{skill}`, unless a pane already carries the skill's marker, the pane user option
+# @{skill}. Claude Code rewrites pane titles, so the marker is a user option. A window missing is
+# created in the session `misc`.
 # Depends on tmux, whose flags have no long forms.
 
 function errf { >&2 printf ${@} }
@@ -69,8 +70,9 @@ else
   target=${windows[1]}
 fi
 
+typeset cmd="claude --name automations:${skill} /${skill}"
 typeset pane
-pane="$(tmux split-window -d -t ${target} -c ${dir} -P -F '#{pane_id}' "claude /${skill}")"
+pane="$(tmux split-window -d -t ${target} -c ${dir} -P -F '#{pane_id}' ${cmd})"
 
 tmux set-option -p -t ${pane} @${skill} 1
 
