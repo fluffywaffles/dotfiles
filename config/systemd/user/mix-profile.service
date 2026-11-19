@@ -1,0 +1,6 @@
+[Unit]
+Description=Open a mix-profile pass in tmux unless the last one is still open
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/claude-skill-pane --window perf --dir %h/dev/dial-a-waffle mix-profile
