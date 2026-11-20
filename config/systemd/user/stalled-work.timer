@@ -1,0 +1,9 @@
+[Unit]
+Description=Open a stalled-work pass every morning
+
+[Timer]
+OnCalendar=*-*-* 08:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target
