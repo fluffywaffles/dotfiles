@@ -71,6 +71,12 @@ export path=(${HOME}/.cargo/bin ${path})
 # Add foundry to path
 export path=(${HOME}/.config/.foundry/bin ${path})
 
+# Run the last known good Claude Code dial-a-waffle keeps, ahead of yay's; the bare binary updates
+# itself unless told not to, as yay's /usr/bin/claude wrapper tells it
+export path=(${HOME}/.local/share/dial-a-waffle/claude-code/lkg ${path})
+export DISABLE_UPDATES=1
+export DISABLE_INSTALLATION_CHECKS=1
+
 
 #
 # Prompt
