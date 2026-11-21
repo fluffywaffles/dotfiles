@@ -116,6 +116,10 @@ export ERL_AFLAGS="-kernel shell_history enabled -kernel shell_history_file_byte
 # stop idle schedulers busy-waiting, which costs CPU with many BEAMs running
 export ELIXIR_ERL_OPTIONS="${ELIXIR_ERL_OPTIONS:-+sbwt none +sbwtdcpu none +sbwtdio none}"
 
+# keep Claude Code's temp files on disk, not in /tmp's RAM and swap; its shells get claude-{uid}
+# under it as TMPDIR only while that path is at most 44 bytes
+export CLAUDE_CODE_TMPDIR=${HOME}/.cache/cct
+
 typeset -gxT FZF_DEFAULT_OPTS fzf_default_opts ' '
 export FZF_DEFAULT_COMMAND='ag -g ""'
 export FZF_CTRL_T_COMMAND="${FZF_DEFAULT_COMMAND}"
