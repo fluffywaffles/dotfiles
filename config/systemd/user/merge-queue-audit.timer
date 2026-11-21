@@ -1,5 +1,5 @@
 [Unit]
-Description=Open a mix-profile pass every morning
+Description=Open a merge-queue-audit pass every morning
 
 [Timer]
 OnCalendar=*-*-* 05:00
