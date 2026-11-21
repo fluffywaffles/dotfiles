@@ -3,24 +3,27 @@ set -euo pipefail
 setopt no_clobber
 
 # Open `claude /{skill}`, or `claude {prompt}` where --prompt gives one, as a pane in the tmux window
-# --window names, started in --dir, named `%automations:{skill}` and given a session id it prints
-# on stderr, unless a pane already carries the skill's marker, the pane user option @{skill}. Claude
-# Code rewrites pane titles, so the marker is a user option. A window missing is created in the
-# session `misc`, and `misc` missing is created with it.
+# --window names, started in --dir, named `%{role}:{skill}` for the --role owning the pass's work,
+# `automations` by default, and given a session id it prints on stderr, unless a pane already
+# carries the skill's marker, the pane user option @{skill}. Claude Code rewrites pane titles, so
+# the marker is a user option. A window missing is created in the session `misc`, and `misc`
+# missing is created with it.
 # Depends on tmux, whose flags have no long forms.
 
 function errf { >&2 printf ${@} }
 
 function usage {
-  >&2 printf 'usage: claude-skill-pane --window <name> --dir <dir> [--prompt <prompt>] <skill>\n'
+  >&2 printf 'usage: claude-skill-pane --window <name> --dir <dir> [--role <role>]%s\n' \
+    ' [--prompt <prompt>] <skill>'
 }
 
-typeset window dir request
+typeset window dir request role=automations
 typeset -a args=()
 
 while (( # > 0 )); do
   if   [[ ${1} =~ ^-+w(indow)*$ && -n ${2:-} ]]; then window=${2}; shift 2
   elif [[ ${1} =~ ^-+d(ir)*$    && -n ${2:-} ]]; then dir=${2};    shift 2
+  elif [[ ${1} =~ ^-+r(ole)*$   && -n ${2:-} ]]; then role=${2};   shift 2
   elif [[ ${1} =~ ^-+p(rompt)*$ && -n ${2:-} ]]; then request=${2}; shift 2
   elif [[ ${1} == -*                          ]]; then
     errf 'claude-skill-pane: unknown option or missing value: %s\n' ${1}
@@ -75,7 +78,7 @@ else
 fi
 
 typeset session="$(uuidgen)"
-typeset cmd="claude --session-id ${session} --name %automations:${skill} ${(q)${request:-/${skill}}}"
+typeset cmd="claude --session-id ${session} --name %${role}:${skill} ${(q)${request:-/${skill}}}"
 typeset pane
 pane="$(tmux split-window -d -t ${target} -c ${dir} -P -F '#{pane_id}' ${cmd})"
 
