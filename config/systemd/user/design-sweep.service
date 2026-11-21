@@ -3,4 +3,4 @@ Description=Open a design-sweep pass in tmux unless the last one is still open
 
 [Service]
 Type=oneshot
-ExecStart=%h/.local/bin/claude-skill-pane --window design --dir %h/.local/share/brain/waffles/dial-a-waffle --prompt "Run the daily design sweep: read projects/dial-a-waffle/roles/designer-sweep.md in full and follow it. When the sweep ends, unset the tmux pane option @design-sweep on the pane TMUX_PANE names." design-sweep
+ExecStart=%h/.local/bin/claude-skill-pane --window sweep --dir %h/.local/share/brain/waffles/dial-a-waffle --prompt "Run the daily design sweep: read projects/dial-a-waffle/roles/designer-sweep.md in full and follow it. When the sweep ends, unset the tmux pane option @design-sweep on the pane TMUX_PANE names." design-sweep
