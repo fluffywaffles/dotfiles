@@ -37,21 +37,28 @@ function batpower-linux {
 }
 
 function batpower-darwin {
+  [[ -n ${did_setup} && -z ${batpower_enabled} ]] && return 1
+  typeset -gH did_setup=1
   local capacities=$(
-    ioreg -rn AppleSmartBattery                                     \
-      | sed -e 's/^[[:space:]]*//'                                  \
-      | grep -E '"(Max|Current)Capacity"|"(Is|Fully)Charg(ing|ed)"' \
+    ioreg -rn AppleSmartBattery                                                        \
+      | sed -e 's/^[[:space:]]*//'                                                     \
+      | grep -E '"(Max|Current)Capacity"|"(Is|Fully)Charg(ing|ed)"|"BatteryInstalled"' \
       | cut -d' ' -f1,3
   )
-  local max_capacity current_capacity
+  local max_capacity current_capacity installed
   local -h status=Discharging
   local key value; for key value in ${=capacities}; do
     if   [[ ${key} =~         Max* ]]; then max_capacity=${value}
     elif [[ ${key} =~     Current* ]]; then current_capacity=${value}
+    elif [[ ${key} =~ BatteryInstalled ]]; then installed=${value}
     elif [[ ${key} =~   IsCharging && ${value} == Yes ]]; then status=Charging
     elif [[ ${key} =~ FullyCharged && ${value} == Yes ]]; then status=Full
     fi
   done
+  if [[ ${installed} == No || ${max_capacity:-0} -eq 0 ]]; then
+    typeset -g batpower_enabled=
+    return 1
+  fi
   local charge=$((100 * ${current_capacity} / ${max_capacity}))
   typeset -g batpower_charge=${charge}
   typeset -g batpower_status=${status}
