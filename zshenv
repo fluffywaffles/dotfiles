@@ -260,6 +260,9 @@ export path=(/usr/local/sbin /usr/local/bin /usr/sbin /usr/bin /sbin /bin)
 # add user-home-local binaries to path
 export path=(${HOME}/.local/bin ${path})
 
+# Run the last known good Claude Code dial-a-waffle keeps, ahead of the self-updating install
+export path=(${HOME}/.local/share/dial-a-waffle/claude-code/lkg ${path})
+
 # if nix is installed, make sure we add the `nix` binary + friends
 # TODO: is this needed since we source nix-daemon.sh above?
 # TODO: does this duplicate adding "nix profile binaries" below? (symlink)
