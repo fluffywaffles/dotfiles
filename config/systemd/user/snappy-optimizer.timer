@@ -1,5 +1,5 @@
 [Unit]
-Description=Open a snappy pass every morning
+Description=Open a snappy-optimizer pass every morning
 
 [Timer]
 OnCalendar=*-*-* 06:00
