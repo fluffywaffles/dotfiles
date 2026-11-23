@@ -392,6 +392,11 @@
             "type": "command",
             "command": "$HOME/.claude/scripts/memory-check-hook",
             "timeout": 15
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.claude/scripts/agents-budget-hook",
+            "timeout": 15
           }
         ]
       }
