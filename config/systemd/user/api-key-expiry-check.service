@@ -1,0 +1,10 @@
+[Unit]
+Description=Notify and start the key's renewal once the Anthropic API key nears its expiry
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/share/brain/stem/tools/api-key-expiry-check
+# api-key-renew reads it; the user manager's environment lacks what zshenv.{host} exports
+Environment=ANTHROPIC_API_KEY_FILE=%h/.config/dial-a-waffle/anthropic-keys/jordan@green.com
+# keeps the api-key-renew the check detaches alive after the check exits
+KillMode=process
