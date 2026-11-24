@@ -2,4 +2,4 @@
 # writing-target-classify, which call the api directly and fail open without
 # one, and for the haiq alias, whose claude --bare takes no other auth; a file
 # rather than ANTHROPIC_API_KEY, which would bill every claude -p to the key
-export ANTHROPIC_API_KEY_FILE="${ANTHROPIC_API_KEY_FILE:-${HOME}/documents/anthropic-console-verdure-key.txt}"
+export ANTHROPIC_API_KEY_FILE="${ANTHROPIC_API_KEY_FILE:-${HOME}/.config/dial-a-waffle/anthropic-keys/jordan@green.com}"
