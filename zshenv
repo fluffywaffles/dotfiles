@@ -290,9 +290,12 @@ fi
 autoload git-worktree-root
 autoload git-worktree-find-for-branch
 
-# perform compinit as late as possible, as it may override other settings
-autoload -U compinit && compinit
-autoload -U bashcompinit && bashcompinit # also load bash completions
+# perform compinit as late as possible, as it may override other settings;
+# only an interactive shell completes words
+if [[ -o interactive ]]; then
+  autoload -U compinit && compinit
+  autoload -U bashcompinit && bashcompinit # also load bash completions
+fi
 
 #
 # autoload custom text effects and colors functions. colorfx provides:
