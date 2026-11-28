@@ -149,6 +149,8 @@
       "Bash(~/.local/share/brain/stem/tools/rebase-drop-check:*)",
       "Bash(~/.local/share/brain/stem/tools/repin-scope-links:*)",
       "Bash(/home/fluffywaffles/.local/share/brain/stem/tools/repin-scope-links:*)",
+      "Bash(~/.local/share/brain/stem/tools/plan-approval:*)",
+      "Bash(/home/fluffywaffles/.local/share/brain/stem/tools/plan-approval:*)",
       "Bash(~/.local/share/brain/stem/tools/cleanup scratch:*)",
       "Bash(~/.local/share/brain/stem/tools/cleanup chrome:*)",
       "Bash(~/.local/share/brain/stem/tools/cleanup tmp:*)",
