@@ -216,11 +216,6 @@
           },
           {
             "type": "command",
-            "command": "$HOME/.claude/scripts/threads-stale-hook",
-            "timeout": 10
-          },
-          {
-            "type": "command",
             "command": "$HOME/.claude/scripts/reply-sigil-hook",
             "timeout": 15
           }
